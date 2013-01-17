@@ -1,0 +1,426 @@
+# Copyright (C) 1991-2004 Altera Corporation
+# Any  megafunction  design,  and related netlist (encrypted  or  decrypted),
+# support information,  device programming or simulation file,  and any other
+# associated  documentation or information  provided by  Altera  or a partner
+# under  Altera's   Megafunction   Partnership   Program  may  be  used  only
+# to program  PLD  devices (but not masked  PLD  devices) from  Altera.   Any
+# other  use  of such  megafunction  design,  netlist,  support  information,
+# device programming or simulation file,  or any other  related documentation
+# or information  is prohibited  for  any  other purpose,  including, but not
+# limited to  modification,  reverse engineering,  de-compiling, or use  with
+# any other  silicon devices,  unless such use is  explicitly  licensed under
+# a separate agreement with  Altera  or a megafunction partner.  Title to the
+# intellectual property,  including patents,  copyrights,  trademarks,  trade
+# secrets,  or maskworks,  embodied in any such megafunction design, netlist,
+# support  information,  device programming or simulation file,  or any other
+# related documentation or information provided by  Altera  or a megafunction
+# partner, remains with Altera, the megafunction partner, or their respective
+# licensors. No other licenses, including any licenses needed under any third
+# party's intellectual property, are provided herein.
+
+
+# The default values for assignments are stored in the file
+#		wrapper10k100_assignment_defaults.qdf
+# If this file doesn't exist, and for assignments not listed, see file
+#		assignment_defaults.qdf
+
+# Altera recommends that you do not modify this file. This
+# file is updated automatically by the Quartus II software
+# and any changes you make may be lost or overwritten.
+
+
+# Project-Wide Assignments
+# ========================
+set_global_assignment -name VERILOG_FILE wrapper10k100.v
+
+# Pin & Location Assignments
+# ==========================
+set_location_assignment PIN_AL1 -to address\[10\]
+set_location_assignment PIN_D16 -to address\[11\]
+set_location_assignment PIN_M42 -to address\[12\]
+set_location_assignment PIN_P40 -to address\[13\]
+set_location_assignment PIN_R39 -to address\[14\]
+set_location_assignment PIN_B10 -to address\[15\]
+set_location_assignment PIN_AK6 -to address\[16\]
+set_location_assignment PIN_E1 -to address\[17\]
+set_location_assignment PIN_T6 -to address\[18\]
+set_location_assignment PIN_AM4 -to address\[19\]
+set_location_assignment PIN_AK4 -to address\[1\]
+set_location_assignment PIN_J37 -to address\[20\]
+set_location_assignment PIN_F38 -to address\[21\]
+set_location_assignment PIN_F36 -to address\[22\]
+set_location_assignment PIN_AD42 -to address\[23\]
+set_location_assignment PIN_J7 -to address\[2\]
+set_location_assignment PIN_B20 -to address\[3\]
+set_location_assignment PIN_AJ7 -to address\[4\]
+set_location_assignment PIN_A43 -to address\[5\]
+set_location_assignment PIN_B38 -to address\[6\]
+set_location_assignment PIN_D36 -to address\[7\]
+set_location_assignment PIN_B42 -to address\[8\]
+set_location_assignment PIN_AK2 -to address\[9\]
+set_location_assignment PIN_L41 -to as
+set_location_assignment PIN_AU29 -to bg_sfpga
+set_location_assignment PIN_AC1 -to bgack_sfpga
+set_location_assignment PIN_BC13 -to br_sfpga
+set_location_assignment PIN_AY22 -to clk
+set_location_assignment PIN_AW15 -to cod_lrsync
+set_location_assignment PIN_AG1 -to cod_sclk
+set_location_assignment PIN_C1 -to cod_sdin
+set_location_assignment PIN_BC3 -to cod_sdout
+set_location_assignment PIN_C3 -to cod_sync
+set_location_assignment PIN_AL7 -to data\[0\]
+set_location_assignment PIN_T42 -to data\[10\]
+set_location_assignment PIN_T38 -to data\[11\]
+set_location_assignment PIN_R43 -to data\[12\]
+set_location_assignment PIN_AP2 -to data\[13\]
+set_location_assignment PIN_AN1 -to data\[14\]
+set_location_assignment PIN_AM2 -to data\[15\]
+set_location_assignment PIN_E43 -to data\[1\]
+set_location_assignment PIN_D40 -to data\[2\]
+set_location_assignment PIN_V40 -to data\[3\]
+set_location_assignment PIN_G41 -to data\[4\]
+set_location_assignment PIN_AT2 -to data\[5\]
+set_location_assignment PIN_AN5 -to data\[6\]
+set_location_assignment PIN_V6 -to data\[7\]
+set_location_assignment PIN_AR1 -to data\[8\]
+set_location_assignment PIN_U39 -to data\[9\]
+set_location_assignment PIN_AG3 -to dtack
+set_location_assignment PIN_AU1 -to fc\[0\]
+set_location_assignment PIN_AM6 -to fc\[1\]
+set_location_assignment PIN_AP4 -to fc\[2\]
+set_location_assignment PIN_A13 -to hex0\[0\]
+set_location_assignment PIN_AL37 -to hex0\[1\]
+set_location_assignment PIN_L37 -to hex0\[2\]
+set_location_assignment PIN_U43 -to hex0\[3\]
+set_location_assignment PIN_V38 -to hex0\[4\]
+set_location_assignment PIN_W37 -to hex0\[5\]
+set_location_assignment PIN_W43 -to hex0\[6\]
+set_location_assignment PIN_AN7 -to hex0\[7\]
+set_location_assignment PIN_E21 -to hex1\[0\]
+set_location_assignment PIN_F42 -to hex1\[1\]
+set_location_assignment PIN_AR5 -to hex1\[2\]
+set_location_assignment PIN_AW1 -to hex1\[3\]
+set_location_assignment PIN_H38 -to hex1\[4\]
+set_location_assignment PIN_G39 -to hex1\[5\]
+set_location_assignment PIN_AA37 -to hex1\[6\]
+set_location_assignment PIN_Y42 -to hex1\[7\]
+set_location_assignment PIN_Y6 -to hex2\[0\]
+set_location_assignment PIN_AY14 -to hex2\[1\]
+set_location_assignment PIN_AV28 -to hex2\[2\]
+set_location_assignment PIN_D10 -to hex2\[3\]
+set_location_assignment PIN_Y4 -to hex2\[4\]
+set_location_assignment PIN_AA7 -to hex2\[5\]
+set_location_assignment PIN_AY28 -to hex2\[6\]
+set_location_assignment PIN_BC29 -to hex2\[7\]
+set_location_assignment PIN_W7 -to hex3\[0\]
+set_location_assignment PIN_BC31 -to hex3\[1\]
+set_location_assignment PIN_G13 -to hex3\[2\]
+set_location_assignment PIN_AW29 -to hex3\[3\]
+set_location_assignment PIN_W1 -to hex3\[4\]
+set_location_assignment PIN_AY18 -to hex3\[5\]
+set_location_assignment PIN_F12 -to hex3\[6\]
+set_location_assignment PIN_BB30 -to hex3\[7\]
+set_location_assignment PIN_A37 -to hsync
+set_location_assignment PIN_D12 -to iacksf
+set_location_assignment PIN_AV20 -to irqsf
+set_location_assignment PIN_AH4 -to lds
+set_location_assignment PIN_A9 -to led\[0\]
+set_location_assignment PIN_AR43 -to led\[10\]
+set_location_assignment PIN_AC43 -to led\[11\]
+set_location_assignment PIN_G15 -to led\[12\]
+set_location_assignment PIN_E33 -to led\[13\]
+set_location_assignment PIN_AL3 -to led\[14\]
+set_location_assignment PIN_Y40 -to led\[15\]
+set_location_assignment PIN_AT42 -to led\[1\]
+set_location_assignment PIN_D32 -to led\[2\]
+set_location_assignment PIN_AE37 -to led\[3\]
+set_location_assignment PIN_L1 -to led\[4\]
+set_location_assignment PIN_AP40 -to led\[5\]
+set_location_assignment PIN_AM38 -to led\[6\]
+set_location_assignment PIN_B34 -to led\[7\]
+set_location_assignment PIN_B12 -to led\[8\]
+set_location_assignment PIN_A11 -to led\[9\]
+set_location_assignment PIN_D22 -to pclk
+set_location_assignment PIN_AH6 -to reset
+set_location_assignment PIN_AH2 -to rw
+set_location_assignment PIN_L7 -to sfpga_con40\[0\]
+set_location_assignment PIN_E29 -to sfpga_con40\[10\]
+set_location_assignment PIN_K38 -to sfpga_con40\[11\]
+set_location_assignment PIN_G9 -to sfpga_con40\[12\]
+set_location_assignment PIN_AU39 -to sfpga_con40\[13\]
+set_location_assignment PIN_D30 -to sfpga_con40\[14\]
+set_location_assignment PIN_AW43 -to sfpga_con40\[15\]
+set_location_assignment PIN_F6 -to sfpga_con40\[16\]
+set_location_assignment PIN_AT38 -to sfpga_con40\[17\]
+set_location_assignment PIN_A5 -to sfpga_con40\[18\]
+set_location_assignment PIN_AR37 -to sfpga_con40\[19\]
+set_location_assignment PIN_B2 -to sfpga_con40\[1\]
+set_location_assignment PIN_E9 -to sfpga_con40\[20\]
+set_location_assignment PIN_AR39 -to sfpga_con40\[21\]
+set_location_assignment PIN_C31 -to sfpga_con40\[22\]
+set_location_assignment PIN_AK38 -to sfpga_con40\[23\]
+set_location_assignment PIN_G11 -to sfpga_con40\[24\]
+set_location_assignment PIN_AP38 -to sfpga_con40\[25\]
+set_location_assignment PIN_B32 -to sfpga_con40\[26\]
+set_location_assignment PIN_AH40 -to sfpga_con40\[27\]
+set_location_assignment PIN_E11 -to sfpga_con40\[28\]
+set_location_assignment PIN_AN37 -to sfpga_con40\[29\]
+set_location_assignment PIN_BA41 -to sfpga_con40\[2\]
+set_location_assignment PIN_B8 -to sfpga_con40\[30\]
+set_location_assignment PIN_AU43 -to sfpga_con40\[31\]
+set_location_assignment PIN_G43 -to sfpga_con40\[3\]
+set_location_assignment PIN_AV38 -to sfpga_con40\[4\]
+set_location_assignment PIN_F28 -to sfpga_con40\[5\]
+set_location_assignment PIN_B4 -to sfpga_con40\[6\]
+set_location_assignment PIN_BA43 -to sfpga_con40\[7\]
+set_location_assignment PIN_E7 -to sfpga_con40\[8\]
+set_location_assignment PIN_AY42 -to sfpga_con40\[9\]
+set_location_assignment PIN_R5 -to sfpga_con60\[0\]
+set_location_assignment PIN_G19 -to sfpga_con60\[10\]
+set_location_assignment PIN_E23 -to sfpga_con60\[11\]
+set_location_assignment PIN_R7 -to sfpga_con60\[12\]
+set_location_assignment PIN_P6 -to sfpga_con60\[13\]
+set_location_assignment PIN_AW35 -to sfpga_con60\[14\]
+set_location_assignment PIN_AU25 -to sfpga_con60\[15\]
+set_location_assignment PIN_BB36 -to sfpga_con60\[16\]
+set_location_assignment PIN_AY36 -to sfpga_con60\[17\]
+set_location_assignment PIN_F24 -to sfpga_con60\[18\]
+set_location_assignment PIN_D42 -to sfpga_con60\[19\]
+set_location_assignment PIN_BA35 -to sfpga_con60\[1\]
+set_location_assignment PIN_M4 -to sfpga_con60\[20\]
+set_location_assignment PIN_BB38 -to sfpga_con60\[21\]
+set_location_assignment PIN_A25 -to sfpga_con60\[22\]
+set_location_assignment PIN_BC39 -to sfpga_con60\[23\]
+set_location_assignment PIN_AV36 -to sfpga_con60\[24\]
+set_location_assignment PIN_AU35 -to sfpga_con60\[25\]
+set_location_assignment PIN_AJ1 -to sfpga_con60\[26\]
+set_location_assignment PIN_B26 -to sfpga_con60\[27\]
+set_location_assignment PIN_K2 -to sfpga_con60\[28\]
+set_location_assignment PIN_J1 -to sfpga_con60\[29\]
+set_location_assignment PIN_F22 -to sfpga_con60\[2\]
+set_location_assignment PIN_AW37 -to sfpga_con60\[30\]
+set_location_assignment PIN_BA33 -to sfpga_con60\[31\]
+set_location_assignment PIN_M6 -to sfpga_con60\[32\]
+set_location_assignment PIN_AY38 -to sfpga_con60\[33\]
+set_location_assignment PIN_A27 -to sfpga_con60\[34\]
+set_location_assignment PIN_AU31 -to sfpga_con60\[35\]
+set_location_assignment PIN_L5 -to sfpga_con60\[36\]
+set_location_assignment PIN_H2 -to sfpga_con60\[37\]
+set_location_assignment PIN_AV32 -to sfpga_con60\[38\]
+set_location_assignment PIN_BA39 -to sfpga_con60\[39\]
+set_location_assignment PIN_BB24 -to sfpga_con60\[3\]
+set_location_assignment PIN_BC41 -to sfpga_con60\[40\]
+set_location_assignment PIN_C27 -to sfpga_con60\[41\]
+set_location_assignment PIN_G1 -to sfpga_con60\[42\]
+set_location_assignment PIN_BB40 -to sfpga_con60\[43\]
+set_location_assignment PIN_C7 -to sfpga_con60\[44\]
+set_location_assignment PIN_BC43 -to sfpga_con60\[45\]
+set_location_assignment PIN_B28 -to sfpga_con60\[46\]
+set_location_assignment PIN_H42 -to sfpga_con60\[47\]
+set_location_assignment PIN_J5 -to sfpga_con60\[48\]
+set_location_assignment PIN_BB42 -to sfpga_con60\[49\]
+set_location_assignment PIN_BC37 -to sfpga_con60\[4\]
+set_location_assignment PIN_A29 -to sfpga_con60\[50\]
+set_location_assignment PIN_U41 -to sfpga_con60\[51\]
+set_location_assignment PIN_E17 -to sfpga_con60\[5\]
+set_location_assignment PIN_A17 -to sfpga_con60\[6\]
+set_location_assignment PIN_BC25 -to sfpga_con60\[7\]
+set_location_assignment PIN_AV34 -to sfpga_con60\[8\]
+set_location_assignment PIN_AU33 -to sfpga_con60\[9\]
+set_location_assignment PIN_R37 -to sfpga_digital\[0\]
+set_location_assignment PIN_AE3 -to sfpga_digital\[10\]
+set_location_assignment PIN_F20 -to sfpga_digital\[11\]
+set_location_assignment PIN_BB34 -to sfpga_digital\[12\]
+set_location_assignment PIN_T4 -to sfpga_digital\[13\]
+set_location_assignment PIN_AU21 -to sfpga_digital\[14\]
+set_location_assignment PIN_AY32 -to sfpga_digital\[15\]
+set_location_assignment PIN_AV30 -to sfpga_digital\[16\]
+set_location_assignment PIN_T2 -to sfpga_digital\[17\]
+set_location_assignment PIN_U5 -to sfpga_digital\[18\]
+set_location_assignment PIN_BC21 -to sfpga_digital\[19\]
+set_location_assignment PIN_AW23 -to sfpga_digital\[1\]
+set_location_assignment PIN_C19 -to sfpga_digital\[20\]
+set_location_assignment PIN_BB32 -to sfpga_digital\[21\]
+set_location_assignment PIN_U1 -to sfpga_digital\[22\]
+set_location_assignment PIN_BA31 -to sfpga_digital\[23\]
+set_location_assignment PIN_T40 -to sfpga_digital\[2\]
+set_location_assignment PIN_A15 -to sfpga_digital\[3\]
+set_location_assignment PIN_V42 -to sfpga_digital\[4\]
+set_location_assignment PIN_BC35 -to sfpga_digital\[5\]
+set_location_assignment PIN_AC5 -to sfpga_digital\[6\]
+set_location_assignment PIN_R1 -to sfpga_digital\[7\]
+set_location_assignment PIN_AD2 -to sfpga_digital\[8\]
+set_location_assignment PIN_AV22 -to sfpga_digital\[9\]
+set_location_assignment PIN_AU23 -to sfpga_logic\[0\]
+set_location_assignment PIN_AV26 -to sfpga_logic\[10\]
+set_location_assignment PIN_AA1 -to sfpga_logic\[11\]
+set_location_assignment PIN_F10 -to sfpga_logic\[12\]
+set_location_assignment PIN_AA5 -to sfpga_logic\[13\]
+set_location_assignment PIN_A7 -to sfpga_logic\[14\]
+set_location_assignment PIN_BB28 -to sfpga_logic\[15\]
+set_location_assignment PIN_AV14 -to sfpga_logic\[16\]
+set_location_assignment PIN_Y2 -to sfpga_logic\[17\]
+set_location_assignment PIN_AV24 -to sfpga_logic\[1\]
+set_location_assignment PIN_AB6 -to sfpga_logic\[2\]
+set_location_assignment PIN_D8 -to sfpga_logic\[3\]
+set_location_assignment PIN_BB26 -to sfpga_logic\[4\]
+set_location_assignment PIN_BC27 -to sfpga_logic\[5\]
+set_location_assignment PIN_AY26 -to sfpga_logic\[6\]
+set_location_assignment PIN_AB4 -to sfpga_logic\[7\]
+set_location_assignment PIN_AB2 -to sfpga_logic\[8\]
+set_location_assignment PIN_AW27 -to sfpga_logic\[9\]
+set_location_assignment PIN_BB8 -to sram1en
+set_location_assignment PIN_AK42 -to sram1ld
+set_location_assignment PIN_AY8 -to sram1oe
+set_location_assignment PIN_AU11 -to sram1ud
+set_location_assignment PIN_AW9 -to sram1we
+set_location_assignment PIN_BB12 -to sram2en
+set_location_assignment PIN_AV12 -to sram2ld
+set_location_assignment PIN_BC11 -to sram2oe
+set_location_assignment PIN_BB10 -to sram2ud
+set_location_assignment PIN_AY12 -to sram2we
+set_location_assignment PIN_D18 -to sram3dl\[0\]
+set_location_assignment PIN_F32 -to sram3dl\[10\]
+set_location_assignment PIN_G23 -to sram3dl\[11\]
+set_location_assignment PIN_G25 -to sram3dl\[12\]
+set_location_assignment PIN_G31 -to sram3dl\[13\]
+set_location_assignment PIN_G29 -to sram3dl\[14\]
+set_location_assignment PIN_G33 -to sram3dl\[15\]
+set_location_assignment PIN_D26 -to sram3dl\[1\]
+set_location_assignment PIN_D28 -to sram3dl\[2\]
+set_location_assignment PIN_D38 -to sram3dl\[3\]
+set_location_assignment PIN_E27 -to sram3dl\[4\]
+set_location_assignment PIN_E37 -to sram3dl\[5\]
+set_location_assignment PIN_F18 -to sram3dl\[6\]
+set_location_assignment PIN_F2 -to sram3dl\[7\]
+set_location_assignment PIN_F26 -to sram3dl\[8\]
+set_location_assignment PIN_F30 -to sram3dl\[9\]
+set_location_assignment PIN_P42 -to sram3en
+set_location_assignment PIN_M2 -to sram3ld
+set_location_assignment PIN_P4 -to sram3oe
+set_location_assignment PIN_N7 -to sram3ud
+set_location_assignment PIN_P38 -to sram3we
+set_location_assignment PIN_A19 -to sram4dh\[0\]
+set_location_assignment PIN_B22 -to sram4dh\[10\]
+set_location_assignment PIN_B24 -to sram4dh\[11\]
+set_location_assignment PIN_B30 -to sram4dh\[12\]
+set_location_assignment PIN_B40 -to sram4dh\[13\]
+set_location_assignment PIN_C29 -to sram4dh\[14\]
+set_location_assignment PIN_C35 -to sram4dh\[15\]
+set_location_assignment PIN_A21 -to sram4dh\[1\]
+set_location_assignment PIN_A23 -to sram4dh\[2\]
+set_location_assignment PIN_A31 -to sram4dh\[3\]
+set_location_assignment PIN_A33 -to sram4dh\[4\]
+set_location_assignment PIN_A35 -to sram4dh\[5\]
+set_location_assignment PIN_A39 -to sram4dh\[6\]
+set_location_assignment PIN_A41 -to sram4dh\[7\]
+set_location_assignment PIN_B16 -to sram4dh\[8\]
+set_location_assignment PIN_B18 -to sram4dh\[9\]
+set_location_assignment PIN_L43 -to sram4en
+set_location_assignment PIN_K6 -to sram4ld
+set_location_assignment PIN_L39 -to sram4oe
+set_location_assignment PIN_G35 -to sram4ud
+set_location_assignment PIN_K42 -to sram4we
+set_location_assignment PIN_AE43 -to srama\[0\]
+set_location_assignment PIN_AW11 -to srama\[10\]
+set_location_assignment PIN_AJ39 -to srama\[11\]
+set_location_assignment PIN_AH38 -to srama\[12\]
+set_location_assignment PIN_AH42 -to srama\[13\]
+set_location_assignment PIN_AG39 -to srama\[14\]
+set_location_assignment PIN_AG41 -to srama\[15\]
+set_location_assignment PIN_AF38 -to srama\[16\]
+set_location_assignment PIN_AJ43 -to srama\[17\]
+set_location_assignment PIN_AF40 -to srama\[1\]
+set_location_assignment PIN_AU9 -to srama\[2\]
+set_location_assignment PIN_AW7 -to srama\[3\]
+set_location_assignment PIN_BA5 -to srama\[4\]
+set_location_assignment PIN_BB4 -to srama\[5\]
+set_location_assignment PIN_BB6 -to srama\[6\]
+set_location_assignment PIN_AV10 -to srama\[7\]
+set_location_assignment PIN_BC7 -to srama\[8\]
+set_location_assignment PIN_AY10 -to srama\[9\]
+set_location_assignment PIN_AB38 -to sramdh\[0\]
+set_location_assignment PIN_AG43 -to sramdh\[10\]
+set_location_assignment PIN_AF42 -to sramdh\[11\]
+set_location_assignment PIN_N43 -to sramdh\[12\]
+set_location_assignment PIN_AD38 -to sramdh\[13\]
+set_location_assignment PIN_AD40 -to sramdh\[14\]
+set_location_assignment PIN_AE41 -to sramdh\[15\]
+set_location_assignment PIN_AC37 -to sramdh\[1\]
+set_location_assignment PIN_AC39 -to sramdh\[2\]
+set_location_assignment PIN_AP42 -to sramdh\[3\]
+set_location_assignment PIN_AT6 -to sramdh\[4\]
+set_location_assignment PIN_AU5 -to sramdh\[5\]
+set_location_assignment PIN_BC1 -to sramdh\[6\]
+set_location_assignment PIN_AY6 -to sramdh\[7\]
+set_location_assignment PIN_AV8 -to sramdh\[8\]
+set_location_assignment PIN_BC5 -to sramdh\[9\]
+set_location_assignment PIN_C43 -to sramdl\[0\]
+set_location_assignment PIN_BB2 -to sramdl\[10\]
+set_location_assignment PIN_BA3 -to sramdl\[11\]
+set_location_assignment PIN_N37 -to sramdl\[12\]
+set_location_assignment PIN_J39 -to sramdl\[13\]
+set_location_assignment PIN_AB42 -to sramdl\[14\]
+set_location_assignment PIN_AB40 -to sramdl\[15\]
+set_location_assignment PIN_AA39 -to sramdl\[1\]
+set_location_assignment PIN_AA43 -to sramdl\[2\]
+set_location_assignment PIN_AP6 -to sramdl\[3\]
+set_location_assignment PIN_AR7 -to sramdl\[4\]
+set_location_assignment PIN_AV2 -to sramdl\[5\]
+set_location_assignment PIN_Y38 -to sramdl\[6\]
+set_location_assignment PIN_AV6 -to sramdl\[7\]
+set_location_assignment PIN_AY2 -to sramdl\[8\]
+set_location_assignment PIN_BA1 -to sramdl\[9\]
+set_location_assignment PIN_J43 -to uds
+set_location_assignment PIN_M38 -to vidblank
+set_location_assignment PIN_B36 -to vidclk
+set_location_assignment PIN_V2 -to videob\[2\]
+set_location_assignment PIN_BC23 -to videob\[3\]
+set_location_assignment PIN_AG5 -to videob\[4\]
+set_location_assignment PIN_AF6 -to videob\[5\]
+set_location_assignment PIN_B14 -to videob\[6\]
+set_location_assignment PIN_AJ5 -to videob\[7\]
+set_location_assignment PIN_AU13 -to videog\[2\]
+set_location_assignment PIN_AN43 -to videog\[3\]
+set_location_assignment PIN_AM40 -to videog\[4\]
+set_location_assignment PIN_AL43 -to videog\[5\]
+set_location_assignment PIN_AJ37 -to videog\[6\]
+set_location_assignment PIN_AK40 -to videog\[7\]
+set_location_assignment PIN_AM42 -to videor\[0\]
+set_location_assignment PIN_AN39 -to videor\[1\]
+set_location_assignment PIN_AV42 -to videor\[2\]
+set_location_assignment PIN_AY34 -to videor\[3\]
+set_location_assignment PIN_AW33 -to videor\[4\]
+set_location_assignment PIN_P2 -to videor\[5\]
+set_location_assignment PIN_F16 -to videor\[6\]
+set_location_assignment PIN_G21 -to videor\[7\]
+set_location_assignment PIN_BB22 -to vidin_cref
+set_location_assignment PIN_D6 -to vidin_href
+set_location_assignment PIN_D24 -to vidin_llc
+set_location_assignment PIN_B6 -to vidin_rts0
+set_location_assignment PIN_AW21 -to vidin_scl
+set_location_assignment PIN_F8 -to vidin_sda
+set_location_assignment PIN_AY16 -to vidin_vpo\[10\]
+set_location_assignment PIN_D14 -to vidin_vpo\[11\]
+set_location_assignment PIN_C5 -to vidin_vpo\[12\]
+set_location_assignment PIN_AE1 -to vidin_vpo\[13\]
+set_location_assignment PIN_AD6 -to vidin_vpo\[14\]
+set_location_assignment PIN_AD4 -to vidin_vpo\[15\]
+set_location_assignment PIN_AF4 -to vidin_vpo\[2\]
+set_location_assignment PIN_AE7 -to vidin_vpo\[3\]
+set_location_assignment PIN_BC33 -to vidin_vpo\[4\]
+set_location_assignment PIN_BA15 -to vidin_vpo\[5\]
+set_location_assignment PIN_AF2 -to vidin_vpo\[6\]
+set_location_assignment PIN_A3 -to vidin_vpo\[7\]
+set_location_assignment PIN_AC7 -to vidin_vs
+set_location_assignment PIN_D34 -to vsync
+
+# Analysis & Synthesis Assignments
+# ================================
+set_global_assignment -name FAMILY FLEX10K
+set_global_assignment -name TOP_LEVEL_ENTITY wrapper10k100
+
+# Fitter Assignments
+# ==================
+set_global_assignment -name DEVICE "EPF10K100GC503-3"
+

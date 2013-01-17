@@ -1,0 +1,22 @@
+/pc/q/q0/pc/courses/hdl/examples/verilog/booth_mult_gizmo/sim/my_top/booth.v {1 {vlog -work work /pc/q/q0/pc/courses/hdl/examples/verilog/booth_mult_gizmo/sim/my_top/booth.v
+Model Technology ModelSim SE vlog 5.8c Compiler 2004.03 Mar 25 2004
+-- Compiling module booth
+
+Top level modules:
+	booth
+
+} {} {}} /pc/q/q0/pc/courses/hdl/examples/verilog/booth_mult_gizmo/sim/my_top/bus_controller.v {1 {vlog -work work /pc/q/q0/pc/courses/hdl/examples/verilog/booth_mult_gizmo/sim/my_top/bus_controller.v
+Model Technology ModelSim SE vlog 5.8c Compiler 2004.03 Mar 25 2004
+-- Compiling module bus_controller
+
+Top level modules:
+	bus_controller
+
+} {} {}} /pc/q/q0/pc/courses/hdl/examples/verilog/booth_mult_gizmo/sim/my_top/mytop.v {1 {vlog -work work /pc/q/q0/pc/courses/hdl/examples/verilog/booth_mult_gizmo/sim/my_top/mytop.v
+Model Technology ModelSim SE vlog 5.8c Compiler 2004.03 Mar 25 2004
+-- Compiling module my_top
+
+Top level modules:
+	my_top
+
+} {} {}}

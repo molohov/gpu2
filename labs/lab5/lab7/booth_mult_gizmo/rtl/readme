@@ -1,0 +1,27 @@
+Paul Chow
+November 4, 2004
+University of Toronto
+
+
+wrapper10k100.v		The wrapper file that is provided with mytop
+			instantiated.  It contains all of the pin
+			definitions.  The corresponding constraints
+			file is found in the synth directory.
+
+mytop.v			This is a top-level file that was created because
+			wrapper10k100.v does not use a naming convention
+			that makes sense.  I was getting very confused about
+			the proper use of each signal, so I defined a new
+			"top-level" file that just gets inserted in the
+			wrapper file.
+
+bus_controller.v	This is a controller that works on the 68K bus.
+			It provides the interface to the Booth multiplier
+			block.
+
+booth.v			This is a simple sequential multiplier block that
+			uses Booth bit-pair recoding.
+
+LEDA_WORK		The Synopsys LEDA linter was used.  All other
+			generated files were deleted for this distribution.
+

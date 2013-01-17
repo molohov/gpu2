@@ -1,0 +1,6 @@
+AR idct_core imp C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/idct_core.vhd sub00/vhpl03
+EN idct NULL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/idct.vhd sub00/vhpl00
+EN idct_core NULL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/idct_core.vhd sub00/vhpl02
+EN xil_idct NULL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/xil_idct_v1_00_a.vhd sub00/vhpl04
+AR idct imp C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/idct.vhd sub00/vhpl01
+AR xil_idct imp C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/xil_idct_v1_00_a.vhd sub00/vhpl05

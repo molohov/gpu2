@@ -1,0 +1,8 @@
+/pc/q/q0/pc/courses/hdl/examples/verilog/booth_mult_gizmo/sim/bus_controller/bus_controller.v {1 {vlog -work work /pc/q/q0/pc/courses/hdl/examples/verilog/booth_mult_gizmo/sim/bus_controller/bus_controller.v
+Model Technology ModelSim SE vlog 5.8c Compiler 2004.03 Mar 25 2004
+-- Compiling module bus_controller
+
+Top level modules:
+	bus_controller
+
+} {} {}}

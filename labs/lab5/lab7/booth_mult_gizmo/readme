@@ -1,0 +1,56 @@
+
+This is a design that works on the UofT UltraGizmo board.
+
+Paul Chow
+November 4, 2004
+University of Toronto
+
+
+The goal is to provide an example using good design practices
+that are a fundamental subset of what is common in industry.  
+The essential elements are:
+
+	- coding style
+	- use of a naming convention, especially in the RTL
+	- a file system for organizing the files
+	- revision control (RCS is used here)
+
+The design and driver examples all worked using the installed tools
+as of November 10, 2004.
+
+The files and directories found here are:
+
+readme	This file.
+
+booth_mult_gizmo.tar	This is a tar archive of the entire directory
+	so that you can copy all of this in one piece.  If you copy to
+	a Unix system, you can untar using:
+
+	% tar xf booth_mult_gizmo.tar
+
+booth_mult_gizmo.zip 	This is an archive of the entire directory in
+	zip format.  For the Windows users, I preserved the symbolic
+	links, which the man page says only works for UNIX, so I
+	don't know what you get if you unzip in a Windows file system.
+
+doc	Documentation files -- none :-)  Read the READMEs.  Typically
+	the design specs and other info, like datasheets, would be
+	located here.
+
+rtl	The Verilog rtl files
+
+sim	The directory for simulation.  There are subdirectories for
+	different levels of simulation and Modelsim script files.
+	The multiplier was an imported design, so no simulation was done
+	of it by itself.  Symbolic links are made to the source in the
+	rtl directory.
+
+synth	The directory for the actual synthesis.  Symbolic links are made
+	to the source in the rtl directory.
+
+src	This contains various example driver programs.
+	68kasm	Example done in 68k assembler.
+	C	Example done using a gcc cross-compiler
+
+
+

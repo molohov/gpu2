@@ -1,0 +1,57 @@
+###############################################################################
+#
+#       XILINX IS PROVIDING THIS DESIGN, CODE, OR INFORMATION "AS IS"
+#       AS A COURTESY TO YOU, SOLELY FOR USE IN DEVELOPING PROGRAMS AND
+#       SOLUTIONS FOR XILINX DEVICES.  BY PROVIDING THIS DESIGN, CODE,
+#       OR INFORMATION AS ONE POSSIBLE IMPLEMENTATION OF THIS FEATURE,
+#       APPLICATION OR STANDARD, XILINX IS MAKING NO REPRESENTATION
+#       THAT THIS IMPLEMENTATION IS FREE FROM ANY CLAIMS OF INFRINGEMENT,
+#       AND YOU ARE RESPONSIBLE FOR OBTAINING ANY RIGHTS YOU MAY REQUIRE
+#       FOR YOUR IMPLEMENTATION.  XILINX EXPRESSLY DISCLAIMS ANY
+#       WARRANTY WHATSOEVER WITH RESPECT TO THE ADEQUACY OF THE
+#       IMPLEMENTATION, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OR
+#       REPRESENTATIONS THAT THIS IMPLEMENTATION IS FREE FROM CLAIMS OF
+#       INFRINGEMENT, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+#       FOR A PARTICULAR PURPOSE.
+#
+#       (c) Copyright 2002 Xilinx Inc.
+#       All rights reserved.
+#
+##############################################################################
+################################################################################
+##
+## Copyright (c) 1995-2002 Xilinx, Inc.  All rights reserved.
+##
+## xil_idct_v2_0_0.mpd
+##
+## Microprocessor Peripheral Definition
+##
+################################################################################
+
+BEGIN xil_idct
+OPTION IPTYPE=PERIPHERAL
+OPTION HDL=VHDL
+OPTION EDIF=TRUE
+
+# Define bus interface
+BUS_INTERFACE BUS=SFSL, BUS_STD=FSL, BUS_TYPE=SLAVE
+BUS_INTERFACE BUS=MFSL, BUS_STD=FSL, BUS_TYPE=MASTER
+
+# Global ports
+PORT Clk   = "", DIR=IN, SIGIS=CLK
+PORT Reset = "", DIR=IN
+
+## proware signals
+PORT FSL_S_CLK     = FSL_S_Clk,     DIR=out, SIGIS=CLOCK, BUS=SFSL, 
+PORT FSL_S_READ    = FSL_S_Read,    DIR=out, BUS=SFSL
+PORT FSL_S_DATA    = FSL_S_Data,    DIR=in, VEC=[0:31], BUS=SFSL
+PORT FSL_S_CONTROL = FSL_S_Control, DIR=in,BUS=SFSL
+PORT FSL_S_EXISTS  = FSL_S_Exists,  DIR=in, BUS=SFSL
+
+PORT FSL_M_CLK     = FSL_M_Clk,     DIR=out, SIGIS=CLOCK, BUS=MFSL
+PORT FSL_M_WRITE   = FSL_M_Write,   DIR=out, BUS=MFSL
+PORT FSL_M_DATA    = FSL_M_Data,    DIR=out, VEC=[0:31], BUS=MFSL
+PORT FSL_M_CONTROL = FSL_M_Control, DIR=out, BUS=MFSL
+PORT FSL_M_FULL    = FSL_M_Full,    DIR=in, BUS=MFSL
+
+END

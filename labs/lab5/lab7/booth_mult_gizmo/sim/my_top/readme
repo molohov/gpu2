@@ -1,0 +1,17 @@
+Paul Chow
+November 4, 2004
+University of Toronto
+
+This is essentially the top-level simulation that puts the
+bus controller and multiplier together.
+
+Simulation was done with Modelsim via the script files shown here.
+
+After compiling the source files:
+
+do init.do	Initializes a few things
+do mults.do	Runs a bunch of test inputs
+
+init+mults.wlf	Waveform file created by running init.do and mults.do
+		from time 0.
+

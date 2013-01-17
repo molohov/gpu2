@@ -1,0 +1,237 @@
+			 * 
+			 * 68K assembly language program to use the Booth multiplier
+			 * 
+			 * Paul Chow
+			 * November 1, 2004
+			 * 
+			 * $Id: booth.s,v 1.4 2004/11/04 14:26:19 pc Exp pc $
+			 * 
+			 * This is an example of a 68K assembly language program that is
+			 * interrupt driven.  To see the definitions and usage of the multiplier
+			 * registers, see the source for bus_controller.v.
+			 *
+			 * The controller is implemented in the FPGA and interrupts on IRQ6.
+			 * 
+			 * This is not a full test of the features of the interface.
+			 *
+			 
+			 
+			 * Booth multiplier register addresses and constants
+			 
+			 B_STATUS	equ	$a00000	; Status register
+			 B_INTENABLE	equ	$a00002	; Interrupt enable register
+			 B_MULTIPLIER	equ	$a00004 ; Multiplier register - need only bottom byte
+			 B_MULTIPLICAND	equ	$a00006 ; Multiplicand register - need only bottom byte
+			 B_PRODUCT	equ	$a00008	; Product register
+			 B_CONTROL	equ	$a0000a ; Control register
+			 
+			 B_INTBIT	equ	$8000	; interrupt enable bit
+			 B_RESET		equ	$2	; status reg bit mask for Reset
+			 B_GO		equ	$1	; status reg bit mask for Go
+			 
+			 * CFPGA registers
+			 
+			 CFPGA_ICR	equ	$00c20000	; configuration register
+			 CFPGA_IVR	equ	$00c20002	; not needed here for auto-vectoring
+			 CFPGA_ISR	equ	$00c20006	; Interrupt status register
+			 
+			 
+			 * 68306 interrupt controller registers
+			 
+			 M68K_PDATA	equ	$fffffff0	; Port data register
+			 M68K_PDIR	equ	$fffffff2	; Port direction register
+			 M68K_ICR	equ	$fffffffa	; Interrupt control register
+			 
+			 
+			 * Console port DUART registers
+			 * Assume that the DUART is otherwise properly configured
+			 
+			 DUART_SRB 	equ 	$fffff7f3	; Status register
+			 DUART_RBB 	equ 	$fffff7f7	; Receive buffer
+			 DUART_TBB 	equ 	$fffff7f7	; Transmit buffer
+			 
+			 DUART_RRDY	equ	$0		; Receiver ready bit number
+			 DUART_TRDY	equ	$2		; Transmit ready bit number
+			 
+			 * Other constants
+			 
+			 CR	equ	$0d			; carriage return
+			 LF	equ	$0a			; line feed
+			 NULL	equ	0			; null character
+			 AUTOVEC6	equ	$78		; Autovector 6
+			 
+			 
+	                  	org $20000
+			 
+020000: 2e7c00020000     start	movea.l	#start,a7	; init stack pointer always!
+			 
+			 * Start by just doing polling
+			 
+020006: 46fc2700         	move.w	#$2700, sr	; set priority 7 for now to ignore interrupts
+			 
+02000a: 207c00020219     	movea.l	#str_start,a0	; print start message
+020010: 4eb90002015e     	jsr	putstr
+020016: 33fc000200a00004 	move.w	#$2,B_MULTIPLIER	; load data
+02001e: 33fc004600a00006 	move.w	#$46,B_MULTIPLICAND	; 2 x 46
+020026: 0079000100a0000a 	ori.w	#B_GO,B_CONTROL	; go!
+02002e: 0c79000000a00000 tstdone	cmp.w	#0,B_STATUS	; wait for done
+020036: 6e00fff6         	bgt	tstdone
+02003a: 303900a00004     	move.w	B_MULTIPLIER,d0	; print the result
+020040: 4eb9000201c6     	jsr	puthexb
+020046: 207c00020236     	movea.l	#str_times,a0
+02004c: 4eb90002015e     	jsr	putstr
+020052: 303900a00006     	move.w	B_MULTIPLICAND,d0
+020058: 4eb9000201c6     	jsr	puthexb
+02005e: 207c0002023e     	movea.l	#str_eq,a0
+020064: 4eb90002015e     	jsr	putstr	
+02006a: 303900a00008     	move.w	B_PRODUCT,d0	; get result = 8c
+020070: 4eb900020184     	jsr	puthex
+020076: 207c00020216     	movea.l	#str_nl,a0
+02007c: 4eb90002015e     	jsr	putstr
+			 
+			 * Now do it with interrupts
+			 
+020082: 207c00020242     	movea.l	#str_int,a0
+020088: 4eb90002015e     	jsr	putstr
+			 
+			 * Set up the interrupts
+			 
+02008e: 303900c20006     	move.w	CFPGA_ISR, d0		; read to clear pending interrupts
+			 *					; should not need to, but just in case
+020094: 00792020fffffffa 	ori.w	#$2020,M68K_ICR		; Enable Interrupt 6, autovectoring
+			 *					; Must leave Level 7 for NMI on
+02009c: 33fc0000fffffff2 	move.w	#$00, M68K_PDIR		; Probably don't need this line
+0200a4: 33fcfffffffffff0 	move.w	#$ffff, M68K_PDATA	; No IACK required for autovectoring
+0200ac: 13fc000200c20000 	move.b	#$2, CFPGA_ICR		; According to Table 6 in gizmo manual
+0200b4: 23fc0002013c00000078  	move.l	#inthdlr,AUTOVEC6 	; init interrupt vector table
+0200be: 46fc2000         	move.w	#$2000, sr	; set priority 0 to listen to all interrupts
+0200c2: 0079800000a00002 	ori.w	#B_INTBIT,B_INTENABLE	; enable interrupts from multiplier
+			 
+			 * Input some numbers
+			 
+0200ca: 33fc001000a00004 	move.w	#$10,B_MULTIPLIER	; load data
+0200d2: 33fc00ad00a00006 	move.w	#$ad,B_MULTIPLICAND	; $10 x $ad = $fad0
+0200da: 0079000100a0000a 	ori.w	#B_GO,B_CONTROL		; go!
+0200e2: 6000fffe         wait	bra	wait			; busy wait for interrupt
+			 prnt	
+0200e6: 303900a00004     	move.w	B_MULTIPLIER,d0		; print the inputs
+0200ec: 4eb9000201c6     	jsr	puthexb
+0200f2: 207c00020236     	movea.l	#str_times,a0
+0200f8: 4eb90002015e     	jsr	putstr
+0200fe: 303900a00006     	move.w	B_MULTIPLICAND,d0
+020104: 4eb9000201c6     	jsr	puthexb
+02010a: 207c0002023e     	movea.l	#str_eq,a0
+020110: 4eb90002015e     	jsr	putstr	
+020116: 303900a00008     	move.w	B_PRODUCT,d0		; get result and print it
+02011c: 4eb900020184     	jsr	puthex	
+020122: 207c00020216     	movea.l	#str_nl,a0
+020128: 4eb90002015e     	jsr	putstr
+02012e: 207c00020208     	movea.l	#str_done,a0
+020134: 4eb90002015e     	jsr	putstr
+02013a: 4e4f             end	trap	#15			;Exit the program
+			 
+			 
+			 * Interrupt routine for multiplier
+			 
+			 inthdlr
+02013c: 207c00020259     	movea.l	#str_hdlr,a0		
+020142: 4eb90002015e     	jsr	putstr
+020148: 303900a00008     	move.w	B_PRODUCT,d0	; get result - clears IRQ from multiplier
+02014e: 303900c20006     	move.w	CFPGA_ISR,d0	; read to clear interrupt from CFPGA
+			 
+			 * This next bit is some trickiness to get out of the wait loop.
+			 * Modify the return PC, currently next to the top of the stack to
+			 * the next instruction after the wait loop.  Note that the saved SR
+			 * is on the top.
+			 
+020154: 2f7c000200e60002 	movea.l	#prnt,2(a7)
+02015c: 4e73             	rte
+			 
+			 
+			 * Character handling routines using polling
+			 *
+			 * d0 and a0 are used to pass parameters
+			 *
+			 * putstr outputs a string of characters terminated by
+			 *    a NULL.  A pointer to the string is passed in a0.
+			 * putch outputs a character.
+			 *    The character is passed in d0.
+			 * puthex prints the word contents of d0 in hex on the terminal
+			 * puthexb prints the byte contents of d0 in hex on the terminal
+			 
+02015e: 1018             putstr	move.b	(a0)+,d0	; put character in d0
+020160: 4a00             	tst.b	d0		; check for null character
+020162: 6700000a         	beq	donestr
+020166: 61000008         	bsr	putch		; print the character
+02016a: 6000fff2         	bra	putstr
+02016e: 4e75             donestr	rts
+			 
+020170: 08390002fffff7f3 putch   btst.b	#DUART_TRDY,DUART_SRB 	; transmitter ready?
+020178: 6700fff6         	beq	putch
+02017c: 13c0fffff7f7     	move.b	d0,DUART_TBB	; output the character
+020182: 4e75             	rts
+			 
+020184: 48a76000         puthex	movem.w	d1-d2,-(a7)	; save some regs
+020188: 3200             	move.w	d0,d1		; free d0 for subroutine calls
+02018a: 7403             	moveq	#3,d2		; counter
+02018c: e959             nextn	rol.w	#4,d1		; 4 msb in lower nibble
+02018e: 3001             	move.w	d1,d0		; work on d0
+020190: 0240000f         	andi.w	#$f,d0		; mask
+020194: 0c400009         	cmpi.w	#9,d0		; check if digit 0-9
+020198: 6e000014         	bgt	let		; if not, check if A-F
+02019c: 06400030         	addi.w	#'0',d0		; convert to ASCII digit
+0201a0: 4eb900020170     	jsr	putch
+0201a6: 57caffe4         	dbeq	d2,nextn	; check if done
+0201aa: 60000014         	bra	lastch
+0201ae: 0440000a         let	subi.w	#10,d0		; letter offset
+0201b2: 06400061         	addi.w	#'a',d0		; convert to ASCII letter
+0201b6: 4eb900020170     	jsr putch		; output the character
+0201bc: 57caffce         	dbeq	d2,nextn	; check if done
+0201c0: 4c9f0006         lastch	movem.w	(a7)+,d1-d2	; restore regs
+0201c4: 4e75             	rts
+			 
+0201c6: 48a76000         puthexb	movem.w	d1-d2,-(a7)	; save some regs
+0201ca: 3200             	move.w	d0,d1		; free d0 for subroutine calls
+0201cc: 7401             	moveq	#1,d2		; counter
+0201ce: e919             nextnb	rol.b	#4,d1		; 4 msb in lower nibble
+0201d0: 3001             	move.w	d1,d0		; work on d0
+0201d2: 0240000f         	andi.w	#$f,d0		; mask
+0201d6: 0c400009         	cmpi.w	#9,d0		; check if digit 0-9
+0201da: 6e000014         	bgt	letb		; if not, check if A-F
+0201de: 06400030         	addi.w	#'0',d0		; convert to ASCII digit
+0201e2: 4eb900020170     	jsr	putch
+0201e8: 57caffe4         	dbeq	d2,nextnb	; check if done
+0201ec: 60000014         	bra	lastchb
+0201f0: 0440000a         letb	subi.w	#10,d0		; letter offset
+0201f4: 06400061         	addi.w	#'a',d0		; convert to ASCII letter
+0201f8: 4eb900020170     	jsr putch		; output the character
+0201fe: 57caff8c         	dbeq	d2,nextn	; check if done
+020202: 4c9f0006         lastchb	movem.w	(a7)+,d1-d2	; restore regs
+020206: 4e75             	rts
+			 
+			 
+			 * string definitions
+			 * all strings are NULL terminated
+			 
+020208: 0d0a50726f6772   str_done	dc.b	CR,LF,'Program done'
+02020f: 616d20646f6e65   
+020216: 0d0a00           str_nl		dc.b	CR,LF,NULL
+			 
+020219: 0d0a5374617274   str_start	dc.b	CR,LF,'Starting with polling...',CR,LF,NULL
+020220: 696e6720776974
+020227: 6820706f6c6c69
+02022e: 6e672e2e2e0d0a
+020235: 00               
+020236: 2074696d657320   str_times	dc.b	' times ',NULL
+02023d: 00               
+02023e: 203d2000         str_eq		dc.b	' = ',NULL
+020242: 0d0a5465737420   str_int		dc.b	CR,LF,'Test by interrupts',CR,LF,NULL
+020249: 627920696e7465
+020250: 7272757074730d
+020257: 0a00             
+020259: 0d0a496e746572   str_hdlr	dc.b	CR,LF,'Interrupt received',CR,LF,NULL
+020260: 72757074207265
+020267: 6365697665640d
+02026e: 0a00             
+			 
+			 

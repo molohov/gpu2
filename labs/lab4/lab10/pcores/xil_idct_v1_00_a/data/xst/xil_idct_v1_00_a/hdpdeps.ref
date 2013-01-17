@@ -1,0 +1,24 @@
+V1 16
+FL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/idct_core.vhd 2003/09/09.15:01:42
+EN xil_idct_v1_00_a/IDCT_CORE \
+      FL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/idct_core.vhd \
+      PB ieee/STD_LOGIC_1164
+AR xil_idct_v1_00_a/IDCT_CORE/IMP \
+      FL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/idct_core.vhd \
+      EN xil_idct_v1_00_a/IDCT_CORE PH ieee/NUMERIC_STD LB XIL_IDCT_V1_00_A \
+      CP IDCT
+FL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/xil_idct_v1_00_a.vhd 2004/01/15.09:18:00
+EN xil_idct_v1_00_a/XIL_IDCT \
+      FL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/xil_idct_v1_00_a.vhd \
+      PB ieee/STD_LOGIC_1164 PH ieee/NUMERIC_STD
+AR xil_idct_v1_00_a/XIL_IDCT/IMP \
+      FL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/xil_idct_v1_00_a.vhd \
+      EN xil_idct_v1_00_a/XIL_IDCT LB UNISIM PH XIL_IDCT_V1_00_A/IDCT_CORE \
+      CP IDCT_CORE
+FL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/idct.vhd 2003/09/09.16:43:32
+EN xil_idct_v1_00_a/IDCT \
+      FL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/idct.vhd \
+      PB ieee/STD_LOGIC_1164 PH ieee/NUMERIC_STD LB UNISIM
+AR xil_idct_v1_00_a/IDCT/IMP \
+      FL C:/rosinger/xapp529_update/pcores/xil_idct_v1_00_a/hdl/vhdl/idct.vhd \
+      EN xil_idct_v1_00_a/IDCT CP MULT18X18S CP RAM16X1S

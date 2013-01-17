@@ -1,0 +1,16 @@
+Paul Chow
+November 4, 2004
+University of Toronto
+
+This is the simulation of just the bus controller.
+
+Simulation was done with Modelsim via the script files shown here.
+
+After compiling the source files:
+
+do init.do	Initializes a few things
+do rwregs.do	Runs a bunch of test inputs
+
+init+rwregs.wlf	Waveform file created by running init.do and rwregs.do
+		from time 0.
+

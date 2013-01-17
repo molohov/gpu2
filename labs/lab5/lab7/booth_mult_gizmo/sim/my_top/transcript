@@ -1,0 +1,26 @@
+# //  ModelSim SE 5.8c Mar 01 2004 SunOS 5.8
+# //
+# //  Copyright Model Technology, a Mentor Graphics Corporation company, 2004
+# //                         All Rights Reserved.
+# //                   UNPUBLISHED, LICENSED SOFTWARE.
+# //         CONFIDENTIAL AND PROPRIETARY INFORMATION WHICH IS THE
+# //        PROPERTY OF MENTOR GRAPHICS CORPORATION OR ITS LICENSORS.
+# //
+# Loading project my_top
+do init.do
+# vsim work.my_top 
+# Loading work.my_top
+# Loading work.bus_controller
+# Loading work.booth
+# .wave
+do mults.do
+dataset open /pc/q/q0/pc/courses/hdl/examples/verilog/booth_mult_gizmo/sim/my_top/init+mults.wlf init_mults
+# /pc/q/q0/pc/courses/hdl/examples/verilog/booth_mult_gizmo/sim/my_top/init+mults.wlf opened as dataset "init_mults"
+compare start init_mults sim
+compare options -track
+compare add -recursive -all -wave *
+# Created 19 comparisons. 
+compare run
+# Computing waveform differences from time 0 ns to 9450 ns
+# No differences found.
+quit

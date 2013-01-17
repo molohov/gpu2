@@ -1,0 +1,7 @@
+# Compile of bus_controller.v was successful.
+do init.do
+# vsim work.bus_controller 
+# Loading work.bus_controller
+# .wave
+do rwregs.do
+quit

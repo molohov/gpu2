@@ -1,0 +1,35 @@
+Paul Chow
+November 6, 2004
+University of Toronto
+
+This directory is where synthesis is done.
+
+Symbolic links should be made to the source files in the rtl directory.
+This ensures that you are synthesizing the current version.
+
+This directory is ready for use with Quartus according to the procedure
+outlined below for a new project.
+
+The qsf file here is a generic constraints file that maps the
+pins for the Gizmo board.
+
+The qpf file is the corresponding Quartus project file.
+
+To use these files for a new project.  Put the qsf and qpf files in
+the directory with your source.  You must have at least the file called
+wrapper10k100.v as this is assumed in the qsf and qpf files.
+1) Start up Quartus.
+2) Open up the project.
+3) If you have additional source files, use Project-->Add/Remove files.
+
+
+To use the pin constraints for an existing project:
+1) Exit Quartus if you are running it.
+2) In the existing project, there should be a qsf file already.
+2) Edit the qsf file and paste in the Pin & Location Assignments
+	section of the generic qsf file in this directory.
+3) You may also need to add in the Analysis & Synthesis Assignments
+	section and the Fitter Assignments section to use the correct device.
+4) Start up Quartus and open the project.  The pins should now be
+	constrained in the project.
+
