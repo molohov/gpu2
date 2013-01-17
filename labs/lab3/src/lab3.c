@@ -42,6 +42,7 @@
 /************************** Constant Definitions *****************************/
 
 #define LED    0x1          /* bit 0 of GPIO is connected to the LED */
+#define SW     0x2          /* bit 1 of GPIO is connected to SW 1 */
 #define printf xil_printf   /* a smaller footprint printf */
 
 /* The following constants are used to determine the amount of time for a time
@@ -276,6 +277,7 @@ int main() {
  ****************************************************************************/
 void TimerCounterHandler(void *CallBackRef, Xuint8 TimerCounterNumber) {
 	Xuint32 Leds;
+	Xuint32 SW1;
 
 	TimerExpiredCount++;
 
@@ -283,6 +285,7 @@ void TimerCounterHandler(void *CallBackRef, Xuint8 TimerCounterNumber) {
 	 * by the time slice
 	 */
 	Leds = XGpio_DiscreteRead(&Gpio, 1) & LED;
+	SW1 = XGpio_DiscreteRead(&Gpio, 1) & SW;
 	if (Leds) {
 		XGpio_DiscreteWrite(&Gpio, 1, ~LED);
 	} else {
