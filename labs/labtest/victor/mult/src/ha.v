@@ -1,11 +1,11 @@
 /* A half adder
  */
-module ha(A, B, carri, s);
+module ha(A, B, carry, s);
 
 input A, B;
-output carri, s;
+output carry, s;
 
-assign carri = A & B;
+assign carry = A & B;
 assign s = A ^ B;
 
 endmodule

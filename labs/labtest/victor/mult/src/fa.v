@@ -1,11 +1,11 @@
 /* A full adder
  */
-module fa(A, B, C, carri, s);
+module fa(A, B, C, carry, s);
 
 input A, B, C;
-output carri, s;
+output carry, s;
 
 assign s = A ^ B ^ C;
-assign carri = A & B | A & C | B & C;
+assign carry = A & B | A & C | B & C;
 
 endmodule
