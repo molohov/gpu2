@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <assert.h>
 
 #include <cv.h>
 #include <highgui.h>
 
-#define GP_DISPLAY_TIMEOUT_IN_MS 5000
+#define GP_DISPLAY_TIMEOUT_IN_MS -1
 #define GP_BG_COLOR (CV_RGB(0x60, 0x00, 0xe0))
+#define GP_XRES 512
+#define GP_YRES 512
 
 /* Struct definitions */
 
@@ -26,6 +29,11 @@ typedef struct {
   int num_vertices;
   gpColor color;
 } gpPoly;
+
+// 2-d fixed point for rendering and matrix ops
+typedef struct {
+  int x, y;
+} gpVertex2Fixed;
 
 /* Library functions */
 gpPoly * gpCreatePoly(int num_vertices)
@@ -54,6 +62,11 @@ void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
   poly->vertices[num] = (gpVertex3){x, y, z};
 }
 
+void gpSetPolyColor(gpPoly *poly, unsigned char r, unsigned char g, unsigned b)
+{
+  poly->color = (gpColor){r, g, b};
+}
+
 void gpDeletePoly(gpPoly *poly)
 {
   assert(poly->num_vertices > 0 && "invalid gpPoly, possibly already deleted");
@@ -63,8 +76,53 @@ void gpDeletePoly(gpPoly *poly)
   free(poly);
 }
 
+bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
+{
+  int ax = vertices[0].x;
+  int ay = vertices[0].y;
+  int bx = vertices[1].x;
+  int by = vertices[1].y;
+  int cx = vertices[2].x;
+  int cy = vertices[2].y;
+
+  if (bx <= x && x <= ax) {
+    int delta_x = cx - bx;
+    return (((cy-by)*(x-bx) + delta_x * by <= y * delta_x)
+      && (y * delta_x <= (ay-by)*(x-bx) + delta_x * by));
+  }
+  else if (ax < x && x <= cx) {
+    int delta_x = cx - bx;
+    return (((cy-by)*(x-bx) + delta_x * by <= y * delta_x)
+      && (y * delta_x <= (ay-cy)*(cx-x) + delta_x * cy));
+  } else {
+    return false;
+  }
+}
+
 void gpScanline(gpPoly *poly, unsigned char *img)
 {
+  // convert floating point to fixed point
+  gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
+
+  for (int i = 0; i < poly->num_vertices; i++) {
+    vertices[i].x = (int)(poly->vertices[i].x * GP_XRES / 2);
+    vertices[i].y = (int)(poly->vertices[i].y * GP_YRES / 2);
+
+    printf("\tVertex %d translated to (0x%x 0x%x)\n", i, vertices[i].x, vertices[i].y);
+  }
+
+  // scanline algorithm
+  for (int x = 0; x < GP_XRES; x++) {
+    int x_coord = x - GP_XRES/2;
+    for (int y = 0; y < GP_YRES; y++) {
+      int y_coord = y - GP_YRES/2;
+      if (inTriangle(x_coord, y_coord, vertices)) {
+        img[3*(y*GP_XRES+x)] = poly->color.b;
+        img[3*(y*GP_XRES+x)+1] = poly->color.r;
+        img[3*(y*GP_XRES+x)+2] = poly->color.g;
+      }
+    }
+  }
 }
 
 void gpRender(gpPoly *poly)
@@ -75,8 +133,7 @@ void gpRender(gpPoly *poly)
   }
   printf("\n");
 
-  int xres = 600, yres = 400;
-  IplImage *img = cvCreateImage(cvSize(xres, yres), IPL_DEPTH_8U, 3);
+  IplImage *img = cvCreateImage(cvSize(GP_XRES, GP_YRES), IPL_DEPTH_8U, 3);
   cvSet(img, GP_BG_COLOR, NULL);
 
   // scanline algorithm
@@ -94,9 +151,10 @@ int main()
 {
   // Create a triangle
   gpPoly *tri = gpCreatePoly(3);
-  gpSetPolyVertex(tri, 0, -1.f, 0.f, 0.f);
-  gpSetPolyVertex(tri, 1, 1.f, 0.f, 0.f);
-  gpSetPolyVertex(tri, 2, 0.f, 1.f, 0.f);
+  gpSetPolyVertex(tri, 0, 0.f, 2.f, 0.f);
+  gpSetPolyVertex(tri, 1, -1.f, -.0f, 0.f);
+  gpSetPolyVertex(tri, 2, 1.f, -.0f, 0.f);
+  gpSetPolyColor(tri, 0xff, 0xff, 0x0); // yellow
 
   // Render it
   gpRender(tri);
