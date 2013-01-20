@@ -2,10 +2,16 @@
  * to your multiplier. This is the carry save multiplier.
  */
 
-module csm_top(mer, mand, product);
+module csm_top(mer, mand, product, reset, clk, go, done);
 	input [15:0] mer;
 	input [15:0] mand;
 	output [31:0] product;
+
+	input clk;
+	input reset;
+
+	input go;
+	output reg done;
 
 	wire [15:0] s0;
 	wire [15:0] s1;
@@ -40,6 +46,10 @@ module csm_top(mer, mand, product);
 	wire [15:0] c14;
 	wire [15:0] c15;
 	wire [13:0] carry;
+
+	always@(posedge clk)
+	        done = go;
+
 	
 	/* Your multiplier circuit goes here. */
         carrySave cs0(16'h0000, 16'h0000, mer, mand[0], c0, s0);
