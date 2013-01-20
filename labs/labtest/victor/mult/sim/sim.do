@@ -4,4 +4,4 @@ vlog ../src/*.v
 vsim work.csm_tb
 add wave sim:/csm_tb/*
 
-run 1000
+run 3000
