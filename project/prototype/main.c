@@ -101,7 +101,7 @@ bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
   return (b1 == b2) && (b2 == b3);
 }
 
-void gpScanlineTriangle(gpPoly *poly, unsigned char *img)
+void gpFillTriangle(gpPoly *poly, unsigned char *img)
 {
   assert(poly);
   assert(poly->num_vertices == 3);
@@ -128,12 +128,12 @@ void gpScanlineTriangle(gpPoly *poly, unsigned char *img)
   }
 }
 
-void gpScanline(gpPoly *poly, unsigned char *img)
+void gpFillPoly(gpPoly *poly, unsigned char *img)
 {
   assert(poly);
 
   if (poly->num_vertices < 3) return;
-  else if (poly->num_vertices == 3) gpScanlineTriangle(poly, img);
+  else if (poly->num_vertices == 3) gpFillTriangle(poly, img);
   else {
     // Assume convex polygon with vertices in the right order!
     for (int i = 2; i < poly->num_vertices; i++) {
@@ -142,7 +142,7 @@ void gpScanline(gpPoly *poly, unsigned char *img)
       gpSetPolyVertex(tri, 1, poly->vertices[i-1].x, poly->vertices[i-1].y, poly->vertices[i-1].z);
       gpSetPolyVertex(tri, 2, poly->vertices[i].x, poly->vertices[i].y, poly->vertices[i].z);
       gpSetPolyColor(tri, poly->color.r, poly->color.g, poly->color.b);
-      gpScanlineTriangle(tri, img);
+      gpFillTriangle(tri, img);
       gpDeletePoly(tri);
     }
   }
@@ -156,7 +156,7 @@ void gpRender(gpPoly *poly)
   cvSet(img, GP_BG_COLOR, NULL);
 
   // scanline algorithm
-  gpScanline(poly, img->imageData);
+  gpFillPoly(poly, img->imageData);
 
   // display image
   cvNamedWindow("GP display", CV_WINDOW_AUTOSIZE);
