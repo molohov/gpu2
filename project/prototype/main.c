@@ -76,6 +76,11 @@ void gpDeletePoly(gpPoly *poly)
   free(poly);
 }
 
+int sign(int x, int y, int ax, int ay, int bx, int by)
+{
+  return (x - bx) * (ay - by) - (ax - bx) * (y - by);
+}
+
 bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
 {
   int ax = vertices[0].x;
@@ -85,18 +90,11 @@ bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
   int cx = vertices[2].x;
   int cy = vertices[2].y;
 
-  if (bx <= x && x <= ax) {
-    int delta_x = cx - bx;
-    return (((cy-by)*(x-bx) + delta_x * by <= y * delta_x)
-      && (y * delta_x <= (ay-by)*(x-bx) + delta_x * by));
-  }
-  else if (ax < x && x <= cx) {
-    int delta_x = cx - bx;
-    return (((cy-by)*(x-bx) + delta_x * by <= y * delta_x)
-      && (y * delta_x <= (ay-cy)*(cx-x) + delta_x * cy));
-  } else {
-    return false;
-  }
+  bool b1 = sign(x, y, ax, ay, bx, by) < 0;
+  bool b2 = sign(x, y, bx, by, cx, cy) < 0;
+  bool b3 = sign(x, y, cx, cy, ax, ay) < 0;
+
+  return (b1 == b2) && (b2 == b3);
 }
 
 void gpScanline(gpPoly *poly, unsigned char *img)
@@ -115,7 +113,7 @@ void gpScanline(gpPoly *poly, unsigned char *img)
   for (int x = 0; x < GP_XRES; x++) {
     int x_coord = x - GP_XRES/2;
     for (int y = 0; y < GP_YRES; y++) {
-      int y_coord = y - GP_YRES/2;
+      int y_coord = GP_YRES/2 - y; // flip y
       if (inTriangle(x_coord, y_coord, vertices)) {
         img[3*(y*GP_XRES+x)] = poly->color.b;
         img[3*(y*GP_XRES+x)+1] = poly->color.r;
@@ -151,9 +149,9 @@ int main()
 {
   // Create a triangle
   gpPoly *tri = gpCreatePoly(3);
-  gpSetPolyVertex(tri, 0, 0.f, 2.f, 0.f);
-  gpSetPolyVertex(tri, 1, -1.f, -.0f, 0.f);
-  gpSetPolyVertex(tri, 2, 1.f, -.0f, 0.f);
+  gpSetPolyVertex(tri, 0, 0.f, 1.f, 0.f);
+  gpSetPolyVertex(tri, 1, -1.f, 0.f, 0.f);
+  gpSetPolyVertex(tri, 2, 1.f, 0.f, 0.f);
   gpSetPolyColor(tri, 0xff, 0xff, 0x0); // yellow
 
   // Render it
