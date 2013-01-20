@@ -1,5 +1,5 @@
 EXE=gpu
-CFLAG=-O3 `pkg-config --cflags --libs opencv`
+CFLAG=-std=c99 -O3 `pkg-config --cflags --libs opencv`
 
 all:
 	$(CC) main.c $(CFLAG) -o $(EXE)
