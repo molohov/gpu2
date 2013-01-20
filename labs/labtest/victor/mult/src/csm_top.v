@@ -16,9 +16,11 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 
 	reg [15:0] ina;
 	reg [15:0] inb;
+
 	reg [15:0] cin;
 	reg [15:0] sin;
 	reg        csb;
+
 	wire [15:0] sout;
 	wire [15:0] cout;
 
@@ -26,7 +28,7 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 
 	assign done = (cur_state == 5'd18);
 
-	// assign cur_state to the next state
+	// assign cur_state
 	always@(posedge clk)
 	begin
 		$display("product: %b", product);
@@ -34,23 +36,27 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 		if (!reset || cur_state == 5'd18)
 			cur_state <= 5'd0;
 		else
+		begin
 			if (go || cur_state != 5'd0)
 				cur_state <= cur_state + 5'd1;
 			else
 				cur_state <= cur_state;
+		end
 	end
 
-	// register inputs and assign product accordingly
+	// assign ina and inb
 	always@(posedge clk)
 	begin
 		if (cur_state == 5'd0 && go)
 		begin
 			ina <= mer;
 			inb <= mand;
-			product <= 0;
 		end
-		else if (cur_state == 5'd17)
-			product[31:16] <= product_wire;
+		else
+		begin
+			ina <= ina;
+			inb <= inb;
+		end
 	end
 
 	// case-dependant logic
@@ -62,6 +68,7 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				cin <= 16'h0000;
 				sin <= 16'h0000;
 				csb <= inb[0];
+				product <= product;
 			end
 			5'd2:
 			begin
@@ -69,6 +76,7 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[1];
 				product[0] <= sout[0];
+				product[31:1] <= product[31:1];
 			end
 			5'd3:
 			begin
@@ -76,6 +84,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[2];
 				product[1] <= sout[0];
+				product[0:0] <= product[0:0];
+				product[31:2] <= product[31:2];
 			end
 			5'd4:
 			begin
@@ -83,6 +93,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[3];
 				product[2] <= sout[0];
+				product[1:0] <= product[1:0];
+				product[31:3] <= product[31:3];
 			end
 			5'd5:
 			begin
@@ -90,6 +102,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[4];
 				product[3] <= sout[0];
+				product[2:0] <= product[2:0];
+				product[31:4] <= product[31:4];
 			end
 			5'd6:
 			begin
@@ -97,6 +111,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[5];
 				product[4] <= sout[0];
+				product[3:0] <= product[3:0];
+				product[31:5] <= product[31:5];
 			end
 			5'd7:
 			begin
@@ -104,6 +120,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[6];
 				product[5] <= sout[0];
+				product[4:0] <= product[4:0];
+				product[31:6] <= product[31:6];
 			end
 			5'd8:
 			begin
@@ -111,6 +129,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[7];
 				product[6] <= sout[0];
+				product[5:0] <= product[5:0];
+				product[31:7] <= product[31:7];
 			end
 			5'd9:
 			begin
@@ -118,6 +138,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[8];
 				product[7] <= sout[0];
+				product[6:0] <= product[6:0];
+				product[31:8] <= product[31:8];
 			end
 			5'd10:
 			begin
@@ -125,6 +147,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[9];
 				product[8] <= sout[0];
+				product[7:0] <= product[7:0];
+				product[31:9] <= product[31:9];
 			end
 			5'd11:
 			begin
@@ -132,6 +156,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[10];
 				product[9] <= sout[0];
+				product[8:0] <= product[8:0];
+				product[31:10] <= product[31:10];
 			end
 			5'd12:
 			begin
@@ -139,6 +165,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[11];
 				product[10] <= sout[0];
+				product[9:0] <= product[9:0];
+				product[31:11] <= product[31:11];
 			end
 			5'd13:
 			begin
@@ -146,6 +174,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[12];
 				product[11] <= sout[0];
+				product[10:0] <= product[10:0];
+				product[31:12] <= product[31:12];
 			end
 			5'd14:
 			begin
@@ -153,6 +183,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[13];
 				product[12] <= sout[0];
+				product[11:0] <= product[11:0];
+				product[31:13] <= product[31:13];
 			end
 			5'd15:
 			begin
@@ -160,6 +192,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[14];
 				product[13] <= sout[0];
+				product[12:0] <= product[12:0];
+				product[31:14] <= product[31:14];
 			end
 			5'd16:
 			begin
@@ -167,6 +201,8 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= {1'b0, sout[15:1]};
 				csb <= inb[15];
 				product[14] <= sout[0];
+				product[13:0] <= product[13:0];
+				product[31:15] <= product[31:15];
 			end
 			5'd17:
 			begin
@@ -174,12 +210,15 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				sin <= 0;
 				csb <= 0;
 				product[15] <= sout[0];
+				product[14:0] <= product[14:0];
+				product[31:16] <= product_wire;
 			end
 			default:
 			begin
 				cin <= 0;
 				sin <= 0;
 				csb <= 0;
+				product <= product;
 			end
 		endcase
 	end
