@@ -5,6 +5,9 @@
 #include <cv.h>
 #include <highgui.h>
 
+#define GP_DISPLAY_TIMEOUT_IN_MS 5000
+#define GP_BG_COLOR (CV_RGB(0x60, 0x00, 0xe0))
+
 /* Struct definitions */
 
 //  3-d coordinate
@@ -12,9 +15,16 @@ typedef struct {
   float x, y, z;
 } gpVertex3;
 
+// RGB colour
+typedef struct {
+  unsigned char r, g, b;
+} gpColor;
+
+// 3-d shape
 typedef struct {
   gpVertex3 *vertices;
   int num_vertices;
+  gpColor color;
 } gpPoly;
 
 /* Library functions */
@@ -27,10 +37,12 @@ gpPoly * gpCreatePoly(int num_vertices)
   poly->num_vertices = num_vertices;
 
   // initialize all vertices to 0
-  gpVertex3 zeroVertex = {0.f, 0.f, 0.f};
   for (int i = 0; i < num_vertices; i++) {
-    memcpy(&poly->vertices[i], &zeroVertex, sizeof(zeroVertex));
+    poly->vertices[i] = (gpVertex3){0.f, 0.f, 0.f};
   }
+
+  // default colour is white
+  poly->color = (gpColor){0xff, 0xff, 0xff};
 
   return poly;
 }
@@ -39,8 +51,7 @@ void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
 {
   assert(num >= 0 && num < poly->num_vertices && "invalid vertex number");
 
-  gpVertex3 vertex = {x, y, z};
-  memcpy(&poly->vertices[num], &vertex, sizeof(vertex));
+  poly->vertices[num] = (gpVertex3){x, y, z};
 }
 
 void gpDeletePoly(gpPoly *poly)
@@ -52,6 +63,10 @@ void gpDeletePoly(gpPoly *poly)
   free(poly);
 }
 
+void gpScanline(gpPoly *poly, unsigned char *img)
+{
+}
+
 void gpRender(gpPoly *poly)
 {
   printf("Polygon vertices:");
@@ -60,9 +75,18 @@ void gpRender(gpPoly *poly)
   }
   printf("\n");
 
+  int xres = 600, yres = 400;
+  IplImage *img = cvCreateImage(cvSize(xres, yres), IPL_DEPTH_8U, 3);
+  cvSet(img, GP_BG_COLOR, NULL);
+
   // scanline algorithm
+  gpScanline(poly, img->imageData);
 
   // display image
+  cvNamedWindow("GP display", CV_WINDOW_AUTOSIZE);
+
+  cvShowImage("GP display", img);
+  cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
 }
 
 /* User program */
