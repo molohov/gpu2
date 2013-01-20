@@ -57,6 +57,7 @@ gpPoly * gpCreatePoly(int num_vertices)
 
 void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
 {
+  assert(poly);
   assert(num >= 0 && num < poly->num_vertices && "invalid vertex number");
 
   poly->vertices[num] = (gpVertex3){x, y, z};
@@ -64,11 +65,14 @@ void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
 
 void gpSetPolyColor(gpPoly *poly, unsigned char r, unsigned char g, unsigned b)
 {
+  assert(poly);
+
   poly->color = (gpColor){r, g, b};
 }
 
 void gpDeletePoly(gpPoly *poly)
 {
+  assert(poly);
   assert(poly->num_vertices > 0 && "invalid gpPoly, possibly already deleted");
 
   free(poly->vertices);
@@ -99,6 +103,7 @@ bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
 
 void gpScanlineTriangle(gpPoly *poly, unsigned char *img)
 {
+  assert(poly);
   assert(poly->num_vertices == 3);
 
   // convert floating point to fixed point
@@ -125,6 +130,8 @@ void gpScanlineTriangle(gpPoly *poly, unsigned char *img)
 
 void gpScanline(gpPoly *poly, unsigned char *img)
 {
+  assert(poly);
+
   if (poly->num_vertices < 3) return;
   else if (poly->num_vertices == 3) gpScanlineTriangle(poly, img);
   else {
@@ -143,6 +150,8 @@ void gpScanline(gpPoly *poly, unsigned char *img)
 
 void gpRender(gpPoly *poly)
 {
+  assert(poly);
+
   IplImage *img = cvCreateImage(cvSize(GP_XRES, GP_YRES), IPL_DEPTH_8U, 3);
   cvSet(img, GP_BG_COLOR, NULL);
 
@@ -187,6 +196,23 @@ int main()
   // Clean up
   gpDeletePoly(quad);
   quad = NULL;
+
+  // Create a hexagon
+  gpPoly *hex = gpCreatePoly(6);
+  gpSetPolyVertex(hex, 0, -.5486, 1.f, 0.f);
+  gpSetPolyVertex(hex, 1, -1.f, 0.f, 0.f);
+  gpSetPolyVertex(hex, 2, -.5486, -1.f, 0.f);
+  gpSetPolyVertex(hex, 3, .5486, -1.f, 0.f);
+  gpSetPolyVertex(hex, 4, 1.f, 0.f, 0.f);
+  gpSetPolyVertex(hex, 5, .5486, 1.f, 0.f);
+  gpSetPolyColor(hex, 0xff, 0x0, 0x0); // red
+
+  // Render it
+  gpRender(hex);
+
+  // Clean up
+  gpDeletePoly(hex);
+  hex = NULL;
 
   return 0;
 }
