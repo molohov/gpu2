@@ -24,30 +24,37 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 
 	reg [4:0] cur_state = 5'd0;
 
-	assign done = (cur_state == 5'd17);
+	assign done = (cur_state == 5'd18);
 
+	// assign cur_state to the next state
 	always@(posedge clk)
 	begin
 		$display("product: %b", product);
 
-		if (!reset || cur_state == 5'd17)
+		if (!reset || cur_state == 5'd18)
 			cur_state <= 5'd0;
 		else
 			if (go || cur_state != 5'd0)
 				cur_state <= cur_state + 5'd1;
 			else
 				cur_state <= cur_state;
+	end
+
+	// register inputs and assign product accordingly
+	always@(posedge clk)
+	begin
 		if (cur_state == 5'd0 && go)
 		begin
 			ina <= mer;
 			inb <= mand;
 			product <= 0;
 		end
-		else if (cur_state == 5'd16)
+		else if (cur_state == 5'd17)
 			product[31:16] <= product_wire;
 	end
 
-	always@(cur_state)
+	// case-dependant logic
+	always@(posedge clk)
 	begin
 		case (cur_state)
 			5'd1:
@@ -161,12 +168,18 @@ module csm_top(mer, mand, product, reset, clk, go, done);
 				csb <= inb[15];
 				product[14] <= sout[0];
 			end
-			default:
+			5'd17:
 			begin
 				cin <= 0;
 				sin <= 0;
 				csb <= 0;
 				product[15] <= sout[0];
+			end
+			default:
+			begin
+				cin <= 0;
+				sin <= 0;
+				csb <= 0;
 			end
 		endcase
 	end
