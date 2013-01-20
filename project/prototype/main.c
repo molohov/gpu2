@@ -97,16 +97,16 @@ bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
   return (b1 == b2) && (b2 == b3);
 }
 
-void gpScanline(gpPoly *poly, unsigned char *img)
+void gpScanlineTriangle(gpPoly *poly, unsigned char *img)
 {
+  assert(poly->num_vertices == 3);
+
   // convert floating point to fixed point
   gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
 
   for (int i = 0; i < poly->num_vertices; i++) {
     vertices[i].x = (int)(poly->vertices[i].x * GP_XRES / 2);
     vertices[i].y = (int)(poly->vertices[i].y * GP_YRES / 2);
-
-    printf("\tVertex %d translated to (0x%x 0x%x)\n", i, vertices[i].x, vertices[i].y);
   }
 
   // scanline algorithm
@@ -116,21 +116,33 @@ void gpScanline(gpPoly *poly, unsigned char *img)
       int y_coord = GP_YRES/2 - y; // flip y
       if (inTriangle(x_coord, y_coord, vertices)) {
         img[3*(y*GP_XRES+x)] = poly->color.b;
-        img[3*(y*GP_XRES+x)+1] = poly->color.r;
-        img[3*(y*GP_XRES+x)+2] = poly->color.g;
+        img[3*(y*GP_XRES+x)+1] = poly->color.g;
+        img[3*(y*GP_XRES+x)+2] = poly->color.r;
       }
+    }
+  }
+}
+
+void gpScanline(gpPoly *poly, unsigned char *img)
+{
+  if (poly->num_vertices < 3) return;
+  else if (poly->num_vertices == 3) gpScanlineTriangle(poly, img);
+  else {
+    // Assume convex polygon with vertices in the right order!
+    for (int i = 2; i < poly->num_vertices; i++) {
+      gpPoly *tri = gpCreatePoly(3);
+      gpSetPolyVertex(tri, 0, poly->vertices[0].x, poly->vertices[0].y, poly->vertices[0].z);
+      gpSetPolyVertex(tri, 1, poly->vertices[i-1].x, poly->vertices[i-1].y, poly->vertices[i-1].z);
+      gpSetPolyVertex(tri, 2, poly->vertices[i].x, poly->vertices[i].y, poly->vertices[i].z);
+      gpSetPolyColor(tri, poly->color.r, poly->color.g, poly->color.b);
+      gpScanlineTriangle(tri, img);
+      gpDeletePoly(tri);
     }
   }
 }
 
 void gpRender(gpPoly *poly)
 {
-  printf("Polygon vertices:");
-  for (int i = 0; i < poly->num_vertices; i++) {
-    printf(" (%f, %f)", poly->vertices[i].x, poly->vertices[i].y);
-  }
-  printf("\n");
-
   IplImage *img = cvCreateImage(cvSize(GP_XRES, GP_YRES), IPL_DEPTH_8U, 3);
   cvSet(img, GP_BG_COLOR, NULL);
 
@@ -159,6 +171,22 @@ int main()
 
   // Clean up
   gpDeletePoly(tri);
+  tri = NULL;
+
+  // Create a quadrilateral
+  gpPoly *quad = gpCreatePoly(4);
+  gpSetPolyVertex(quad, 0, 0.f, 1.f, 0.f);
+  gpSetPolyVertex(quad, 1, -1.f, 0.f, 0.f);
+  gpSetPolyVertex(quad, 2, 0.f, -1.f, 0.f);
+  gpSetPolyVertex(quad, 3, 1.f, 0.5f, 0.f);
+  gpSetPolyColor(quad, 0x0, 0xff, 0x0); // green
+
+  // Render it
+  gpRender(quad);
+
+  // Clean up
+  gpDeletePoly(quad);
+  quad = NULL;
 
   return 0;
 }
