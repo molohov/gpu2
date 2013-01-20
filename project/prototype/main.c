@@ -155,7 +155,7 @@ void gpRender(gpPoly *poly)
   IplImage *img = cvCreateImage(cvSize(GP_XRES, GP_YRES), IPL_DEPTH_8U, 3);
   cvSet(img, GP_BG_COLOR, NULL);
 
-  // scanline algorithm
+  // fill polygon algorithm
   gpFillPoly(poly, img->imageData);
 
   // display image
