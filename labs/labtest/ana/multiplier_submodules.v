@@ -5,6 +5,7 @@ module shiftreg # (parameter N = 16)
                   (input clk,
                    input enable,
 				   input shift_right,
+				   input MSBin,
                    input reset,
                    input [N-1:0] in,
                    output reg [N-1:0] q);
@@ -13,11 +14,10 @@ module shiftreg # (parameter N = 16)
     begin
       if (reset)        		q <= 'b0;
 	  else if (enable) 			q <= in;
-	  else if (shift_right) 	q <= {0, q[N-1:1]};
+	  else if (shift_right) 	q <= {MSBin, q[N-1:1]};
     end  
 	
 endmodule
-
 
 module adder (	input [15:0] in1,
 				input [15:0] in2,

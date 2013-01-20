@@ -9,7 +9,7 @@ module sequential_mult(	input clk,
   wire [15:0] mand_wire;
   wire [15:0] mer_wire;
   reg shift_mer;
-  wire [31:0] sum;
+  wire [16:0] sum;
   reg enable_product; 
   reg shift_product;
   wire [4:0] count;
@@ -23,6 +23,7 @@ module sequential_mult(	input clk,
                                          .reset(reset),
                                          .enable(enable_mand),
 										 .shift_right(0),
+										 .MSBin(0),
 										 .in(mand),
                                          .q(mand_wire));
   //instantiate 16bit shift register to store mer
@@ -30,15 +31,17 @@ module sequential_mult(	input clk,
                                          .reset(reset),
                                          .enable(enable_mer),
 										 .shift_right(shift_mer),
+										 .MSBin(0),
 										 .in(mer),
                                          .q(mer_wire));
 										 
   //instantiate 32bit shift register to store product
-  shiftreg # (.N(32))        prodcutReg(.clk(clk),
+  shiftreg_withMSB # (.N(32))        prodcutReg(.clk(clk),
                                          .reset(go),
                                          .enable(enable_product),
 										 .shift_right(shift_product),
-										 .in({sum, product[15:0]}),
+										 .MSBin(sum[16]);
+										 .in({sum[15:0], product[15:0]}),
                                          .q(product));
   
   //instantiate 16-bit adder
