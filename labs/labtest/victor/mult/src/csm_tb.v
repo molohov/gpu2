@@ -27,6 +27,8 @@ go <= 1;
 go <= 0;
 ref <= 32'h0054ffab;
 @(negedge clk);
+$display("%x", product);
+$display("%x", ref);
 mer <= 16'b0000000000000001;
 mand <= 16'b0000000001110110;
 @(negedge clk);
@@ -35,6 +37,8 @@ go <= 1;
 go <= 0;
 ref <= 32'h00000076;
 @(negedge clk);
+$display("%x", product);
+$display("%x", ref);
 mer <= 16'b0000000000001111;
 mand <= 16'b0000000000010001;
 @(negedge clk);
@@ -43,6 +47,8 @@ go <= 1;
 go <= 0;
 ref <= 32'h000000ff;
 @(negedge clk);
+$display("%x", product);
+$display("%x", ref);
 mer <= 16'b 0000000001001110;
 mand <= 16'b0000000000010001;
 @(negedge clk);
@@ -50,6 +56,10 @@ go <= 1;
 @(posedge done);
 go <= 0;
 ref <= 32'h0000052e;
+@(negedge clk);
+$display("%x", product);
+$display("%x", ref);
+$finish;
 end
 
 csm_top csm_inst(
