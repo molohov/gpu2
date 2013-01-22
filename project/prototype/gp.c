@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -72,12 +73,30 @@ gpPoly * gpCreatePoly(int num_vertices)
   return poly;
 }
 
+gpVertex3 gpVertex3CrossProduct(gpVertex3 a, gpVertex3 b)
+{
+  return (gpVertex3){a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
+}
+
+gpVertex3 gpVertex3Normalize(gpVertex3 v)
+{
+  float mag = sqrt(v.x * v.x + v.y + v.y + v.z * v.z);
+  return (gpVertex3){v.x / mag, v.y / mag, v.z / mag};
+}
+
 void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
 {
   assert(poly);
   assert(num >= 0 && num < poly->num_vertices && "invalid vertex number");
 
   poly->vertices[num] = (gpVertex3){x, y, z};
+
+  // compute normal via cross product for the 3rd point
+  if (num == 2) {
+    gpVertex3 a = (gpVertex3){poly->vertices[0].x - x, poly->vertices[0].y - y, poly->vertices[0].z - z};
+    gpVertex3 b = (gpVertex3){poly->vertices[1].x - x, poly->vertices[1].y - y, poly->vertices[1].z - z};
+    poly->normal = gpVertex3Normalize(gpVertex3CrossProduct(a, b));
+  }
 }
 
 void gpSetPolyColor(gpPoly *poly, unsigned char r, unsigned char g, unsigned b)

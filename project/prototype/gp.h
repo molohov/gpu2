@@ -20,6 +20,7 @@ typedef struct {
   gpVertex3 *vertices;
   int num_vertices;
   gpColor color;
+  gpVertex3 normal;
   float avg_z;
 } gpPoly;
 
