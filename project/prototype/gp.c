@@ -201,9 +201,9 @@ int poly_z_cmp(const void *a, const void *b)
   const gpPoly *pa = *(const gpPoly **)a;
   const gpPoly *pb = *(const gpPoly **)b;
 
-  if (pa->vertices[0].z == pb->vertices[0].z) return 0;
+  if (pa->avg_z == pb->avg_z) return 0;
 
-  return (pa->vertices[0].z > pb->vertices[0].z) ? -1 : 1;
+  return (pa->avg_z > pb->avg_z) ? -1 : 1;
 }
 
 void gpRender(gpPolyList *list)
@@ -224,7 +224,7 @@ void gpRender(gpPolyList *list)
     poly->avg_z = sum_z / poly->num_vertices;
   }
 
-  // sort polygons by decreasing z (should be same for all vertices, so just use vertices[0])
+  // sort polygons by decreasing z (use average for now)
   qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_z_cmp);
 
   // fill polygon algorithm for each polygon
