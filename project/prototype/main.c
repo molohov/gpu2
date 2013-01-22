@@ -101,6 +101,13 @@ bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
   return (b1 == b2) && (b2 == b3);
 }
 
+#ifndef MAX
+#define MAX(a,b) (a<b?b:a)
+#endif
+#ifndef MIN
+#define MIN(a,b) (a<b?a:b)
+#endif
+
 void gpFillTriangle(gpPoly *poly, unsigned char *img)
 {
   assert(poly);
@@ -114,10 +121,16 @@ void gpFillTriangle(gpPoly *poly, unsigned char *img)
     vertices[i].y = (int)(poly->vertices[i].y * GP_YRES / 2);
   }
 
+  int x_start = MAX(0, GP_XRES/2+1+MIN(vertices[0].x, MIN(vertices[1].x, vertices[2].x)));
+  int x_end   = MIN(GP_XRES, GP_XRES/2+1+MAX(vertices[0].x, MAX(vertices[1].x, vertices[2].x)));
+
+  int y_start = MIN(GP_YRES, GP_YRES/2+1-MAX(vertices[0].y, MAX(vertices[1].y, vertices[2].y)));
+  int y_end   = MAX(0, GP_YRES/2+1-MIN(vertices[0].y, MIN(vertices[1].y, vertices[2].y)));
+
   // scanline algorithm
-  for (int x = 0; x < GP_XRES; x++) {
+  for (int x = x_start; x < x_end; x++) {
     int x_coord = x - GP_XRES/2;
-    for (int y = 0; y < GP_YRES; y++) {
+    for (int y = y_start; y < y_end; y++) {
       int y_coord = GP_YRES/2 - y; // flip y
       if (inTriangle(x_coord, y_coord, vertices)) {
         img[3*(y*GP_XRES+x)] = poly->color.b;
