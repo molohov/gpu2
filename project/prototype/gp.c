@@ -1,4 +1,3 @@
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -78,16 +77,20 @@ gpVertex3 gpVertex3CrossProduct(gpVertex3 a, gpVertex3 b)
   return (gpVertex3){a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
 }
 
-gpVertex3 gpVertex3Normalize(gpVertex3 v)
-{
-  float mag = sqrt(v.x * v.x + v.y + v.y + v.z * v.z);
-  return (gpVertex3){v.x / mag, v.y / mag, v.z / mag};
-}
-
 void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
 {
   assert(poly);
   assert(num >= 0 && num < poly->num_vertices && "invalid vertex number");
+
+  // ensure z is on the right plane
+  if (num > 2) {
+    gpVertex3 a = (gpVertex3){poly->vertices[0].x - poly->vertices[2].x, poly->vertices[0].y - poly->vertices[2].y, poly->vertices[0].z - poly->vertices[2].z};
+    if (fabs(a.x) > fabs(a.y)) {
+      z = poly->vertices[2].z - (a.z * (x - poly->vertices[2].x) - poly->normal.y)/a.x;
+    } else {
+      z = poly->vertices[2].z - (a.z * (y - poly->vertices[2].y) + poly->normal.x)/a.y;
+    }
+  }
 
   poly->vertices[num] = (gpVertex3){x, y, z};
 
@@ -95,7 +98,7 @@ void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
   if (num == 2) {
     gpVertex3 a = (gpVertex3){poly->vertices[0].x - x, poly->vertices[0].y - y, poly->vertices[0].z - z};
     gpVertex3 b = (gpVertex3){poly->vertices[1].x - x, poly->vertices[1].y - y, poly->vertices[1].z - z};
-    poly->normal = gpVertex3Normalize(gpVertex3CrossProduct(a, b));
+    poly->normal = gpVertex3CrossProduct(a, b);
   }
 }
 
