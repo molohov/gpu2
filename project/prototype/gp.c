@@ -9,6 +9,7 @@
 #include "gp.h"
 
 #define POLY_LIST_CHUNK_SIZE 16
+#define EPSILON 0.00001f
 
 /* Struct definitions */
 
@@ -82,13 +83,14 @@ void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
   assert(poly);
   assert(num >= 0 && num < poly->num_vertices && "invalid vertex number");
 
-  // ensure z is on the right plane
+  // ensure new vertex is on the right plane, ie n . (r - r0) = 0
   if (num > 2) {
-    gpVertex3 a = (gpVertex3){poly->vertices[0].x - poly->vertices[2].x, poly->vertices[0].y - poly->vertices[2].y, poly->vertices[0].z - poly->vertices[2].z};
-    if (fabs(a.x) > fabs(a.y)) {
-      z = poly->vertices[2].z - (a.z * (x - poly->vertices[2].x) - poly->normal.y)/a.x;
+    if (fabs(poly->normal.z) > EPSILON) {
+      z = poly->vertices[0].z + (-poly->normal.x * (x - poly->vertices[0].x) - poly->normal.y * (y - poly->vertices[0].y))/poly->normal.z;
+    } else if (fabs(poly->normal.y) > EPSILON) {
+      y = poly->vertices[0].y + (-poly->normal.x * (x - poly->vertices[0].x) - poly->normal.z * (z - poly->vertices[0].z))/poly->normal.y;
     } else {
-      z = poly->vertices[2].z - (a.z * (y - poly->vertices[2].y) + poly->normal.x)/a.y;
+      x = poly->vertices[0].x + (-poly->normal.y * (x - poly->vertices[0].y) - poly->normal.z * (z - poly->vertices[0].z))/poly->normal.x;
     }
   }
 
