@@ -22,16 +22,23 @@ typedef struct {
   gpColor color;
 } gpPoly;
 
-// 2-d fixed point for rendering and matrix ops
+// list of 3-d shapes
 typedef struct {
-  int x, y;
-} gpVertex2Fixed;
+  int num_polys;
+  int capacity;
+  gpPoly **polys;
+} gpPolyList;
 
 /* Library functions */
+
+gpPolyList * gpCreatePolyList();
+void gpAddPolyToList(gpPolyList *list, gpPoly *poly);
+void gpDeletePolyList(gpPolyList *list);
 
 gpPoly * gpCreatePoly(int num_vertices);
 void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z);
 void gpSetPolyColor(gpPoly *poly, unsigned char r, unsigned char g, unsigned b);
 void gpDeletePoly(gpPoly *poly);
 
-void gpRender(gpPoly *poly);
+void gpRenderPoly(gpPoly *poly);
+void gpRender(gpPolyList *list);

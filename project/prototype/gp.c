@@ -8,7 +8,49 @@
 
 #include "gp.h"
 
+#define POLY_LIST_CHUNK_SIZE 16
+
+/* Struct definitions */
+
+// 2-d fixed point for rendering and matrix ops
+typedef struct {
+  int x, y;
+} gpVertex2Fixed;
+
 /* Library functions */
+
+gpPolyList * gpCreatePolyList()
+{
+  gpPolyList *list = malloc(sizeof(gpPolyList));
+
+  list->capacity = POLY_LIST_CHUNK_SIZE;
+  list->polys = malloc(list->capacity * sizeof(gpPoly *));
+  list->num_polys = 0;
+
+  return list;
+}
+
+void gpAddPolyToList(gpPolyList *list, gpPoly *poly)
+{
+  if (list->num_polys == list->capacity) {
+    list->capacity += POLY_LIST_CHUNK_SIZE;
+    list->polys = realloc(list->polys, list->capacity * sizeof(gpPoly *));
+  }
+
+  list->polys[list->num_polys] = poly;
+  list->num_polys++;
+}
+
+void gpDeletePolyList(gpPolyList *list)
+{
+  for (int i = 0; i < list->num_polys; i++) {
+    gpDeletePoly(list->polys[i]);
+  }
+
+  free(list->polys);
+  free(list);
+}
+
 gpPoly * gpCreatePoly(int num_vertices)
 {
   assert(num_vertices > 0 && "gpPoly must have at least 1 vertex");
@@ -134,7 +176,7 @@ void gpFillPoly(gpPoly *poly, unsigned char *img)
   }
 }
 
-void gpRender(gpPoly *poly)
+void gpRenderPoly(gpPoly *poly)
 {
   assert(poly);
 
@@ -143,6 +185,25 @@ void gpRender(gpPoly *poly)
 
   // fill polygon algorithm
   gpFillPoly(poly, img->imageData);
+
+  // display image
+  cvNamedWindow("GP display", CV_WINDOW_AUTOSIZE);
+
+  cvShowImage("GP display", img);
+  cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
+}
+
+void gpRender(gpPolyList *list)
+{
+  assert(list);
+
+  IplImage *img = cvCreateImage(cvSize(GP_XRES, GP_YRES), IPL_DEPTH_8U, 3);
+  cvSet(img, GP_BG_COLOR, NULL);
+
+  // fill polygon algorithm for each polygon
+  for (int i = 0; i < list->num_polys; i++) {
+    gpFillPoly(list->polys[i], img->imageData);
+  }
 
   // display image
   cvNamedWindow("GP display", CV_WINDOW_AUTOSIZE);

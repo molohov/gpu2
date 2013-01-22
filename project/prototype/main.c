@@ -13,11 +13,7 @@ int main()
   gpSetPolyColor(tri, 0xff, 0xff, 0x0); // yellow
 
   // Render it
-  gpRender(tri);
-
-  // Clean up
-  gpDeletePoly(tri);
-  tri = NULL;
+  gpRenderPoly(tri);
 
   // Create a quadrilateral
   gpPoly *quad = gpCreatePoly(4);
@@ -28,11 +24,7 @@ int main()
   gpSetPolyColor(quad, 0x0, 0xff, 0x0); // green
 
   // Render it
-  gpRender(quad);
-
-  // Clean up
-  gpDeletePoly(quad);
-  quad = NULL;
+  gpRenderPoly(quad);
 
   // Create a hexagon
   gpPoly *hex = gpCreatePoly(6);
@@ -45,11 +37,20 @@ int main()
   gpSetPolyColor(hex, 0xff, 0x0, 0x0); // red
 
   // Render it
-  gpRender(hex);
+  gpRenderPoly(hex);
 
-  // Clean up
-  gpDeletePoly(hex);
-  hex = NULL;
+  // Render all polygons as a list
+
+  gpPolyList *list = gpCreatePolyList();
+  gpAddPolyToList(list, hex);
+  gpAddPolyToList(list, quad);
+  gpAddPolyToList(list, tri);
+
+  // Render it
+  gpRender(list);
+
+  // Cleanup
+  gpDeletePolyList(list);
 
   return 0;
 }
