@@ -193,6 +193,17 @@ void gpRenderPoly(gpPoly *poly)
   cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
 }
 
+// compare z-coordinate of polygon a and b in descending order
+int poly_z_cmp(const void *a, const void *b)
+{
+  const gpPoly *pa = *(const gpPoly **)a;
+  const gpPoly *pb = *(const gpPoly **)b;
+
+  if (pa->vertices[0].z == pb->vertices[0].z) return 0;
+
+  return (pa->vertices[0].z > pb->vertices[0].z) ? -1 : 1;
+}
+
 void gpRender(gpPolyList *list)
 {
   assert(list);
@@ -200,8 +211,16 @@ void gpRender(gpPolyList *list)
   IplImage *img = cvCreateImage(cvSize(GP_XRES, GP_YRES), IPL_DEPTH_8U, 3);
   cvSet(img, GP_BG_COLOR, NULL);
 
+  // sort polygons by decreasing z (should be same for all vertices, so just use vertices[0])
+  qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_z_cmp);
+
   // fill polygon algorithm for each polygon
   for (int i = 0; i < list->num_polys; i++) {
+    // beneath viewing plane, do not display
+    if (list->polys[i]->vertices[0].z < -0.f) {
+      break;
+    }
+
     gpFillPoly(list->polys[i], img->imageData);
   }
 
