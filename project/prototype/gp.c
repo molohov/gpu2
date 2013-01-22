@@ -67,6 +67,8 @@ gpPoly * gpCreatePoly(int num_vertices)
   // default colour is white
   poly->color = (gpColor){0xff, 0xff, 0xff};
 
+  poly->avg_z = 0.f;
+
   return poly;
 }
 
@@ -210,6 +212,17 @@ void gpRender(gpPolyList *list)
 
   IplImage *img = cvCreateImage(cvSize(GP_XRES, GP_YRES), IPL_DEPTH_8U, 3);
   cvSet(img, GP_BG_COLOR, NULL);
+
+  // compute avg_z for each polygon
+  for (int i = 0; i < list->num_polys; i++) {
+    gpPoly *poly = list->polys[i];
+
+    float sum_z = 0.f;
+    for (int j = 0; j < poly->num_vertices; j++) {
+      sum_z += poly->vertices[j].z;
+    }
+    poly->avg_z = sum_z / poly->num_vertices;
+  }
 
   // sort polygons by decreasing z (should be same for all vertices, so just use vertices[0])
   qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_z_cmp);
