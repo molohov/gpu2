@@ -1,12 +1,15 @@
-EXE=gpu
+EXE=prototype
 CFLAG=-std=c99 -O3 `pkg-config --cflags --libs opencv`
 
 all: $(EXE)
 
-$(EXE): main.c
-	$(CC) main.c $(CFLAG) -o $(EXE)
+gp.o: gp.c gp.h
+	$(CC) -c gp.c $(CFLAG)
+
+$(EXE): main.c gp.h gp.o
+	$(CC) main.c gp.o $(CFLAG) -o $(EXE)
 
 clean:
-	rm -rf $(EXE)
+	rm -rf $(EXE) *.o
 
 .PHONY: all clean
