@@ -270,6 +270,7 @@ void gpApplyRotate(gpTMatrix *trans, float yaw, float pitch, float roll)
   float cosr = cosf(roll);
 
   // rotate is a transpose!
+  // this matrix applies roll, then pitch, then yaw
   gpTMatrix rotate = (gpTMatrix){{{cosy*cosp, cosy*sinp*sinr+cosr*siny, -cosy*sinp*cosr+siny*sinr, 0.f}, {-siny*cosp, -siny*sinp*sinr+cosy*cosr, siny*sinp*cosr+cosy*sinr, 0.f}, {sinp, -cosp*sinr, cosp*cosr, 0.f}, {0.f, 0.f, 0.f, 1.f}}};
   gpApplyTMatrix(trans, &rotate);
 }
