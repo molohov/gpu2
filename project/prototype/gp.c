@@ -164,8 +164,8 @@ void gpFillTriangle(gpPoly *poly, unsigned char *img)
   int x_start = MAX(0, GP_XRES/2+1+MIN(vertices[0].x, MIN(vertices[1].x, vertices[2].x)));
   int x_end   = MIN(GP_XRES, GP_XRES/2+1+MAX(vertices[0].x, MAX(vertices[1].x, vertices[2].x)));
 
-  int y_start = MIN(GP_YRES, GP_YRES/2+1-MAX(vertices[0].y, MAX(vertices[1].y, vertices[2].y)));
-  int y_end   = MAX(0, GP_YRES/2+1-MIN(vertices[0].y, MIN(vertices[1].y, vertices[2].y)));
+  int y_start = MAX(0, GP_YRES/2+1-MAX(vertices[0].y, MAX(vertices[1].y, vertices[2].y)));
+  int y_end   = MIN(GP_XRES, GP_YRES/2+1-MIN(vertices[0].y, MIN(vertices[1].y, vertices[2].y)));
 
   // scanline algorithm
   for (int x = x_start; x < x_end; x++) {
@@ -226,7 +226,7 @@ void gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
 
 void gpApplyTranslate(gpTMatrix *trans, float x, float y, float z)
 {
-  gpTMatrix translate = (gpTMatrix){{{1.f, 0.f, 0.f, x}, {0.f, 1.f, 0.f, y}, {0.f, 0.f, 1.f, z}, {0.f, 0.f, 0.f, 1.f}}};
+  gpTMatrix translate = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {x, y, z, 1.f}}};
   gpApplyTMatrix(trans, &translate);
 }
 
@@ -242,7 +242,7 @@ void gpTranslatePolyList(gpPolyList *list, float x, float y, float z)
 
 void gpApplyScale(gpTMatrix *trans, float x, float y, float z)
 {
-  gpTMatrix translate = (gpTMatrix){{{x, 0.f, 0.f, 0.f}, {y, 1.f, 0.f, 0.f}, {z, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}};
+  gpTMatrix translate = (gpTMatrix){{{x, 0.f, 0.f, 0.f}, {0.f, y, 0.f, 0.f}, {0.f, 0.f, z, 0.f}, {0.f, 0.f, 0.f, 1.f}}};
   gpApplyTMatrix(trans, &translate);
 }
 

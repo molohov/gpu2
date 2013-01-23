@@ -15,6 +15,9 @@ int main()
   // Render it
   gpRenderPoly(tri);
 
+  gpTranslatePoly(tri, 0.2f, 0.2f, 0.f);
+  gpRenderPoly(tri);
+
   // Create a quadrilateral
   gpPoly *quad = gpCreatePoly(4);
   gpSetPolyVertex(quad, 0, 0.f, 1.f, 2.f);
@@ -24,6 +27,9 @@ int main()
   gpSetPolyColor(quad, 0x0, 0xff, 0x0); // green
 
   // Render it
+  gpRenderPoly(quad);
+
+  gpScalePoly(quad, 0.8f, 0.8f, 1.f);
   gpRenderPoly(quad);
 
   // Create a hexagon
