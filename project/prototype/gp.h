@@ -53,5 +53,10 @@ void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z);
 void gpSetPolyColor(gpPoly *poly, unsigned char r, unsigned char g, unsigned b);
 void gpDeletePoly(gpPoly *poly);
 
+void gpTranslatePoly(gpPoly *poly, float x, float y, float z);
+void gpTranslatePolyList(gpPolyList *list, float x, float y, float z);
+void gpScalePoly(gpPoly *poly, float x, float y, float z);
+void gpScalePolyList(gpPolyList *list, float x, float y, float z);
+
 void gpRenderPoly(gpPoly *poly);
 void gpRender(gpPolyList *list);

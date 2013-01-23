@@ -59,7 +59,7 @@ gpPoly * gpCreatePoly(int num_vertices)
 
   gpPoly *poly = malloc(sizeof(gpPoly));
   poly->vertices = malloc(num_vertices * sizeof(gpVertex3));
-  poly->t_vertices = NULL;
+  poly->t_vertices = malloc(num_vertices * sizeof(gpVertex3));
   poly->num_vertices = num_vertices;
 
   // initialize all vertices to 0
@@ -157,8 +157,8 @@ void gpFillTriangle(gpPoly *poly, unsigned char *img)
   gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
 
   for (int i = 0; i < poly->num_vertices; i++) {
-    vertices[i].x = (int)(poly->vertices[i].x * GP_XRES / 2);
-    vertices[i].y = (int)(poly->vertices[i].y * GP_YRES / 2);
+    vertices[i].x = (int)(poly->t_vertices[i].x * GP_XRES / 2);
+    vertices[i].y = (int)(poly->t_vertices[i].y * GP_YRES / 2);
   }
 
   int x_start = MAX(0, GP_XRES/2+1+MIN(vertices[0].x, MIN(vertices[1].x, vertices[2].x)));
@@ -210,10 +210,6 @@ void gpApplyTMatrix(gpTMatrix *dst, gpTMatrix *src)
 
 void gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
 {
-  if (!poly->t_vertices) {
-    poly->t_vertices = malloc(poly->num_vertices * sizeof(gpVertex3));
-  }
-
   for (int i = 0; i < poly->num_vertices; i++) {
     float temp[1][4] = {{poly->vertices[i].x, poly->vertices[i].y, poly->vertices[i].z, 1.f}};
     float result[1][4];
@@ -228,6 +224,38 @@ void gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
   }
 }
 
+void gpApplyTranslate(gpTMatrix *trans, float x, float y, float z)
+{
+  gpTMatrix translate = (gpTMatrix){{{1.f, 0.f, 0.f, x}, {0.f, 1.f, 0.f, y}, {0.f, 0.f, 1.f, z}, {0.f, 0.f, 0.f, 1.f}}};
+  gpApplyTMatrix(trans, &translate);
+}
+
+void gpTranslatePoly(gpPoly *poly, float x, float y, float z)
+{
+  gpApplyTranslate(&poly->trans, x, y, z);
+}
+
+void gpTranslatePolyList(gpPolyList *list, float x, float y, float z)
+{
+  gpApplyTranslate(&list->trans, x, y, z);
+}
+
+void gpApplyScale(gpTMatrix *trans, float x, float y, float z)
+{
+  gpTMatrix translate = (gpTMatrix){{{x, 0.f, 0.f, 0.f}, {y, 1.f, 0.f, 0.f}, {z, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}};
+  gpApplyTMatrix(trans, &translate);
+}
+
+void gpScalePoly(gpPoly *poly, float x, float y, float z)
+{
+  gpApplyScale(&poly->trans, x, y, z);
+}
+
+void gpScalePolyList(gpPolyList *list, float x, float y, float z)
+{
+  gpApplyScale(&list->trans, x, y, z);
+}
+
 void gpFillPoly(gpPoly *poly, unsigned char *img)
 {
   assert(poly);
@@ -238,9 +266,9 @@ void gpFillPoly(gpPoly *poly, unsigned char *img)
     // Assume convex polygon with vertices in the right order!
     for (int i = 2; i < poly->num_vertices; i++) {
       gpPoly *tri = gpCreatePoly(3);
-      gpSetPolyVertex(tri, 0, poly->vertices[0].x, poly->vertices[0].y, poly->vertices[0].z);
-      gpSetPolyVertex(tri, 1, poly->vertices[i-1].x, poly->vertices[i-1].y, poly->vertices[i-1].z);
-      gpSetPolyVertex(tri, 2, poly->vertices[i].x, poly->vertices[i].y, poly->vertices[i].z);
+      tri->t_vertices[0] = (gpVertex3){poly->t_vertices[0].x, poly->t_vertices[0].y, poly->t_vertices[0].z};
+      tri->t_vertices[1] = (gpVertex3){poly->t_vertices[i-1].x, poly->t_vertices[i-1].y, poly->t_vertices[i-1].z};
+      tri->t_vertices[2] = (gpVertex3){poly->t_vertices[i].x, poly->t_vertices[i].y, poly->t_vertices[i].z};
       gpSetPolyColor(tri, poly->color.r, poly->color.g, poly->color.b);
       gpFillTriangle(tri, img);
       gpDeletePoly(tri);
