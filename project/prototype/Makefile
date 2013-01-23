@@ -1,5 +1,5 @@
 EXE=prototype
-CFLAG=-std=c99 -O3 `pkg-config --cflags --libs opencv`
+CFLAG=-std=c99 -O3 -lm `pkg-config --cflags --libs opencv`
 
 all: $(EXE)
 

@@ -55,6 +55,9 @@ int main()
   // Render it
   gpRender(list);
 
+  gpRotatePolyList(list, 0.5f, 0.f, 0.f);
+  gpRender(list);
+
   // Cleanup
   gpDeletePolyList(list);
 

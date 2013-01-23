@@ -57,6 +57,8 @@ void gpTranslatePoly(gpPoly *poly, float x, float y, float z);
 void gpTranslatePolyList(gpPolyList *list, float x, float y, float z);
 void gpScalePoly(gpPoly *poly, float x, float y, float z);
 void gpScalePolyList(gpPolyList *list, float x, float y, float z);
+void gpRotatePoly(gpPoly *poly, float yaw, float pitch, float roll);
+void gpRotatePolyList(gpPolyList *list, float yaw, float pitch, float roll);
 
 void gpRenderPoly(gpPoly *poly);
 void gpRender(gpPolyList *list);

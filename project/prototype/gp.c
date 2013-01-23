@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -257,6 +258,30 @@ void gpScalePoly(gpPoly *poly, float x, float y, float z)
 void gpScalePolyList(gpPolyList *list, float x, float y, float z)
 {
   gpApplyScale(&list->trans, x, y, z);
+}
+
+void gpApplyRotate(gpTMatrix *trans, float yaw, float pitch, float roll)
+{
+  float siny = sinf(yaw);
+  float cosy = cosf(yaw);
+  float sinp = sinf(pitch);
+  float cosp = cosf(pitch);
+  float sinr = sinf(roll);
+  float cosr = cosf(roll);
+
+  // rotate is a transpose!
+  gpTMatrix rotate = (gpTMatrix){{{cosy*cosp, cosy*sinp*sinr+cosr*siny, -cosy*sinp*cosr+siny*sinr, 0.f}, {-siny*cosp, -siny*sinp*sinr+cosy*cosr, siny*sinp*cosr+cosy*sinr, 0.f}, {sinp, -cosp*sinr, cosp*cosr, 0.f}, {0.f, 0.f, 0.f, 1.f}}};
+  gpApplyTMatrix(trans, &rotate);
+}
+
+void gpRotatePoly(gpPoly *poly, float yaw, float pitch, float roll)
+{
+  gpApplyRotate(&poly->trans, yaw, pitch, roll);
+}
+
+void gpRotatePolyList(gpPolyList *list, float yaw, float pitch, float roll)
+{
+  gpApplyRotate(&list->trans, yaw, pitch, roll);
 }
 
 void gpFillPoly(gpPoly *poly, unsigned char *img)
