@@ -18,13 +18,20 @@ typedef struct {
   unsigned char r, g, b;
 } gpColor;
 
+// 4x4 matrix for transformation calculations
+typedef struct {
+  float m[4][4];
+} gpTMatrix;
+
 // 3-d shape
 typedef struct {
   gpVertex3 *vertices;
+  gpVertex3 *t_vertices;
   int num_vertices;
   gpColor color;
   gpVertex3 normal;
   float avg_z;
+  gpTMatrix trans;
 } gpPoly;
 
 // list of 3-d shapes
@@ -32,6 +39,7 @@ typedef struct {
   int num_polys;
   int capacity;
   gpPoly **polys;
+  gpTMatrix trans;
 } gpPolyList;
 
 /* Library functions */

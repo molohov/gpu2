@@ -13,7 +13,7 @@
 
 /* Struct definitions */
 
-// 2-d fixed point for rendering and matrix ops
+// 2-d fixed point for rendering
 typedef struct {
   int x, y;
 } gpVertex2Fixed;
@@ -27,6 +27,7 @@ gpPolyList * gpCreatePolyList()
   list->capacity = POLY_LIST_CHUNK_SIZE;
   list->polys = malloc(list->capacity * sizeof(gpPoly *));
   list->num_polys = 0;
+  list->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
 
   return list;
 }
@@ -58,6 +59,7 @@ gpPoly * gpCreatePoly(int num_vertices)
 
   gpPoly *poly = malloc(sizeof(gpPoly));
   poly->vertices = malloc(num_vertices * sizeof(gpVertex3));
+  poly->t_vertices = NULL;
   poly->num_vertices = num_vertices;
 
   // initialize all vertices to 0
@@ -69,6 +71,7 @@ gpPoly * gpCreatePoly(int num_vertices)
   poly->color = (gpColor){0xff, 0xff, 0xff};
 
   poly->avg_z = 0.f;
+  poly->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
 
   return poly;
 }
@@ -119,6 +122,7 @@ void gpDeletePoly(gpPoly *poly)
   assert(poly->num_vertices > 0 && "invalid gpPoly, possibly already deleted");
 
   free(poly->vertices);
+  free(poly->t_vertices);
   poly->num_vertices = 0;
   free(poly);
 }
@@ -143,13 +147,6 @@ bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
 
   return (b1 == b2) && (b2 == b3);
 }
-
-#ifndef MAX
-#define MAX(a,b) (a<b?b:a)
-#endif
-#ifndef MIN
-#define MIN(a,b) (a<b?a:b)
-#endif
 
 void gpFillTriangle(gpPoly *poly, unsigned char *img)
 {
@@ -184,6 +181,53 @@ void gpFillTriangle(gpPoly *poly, unsigned char *img)
   }
 }
 
+void gpMatrixMult(float *x, float *y, float *result, int a, int b, int c)
+{
+  // result = x y, x is a x b, y = b x c, result = a x c
+
+  for (int i = 0; i < a; i++) {
+    for (int j = 0; j < c; j++) {
+      result[i*c+j] = 0.f;
+    }
+  }
+
+  for (int i = 0; i < a; i++) {
+    for (int j = 0; j < b; j++) {
+      for (int k = 0; k < c; k++) {
+        result[i*c+k] += x[i*b+j] * y[j*c+k];
+      }
+    }
+  }
+}
+
+void gpApplyTMatrix(gpTMatrix *dst, gpTMatrix *src)
+{
+  float temp[4][4];
+  memcpy(temp, dst->m, sizeof(dst->m));
+
+  gpMatrixMult((float *)temp, (float *)src->m, (float *)dst->m, 4, 4, 4);
+}
+
+void gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
+{
+  if (!poly->t_vertices) {
+    poly->t_vertices = malloc(poly->num_vertices * sizeof(gpVertex3));
+  }
+
+  for (int i = 0; i < poly->num_vertices; i++) {
+    float temp[1][4] = {{poly->vertices[i].x, poly->vertices[i].y, poly->vertices[i].z, 1.f}};
+    float result[1][4];
+
+    gpMatrixMult((float *)temp, (float *)trans->m, (float *)result, 1, 4, 4);
+
+    float h = result[0][3];
+
+    poly->t_vertices[i].x = result[0][0] / h;
+    poly->t_vertices[i].y = result[0][1] / h;
+    poly->t_vertices[i].z = result[0][2] / h;
+  }
+}
+
 void gpFillPoly(gpPoly *poly, unsigned char *img)
 {
   assert(poly);
@@ -210,6 +254,9 @@ void gpRenderPoly(gpPoly *poly)
 
   IplImage *img = cvCreateImage(cvSize(GP_XRES, GP_YRES), IPL_DEPTH_8U, 3);
   cvSet(img, GP_BG_COLOR, NULL);
+
+  // apply transformations
+  gpApplyTMatrixToCoord(poly, &poly->trans);
 
   // fill polygon algorithm
   gpFillPoly(poly, img->imageData);
@@ -243,6 +290,11 @@ void gpRender(gpPolyList *list)
   for (int i = 0; i < list->num_polys; i++) {
     gpPoly *poly = list->polys[i];
 
+    // apply transformations
+    gpTMatrix temp;
+    gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4, 4);
+    gpApplyTMatrixToCoord(poly, &temp);
+
     float sum_z = 0.f;
     for (int j = 0; j < poly->num_vertices; j++) {
       sum_z += poly->vertices[j].z;
@@ -255,11 +307,6 @@ void gpRender(gpPolyList *list)
 
   // fill polygon algorithm for each polygon
   for (int i = 0; i < list->num_polys; i++) {
-    // beneath viewing plane, do not display
-    if (list->polys[i]->vertices[0].z < -0.f) {
-      break;
-    }
-
     gpFillPoly(list->polys[i], img->imageData);
   }
 
