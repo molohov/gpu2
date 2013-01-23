@@ -83,15 +83,17 @@ void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
   assert(poly);
   assert(num >= 0 && num < poly->num_vertices && "invalid vertex number");
 
-  // ensure new vertex is on the right plane, ie n . (r - r0) = 0
+  // ensure new vertex is on the right plane, ie n dot (r - r0) = 0
   if (num > 2) {
-    if (fabs(poly->normal.z) > EPSILON) {
+    assert((isnan(x) || isnan(y) || isnan(z)) && "polygon vertices over 2 should allow one coordinate to be GP_INFER_COORD (NaN)");
+    if (isnan(z)) {
       z = poly->vertices[0].z + (-poly->normal.x * (x - poly->vertices[0].x) - poly->normal.y * (y - poly->vertices[0].y))/poly->normal.z;
-    } else if (fabs(poly->normal.y) > EPSILON) {
+    } else if (isnan(y)) {
       y = poly->vertices[0].y + (-poly->normal.x * (x - poly->vertices[0].x) - poly->normal.z * (z - poly->vertices[0].z))/poly->normal.y;
     } else {
       x = poly->vertices[0].x + (-poly->normal.y * (x - poly->vertices[0].y) - poly->normal.z * (z - poly->vertices[0].z))/poly->normal.x;
     }
+    assert(!isnan(x) && !isnan(y) && !isnan(z));
   }
 
   poly->vertices[num] = (gpVertex3){x, y, z};

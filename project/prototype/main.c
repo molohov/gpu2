@@ -20,7 +20,7 @@ int main()
   gpSetPolyVertex(quad, 0, 0.f, 1.f, 2.f);
   gpSetPolyVertex(quad, 1, -1.f, 0.f, 2.f);
   gpSetPolyVertex(quad, 2, 0.f, -1.f, 2.f);
-  gpSetPolyVertex(quad, 3, 1.f, 0.5f, 2.f);
+  gpSetPolyVertex(quad, 3, 1.f, 0.5f, GP_INFER_COORD);
   gpSetPolyColor(quad, 0x0, 0xff, 0x0); // green
 
   // Render it
@@ -31,9 +31,9 @@ int main()
   gpSetPolyVertex(hex, 0, -.5486, 1.f, 3.f);
   gpSetPolyVertex(hex, 1, -1.f, 0.f, 3.f);
   gpSetPolyVertex(hex, 2, -.5486, -1.f, 3.f);
-  gpSetPolyVertex(hex, 3, .5486, -1.f, 3.f);
-  gpSetPolyVertex(hex, 4, 1.f, 0.f, 3.f);
-  gpSetPolyVertex(hex, 5, .5486, 1.f, 3.f);
+  gpSetPolyVertex(hex, 3, .5486, -1.f, GP_INFER_COORD);
+  gpSetPolyVertex(hex, 4, 1.f, 0.f, GP_INFER_COORD);
+  gpSetPolyVertex(hex, 5, .5486, 1.f, GP_INFER_COORD);
   gpSetPolyColor(hex, 0xff, 0x0, 0x0); // red
 
   // Render it
