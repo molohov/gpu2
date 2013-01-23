@@ -230,7 +230,7 @@ int main() {
 	 * processing in the background
 	 */
 	while (1) {
-		char get = (char)*(volatile int *)(XPAR_RS232_UART_1_BASEADDR)
+		char get = (char)*(volatile int *)(XPAR_RS232_UART_1_BASEADDR);
 		if (get >= ' ' && get <= '~')
 			break;
 	}
