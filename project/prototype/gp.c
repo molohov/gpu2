@@ -181,20 +181,21 @@ void gpFillTriangle(gpPoly *poly, unsigned char *img)
   }
 }
 
-void gpMatrixMult(float *x, float *y, float *result, int a, int b, int c)
+void gpMatrixMult(float *x, float *y, float *result, int a, int b)
 {
-  // result = x y, x is a x b, y = b x c, result = a x c
+  // Note: since y is always a square matrix, this computes result = x yT, so the input for y is a transposed matrix!
+  // Dimensions: x is a x b, y = b x b, result = a x b
 
   for (int i = 0; i < a; i++) {
-    for (int j = 0; j < c; j++) {
-      result[i*c+j] = 0.f;
+    for (int j = 0; j < b; j++) {
+      result[i*b+j] = 0.f;
     }
   }
 
   for (int i = 0; i < a; i++) {
     for (int j = 0; j < b; j++) {
-      for (int k = 0; k < c; k++) {
-        result[i*c+k] += x[i*b+j] * y[j*c+k];
+      for (int k = 0; k < b; k++) {
+        result[i*b+k] += x[i*b+j] * y[j*b+k];
       }
     }
   }
@@ -205,7 +206,7 @@ void gpApplyTMatrix(gpTMatrix *dst, gpTMatrix *src)
   float temp[4][4];
   memcpy(temp, dst->m, sizeof(dst->m));
 
-  gpMatrixMult((float *)temp, (float *)src->m, (float *)dst->m, 4, 4, 4);
+  gpMatrixMult((float *)temp, (float *)src->m, (float *)dst->m, 4, 4);
 }
 
 void gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
@@ -214,7 +215,7 @@ void gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
     float temp[1][4] = {{poly->vertices[i].x, poly->vertices[i].y, poly->vertices[i].z, 1.f}};
     float result[1][4];
 
-    gpMatrixMult((float *)temp, (float *)trans->m, (float *)result, 1, 4, 4);
+    gpMatrixMult((float *)temp, (float *)trans->m, (float *)result, 1, 4);
 
     float h = result[0][3];
 
@@ -322,7 +323,7 @@ void gpRender(gpPolyList *list)
 
     // apply transformations
     gpTMatrix temp;
-    gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4, 4);
+    gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4);
     gpApplyTMatrixToCoord(poly, &temp);
 
     float sum_z = 0.f;
