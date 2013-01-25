@@ -364,7 +364,7 @@ void gpRender(gpPolyList *list)
 
     float sum_z = 0.f;
     for (int j = 0; j < poly->num_vertices; j++) {
-      sum_z += poly->vertices[j].z;
+      sum_z += poly->t_vertices[j].z;
     }
     poly->avg_z = sum_z / poly->num_vertices;
   }
