@@ -158,8 +158,8 @@ void gpFillTriangle(gpPoly *poly, unsigned char *img)
   gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
 
   for (int i = 0; i < poly->num_vertices; i++) {
-    vertices[i].x = (int)(poly->t_vertices[i].x * GP_XRES / 2);
-    vertices[i].y = (int)(poly->t_vertices[i].y * GP_YRES / 2);
+    vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2);
+    vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2);
   }
 
   int x_start = MAX(0, GP_XRES/2+MIN(vertices[0].x, MIN(vertices[1].x, vertices[2].x)));
