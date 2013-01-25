@@ -95,7 +95,7 @@ void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
     } else if (isnan(y)) {
       y = poly->vertices[0].y + (-poly->normal.x * (x - poly->vertices[0].x) - poly->normal.z * (z - poly->vertices[0].z))/poly->normal.y;
     } else {
-      x = poly->vertices[0].x + (-poly->normal.y * (x - poly->vertices[0].y) - poly->normal.z * (z - poly->vertices[0].z))/poly->normal.x;
+      x = poly->vertices[0].x + (-poly->normal.y * (y - poly->vertices[0].y) - poly->normal.z * (z - poly->vertices[0].z))/poly->normal.x;
     }
     assert(!isnan(x) && !isnan(y) && !isnan(z));
   }
