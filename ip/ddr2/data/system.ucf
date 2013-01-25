@@ -1,0 +1,16 @@
+#
+# pin constraints
+#
+NET GCLK LOC = "L15"  |  IOSTANDARD = "LVCMOS33";
+NET RESET LOC = "T15"  |  IOSTANDARD = "LVCMOS33"  |  TIG;
+NET RS232_Uart_1_sin LOC = "A16"  |  IOSTANDARD = "LVCMOS33";
+NET RS232_Uart_1_sout LOC = "B16"  |  IOSTANDARD = "LVCMOS33";
+NET rzq IOSTANDARD = "LVCMOS18_JEDEC";
+NET zio IOSTANDARD = "LVCMOS18_JEDEC";
+#
+# additional constraints
+#
+
+NET "GCLK" TNM_NET = sys_clk_pin;
+TIMESPEC TS_sys_clk_pin = PERIOD sys_clk_pin 100000 kHz;
+
