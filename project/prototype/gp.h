@@ -60,5 +60,8 @@ void gpScalePolyList(gpPolyList *list, float x, float y, float z);
 void gpRotatePoly(gpPoly *poly, float yaw, float pitch, float roll);
 void gpRotatePolyList(gpPolyList *list, float yaw, float pitch, float roll);
 
+void gpClearTMatrixPoly(gpPoly *poly);
+void gpClearTMatrixPolyList(gpPolyList *list);
+
 void gpRenderPoly(gpPoly *poly);
 void gpRender(gpPolyList *list);

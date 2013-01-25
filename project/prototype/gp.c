@@ -285,6 +285,16 @@ void gpRotatePolyList(gpPolyList *list, float yaw, float pitch, float roll)
   gpApplyRotate(&list->trans, yaw, pitch, roll);
 }
 
+void gpClearTMatrixPoly(gpPoly *poly)
+{
+  poly->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
+}
+
+void gpClearTMatrixPolyList(gpPolyList *list)
+{
+  list->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
+}
+
 void gpFillPoly(gpPoly *poly, unsigned char *img)
 {
   assert(poly);
