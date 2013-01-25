@@ -34,12 +34,12 @@ int main()
 
   // Create a hexagon
   gpPoly *hex = gpCreatePoly(6);
-  gpSetPolyVertex(hex, 0, -.5486, 1.f, 3.f);
+  gpSetPolyVertex(hex, 0, -.5486f, 1.f, 3.f);
   gpSetPolyVertex(hex, 1, -1.f, 0.f, 3.f);
-  gpSetPolyVertex(hex, 2, -.5486, -1.f, 3.f);
-  gpSetPolyVertex(hex, 3, .5486, -1.f, GP_INFER_COORD);
+  gpSetPolyVertex(hex, 2, -.5486f, -1.f, 3.f);
+  gpSetPolyVertex(hex, 3, .5486f, -1.f, GP_INFER_COORD);
   gpSetPolyVertex(hex, 4, 1.f, 0.f, GP_INFER_COORD);
-  gpSetPolyVertex(hex, 5, .5486, 1.f, GP_INFER_COORD);
+  gpSetPolyVertex(hex, 5, .5486f, 1.f, GP_INFER_COORD);
   gpSetPolyColor(hex, 0xff, 0x0, 0x0); // red
 
   // Render it
@@ -55,11 +55,43 @@ int main()
   // Render it
   gpRender(list);
 
-  gpRotatePolyList(list, 0.5f, 0.f, 0.f);
+  gpRotatePolyList(list, 0.f, 0.f, 0.5f);
   gpRender(list);
 
   // Cleanup
   gpDeletePolyList(list);
+
+  // Cube
+  gpPoly *z = gpCreatePoly(4);
+  gpSetPolyVertex(z, 0, -.5f, -.5f,-.5f);
+  gpSetPolyVertex(z, 1, -.5f, .5f, -.5f);
+  gpSetPolyVertex(z, 2, .5f, .5f, -.5f);
+  gpSetPolyVertex(z, 3, .5f, -.5f, GP_INFER_COORD);
+  gpSetPolyColor(z, 0xff, 0x0, 0x0);
+
+  gpPoly *y = gpCreatePoly(4);
+  gpSetPolyVertex(y, 0, -.5f, .5f, -.5f);
+  gpSetPolyVertex(y, 1, -.5f, .5f, .5f);
+  gpSetPolyVertex(y, 2, .5f, .5f, .5f);
+  gpSetPolyVertex(y, 3, .5f, GP_INFER_COORD, -.5f);
+  gpSetPolyColor(y, 0xbf, 0x0, 0x0);
+
+  gpPoly *x = gpCreatePoly(4);
+  gpSetPolyVertex(x, 0, .5f, -.5f, -.5f);
+  gpSetPolyVertex(x, 1, .5f, -.5f, .5f);
+  gpSetPolyVertex(x, 2, .5f, .5f, .5f);
+  gpSetPolyVertex(x, 3, GP_INFER_COORD, .5f, -.5f);
+  gpSetPolyColor(x, 0x7f, 0x0, 0x0);
+
+  gpPolyList *cube = gpCreatePolyList();
+  gpAddPolyToList(cube, z);
+  gpAddPolyToList(cube, y);
+  gpAddPolyToList(cube, x);
+
+  gpRotatePolyList(cube, -0.4f, 0.4f, 0.2f);
+  gpRender(cube);
+
+  gpDeletePolyList(cube);
 
   return 0;
 }

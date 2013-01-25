@@ -260,29 +260,29 @@ void gpScalePolyList(gpPolyList *list, float x, float y, float z)
   gpApplyScale(&list->trans, x, y, z);
 }
 
-void gpApplyRotate(gpTMatrix *trans, float yaw, float pitch, float roll)
+void gpApplyRotate(gpTMatrix *trans, float x, float y, float z)
 {
-  float siny = sinf(yaw);
-  float cosy = cosf(yaw);
-  float sinp = sinf(pitch);
-  float cosp = cosf(pitch);
-  float sinr = sinf(roll);
-  float cosr = cosf(roll);
+  float sinx = sinf(x);
+  float cosx = cosf(x);
+  float siny = sinf(y);
+  float cosy = cosf(y);
+  float sinz = sinf(z);
+  float cosz = cosf(z);
 
   // rotate is a transpose!
-  // this matrix applies roll, then pitch, then yaw
-  gpTMatrix rotate = (gpTMatrix){{{cosy*cosp, cosy*sinp*sinr+cosr*siny, -cosy*sinp*cosr+siny*sinr, 0.f}, {-siny*cosp, -siny*sinp*sinr+cosy*cosr, siny*sinp*cosr+cosy*sinr, 0.f}, {sinp, -cosp*sinr, cosp*cosr, 0.f}, {0.f, 0.f, 0.f, 1.f}}};
+  // this matrix applies rotation about x-axis, than y-axis, then z-axis
+  gpTMatrix rotate = (gpTMatrix){{{cosz*cosy, cosz*siny*sinx+cosx*sinz, -cosz*siny*cosx+sinz*sinx, 0.f}, {-sinz*cosy, -sinz*siny*sinx+cosz*cosx, sinz*siny*cosx+cosz*sinx, 0.f}, {siny, -cosy*sinx, cosy*cosx, 0.f}, {0.f, 0.f, 0.f, 1.f}}};
   gpApplyTMatrix(trans, &rotate);
 }
 
-void gpRotatePoly(gpPoly *poly, float yaw, float pitch, float roll)
+void gpRotatePoly(gpPoly *poly, float x, float y, float z)
 {
-  gpApplyRotate(&poly->trans, yaw, pitch, roll);
+  gpApplyRotate(&poly->trans, x, y, z);
 }
 
-void gpRotatePolyList(gpPolyList *list, float yaw, float pitch, float roll)
+void gpRotatePolyList(gpPolyList *list, float x, float y, float z)
 {
-  gpApplyRotate(&list->trans, yaw, pitch, roll);
+  gpApplyRotate(&list->trans, x, y, z);
 }
 
 void gpClearTMatrixPoly(gpPoly *poly)
