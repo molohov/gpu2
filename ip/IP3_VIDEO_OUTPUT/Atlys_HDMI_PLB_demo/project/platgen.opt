@@ -1,0 +1,9 @@
+-p
+xc6slx45csg324-2
+-lang
+vhdl
+-lp
+C:/Sam_work/EDK_repo/Atlys_BSB_Support_v_3_1/Atlys_PLB_BSB_Support/lib/
+-msg
+__xps/ise/xmsgprops.lst
+system.mhs

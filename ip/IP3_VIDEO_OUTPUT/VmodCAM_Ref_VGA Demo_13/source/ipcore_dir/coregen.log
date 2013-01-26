@@ -1,0 +1,11 @@
+CoreGen has not been configured with any user repositories.
+CoreGen has been configured with the following Xilinx repositories:
+ - 'C:\Xilinx\13.2\ISE_DS\ISE\coregen\' [reloaded]
+INFO:sim - Generating component instance 'dcm_fixed' of
+   'xilinx.com:ip:clk_wiz:3.2' from
+   'C:\Xilinx\13.2\ISE_DS\ISE\coregen\ip\xilinx\primary\com\xilinx\ip\clk_wiz_v3
+   _2\component.xml'.
+Applying current project options...
+Finished applying current project options.
+Cancelled executing Tcl generator.
+Wrote CGP file for project 'dcm_fixed'.

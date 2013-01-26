@@ -1,110 +1,245 @@
-/* This is a top level module that connects the switches and the 7-segment hex displays
- * to your multiplier. This is the carry save multiplier.
- */
+/* This is a carry save multiplier. */
 
-module csm_top(mer, mand, product);
+module csm_top(mer, mand, product, reset, clk, go, done);
 	input [15:0] mer;
 	input [15:0] mand;
-	output [31:0] product;
+	output reg [31:0] product;
 
-	wire [15:0] s0;
-	wire [15:0] s1;
-	wire [15:0] s2;
-	wire [15:0] s3;
-	wire [15:0] s4;
-	wire [15:0] s5;
-	wire [15:0] s6;
-	wire [15:0] s7;
-	wire [15:0] s8;
-	wire [15:0] s9;
-	wire [15:0] s10;
-	wire [15:0] s11;
-	wire [15:0] s12;
-	wire [15:0] s13;
-	wire [15:0] s14;
-	wire [15:0] s15;
-	wire [15:0] c0;
-	wire [15:0] c1;
-	wire [15:0] c2;
-	wire [15:0] c3;
-	wire [15:0] c4;
-	wire [15:0] c5;
-	wire [15:0] c6;
-	wire [15:0] c7;
-	wire [15:0] c8;
-	wire [15:0] c9;
-	wire [15:0] c10;
-	wire [15:0] c11;
-	wire [15:0] c12;
-	wire [15:0] c13;
-	wire [15:0] c14;
-	wire [15:0] c15;
+	input clk;
+	input reset;
+
+	input go;
+	output done;
+
 	wire [13:0] carry;
-	
-	/* Your multiplier circuit goes here. */
-        carrySave cs0(16'h0000, 16'h0000, mer, mand[0], c0, s0);
-        assign product[0] = s0[0];
+	wire [31:16] product_wire;
 
-        carrySave cs1(c0, {1'b0, s0[15:1]}, mer, mand[1], c1, s1);
-        assign product[1] = s1[0];
+	reg [15:0] ina;
+	reg [15:0] inb;
 
-        carrySave cs2(c1, {1'b0, s1[15:1]}, mer, mand[2], c2, s2);
-        assign product[2] = s2[0];
+	reg [15:0] cin;
+	reg [15:0] sin;
+	reg        csb;
 
-        carrySave cs3(c2, {1'b0, s2[15:1]}, mer, mand[3], c3, s3);
-        assign product[3] = s3[0];
+	wire [15:0] sout;
+	wire [15:0] cout;
 
-        carrySave cs4(c3, {1'b0, s3[15:1]}, mer, mand[4], c4, s4);
-        assign product[4] = s4[0];
+	reg [4:0] cur_state = 5'd0;
 
-        carrySave cs5(c4, {1'b0, s4[15:1]}, mer, mand[5], c5, s5);
-        assign product[5] = s5[0];
+	assign done = (cur_state == 5'd18);
 
-        carrySave cs6(c5, {1'b0, s5[15:1]}, mer, mand[6], c6, s6);
-        assign product[6] = s6[0];
+	// assign cur_state
+	always@(posedge clk)
+	begin
+		$display("product: %b", product);
 
-        carrySave cs7(c6, {1'b0, s6[15:1]}, mer, mand[7], c7, s7);
-        assign product[7] = s7[0];
+		if (!reset || cur_state == 5'd18)
+			cur_state <= 5'd0;
+		else
+		begin
+			if (go || cur_state != 5'd0)
+				cur_state <= cur_state + 5'd1;
+			else
+				cur_state <= cur_state;
+		end
+	end
 
-        carrySave cs8(c7, {1'b0, s7[15:1]}, mer, mand[7], c8, s8);
-        assign product[8] = s8[0];
+	// assign ina and inb
+	always@(posedge clk)
+	begin
+		if (cur_state == 5'd0 && go)
+		begin
+			ina <= mer;
+			inb <= mand;
+		end
+		else
+		begin
+			ina <= ina;
+			inb <= inb;
+		end
+	end
 
-        carrySave cs9(c8, {1'b0, s8[15:1]}, mer, mand[7], c9, s9);
-        assign product[9] = s9[0];
+	// case-dependant logic
+	always@(posedge clk)
+	begin
+		case (cur_state)
+			5'd1:
+			begin
+				cin <= 16'h0000;
+				sin <= 16'h0000;
+				csb <= inb[0];
+				product <= product;
+			end
+			5'd2:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[1];
+				product[0] <= sout[0];
+				product[31:1] <= product[31:1];
+			end
+			5'd3:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[2];
+				product[1] <= sout[0];
+				product[0:0] <= product[0:0];
+				product[31:2] <= product[31:2];
+			end
+			5'd4:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[3];
+				product[2] <= sout[0];
+				product[1:0] <= product[1:0];
+				product[31:3] <= product[31:3];
+			end
+			5'd5:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[4];
+				product[3] <= sout[0];
+				product[2:0] <= product[2:0];
+				product[31:4] <= product[31:4];
+			end
+			5'd6:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[5];
+				product[4] <= sout[0];
+				product[3:0] <= product[3:0];
+				product[31:5] <= product[31:5];
+			end
+			5'd7:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[6];
+				product[5] <= sout[0];
+				product[4:0] <= product[4:0];
+				product[31:6] <= product[31:6];
+			end
+			5'd8:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[7];
+				product[6] <= sout[0];
+				product[5:0] <= product[5:0];
+				product[31:7] <= product[31:7];
+			end
+			5'd9:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[8];
+				product[7] <= sout[0];
+				product[6:0] <= product[6:0];
+				product[31:8] <= product[31:8];
+			end
+			5'd10:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[9];
+				product[8] <= sout[0];
+				product[7:0] <= product[7:0];
+				product[31:9] <= product[31:9];
+			end
+			5'd11:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[10];
+				product[9] <= sout[0];
+				product[8:0] <= product[8:0];
+				product[31:10] <= product[31:10];
+			end
+			5'd12:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[11];
+				product[10] <= sout[0];
+				product[9:0] <= product[9:0];
+				product[31:11] <= product[31:11];
+			end
+			5'd13:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[12];
+				product[11] <= sout[0];
+				product[10:0] <= product[10:0];
+				product[31:12] <= product[31:12];
+			end
+			5'd14:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[13];
+				product[12] <= sout[0];
+				product[11:0] <= product[11:0];
+				product[31:13] <= product[31:13];
+			end
+			5'd15:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[14];
+				product[13] <= sout[0];
+				product[12:0] <= product[12:0];
+				product[31:14] <= product[31:14];
+			end
+			5'd16:
+			begin
+				cin <= cout;
+				sin <= {1'b0, sout[15:1]};
+				csb <= inb[15];
+				product[14] <= sout[0];
+				product[13:0] <= product[13:0];
+				product[31:15] <= product[31:15];
+			end
+			5'd17:
+			begin
+				cin <= 0;
+				sin <= 0;
+				csb <= 0;
+				product[15] <= sout[0];
+				product[14:0] <= product[14:0];
+				product[31:16] <= product_wire;
+			end
+			default:
+			begin
+				cin <= 0;
+				sin <= 0;
+				csb <= 0;
+				product <= product;
+			end
+		endcase
+	end
 
-        carrySave cs10(c9, {1'b0, s9[15:1]}, mer, mand[7], c10, s10);
-        assign product[10] = s10[0];
+	carrySave cs(cin, sin, ina, csb, cout, sout);
 
-        carrySave cs11(c10, {1'b0, s10[15:1]}, mer, mand[7], c11, s11);
-        assign product[11] = s11[0];
-
-        carrySave cs12(c11, {1'b0, s11[15:1]}, mer, mand[7], c12, s12);
-        assign product[12] = s12[0];
-
-        carrySave cs13(c12, {1'b0, s12[15:1]}, mer, mand[7], c13, s13);
-        assign product[13] = s13[0];
-
-        carrySave cs14(c13, {1'b0, s13[15:1]}, mer, mand[7], c14, s14);
-        assign product[14] = s14[0];
-
-        carrySave cs15(c14, {1'b0, s14[15:1]}, mer, mand[7], c15, s15);
-        assign product[15] = s15[0];
-
-        ha a0(c15[0], s15[1], carry[0], product[16]);
-        fa a1(c15[1], s15[2], carry[0], carry[1], product[17]);
-        fa a2(c15[2], s15[3], carry[1], carry[2], product[18]);
-        fa a3(c15[3], s15[4], carry[2], carry[3], product[19]);
-        fa a4(c15[4], s15[5], carry[3], carry[4], product[20]);
-        fa a5(c15[5], s15[6], carry[4], carry[5], product[21]);
-        fa a6(c15[6], s15[7], carry[5], carry[6], product[22]);
-        fa a7(c15[7], s15[8], carry[6], carry[7], product[23]);
-        fa a8(c15[8], s15[9], carry[7], carry[8], product[24]);
-        fa a9(c15[9], s15[10], carry[8], carry[9], product[25]);
-        fa aa(c15[10], s15[11], carry[9], carry[10], product[26]);
-        fa ab(c15[11], s15[12], carry[10], carry[11], product[27]);
-        fa ac(c15[12], s15[13], carry[11], carry[12], product[28]);
-        fa ad(c15[13], s15[14], carry[12], carry[13], product[29]);
-        fa ae(c15[14], s15[15], carry[13], product[31], product[30]);
+        ha a0(cout[0], sout[1], carry[0], product_wire[16]);
+        fa a1(cout[1], sout[2], carry[0], carry[1], product_wire[17]);
+        fa a2(cout[2], sout[3], carry[1], carry[2], product_wire[18]);
+        fa a3(cout[3], sout[4], carry[2], carry[3], product_wire[19]);
+        fa a4(cout[4], sout[5], carry[3], carry[4], product_wire[20]);
+        fa a5(cout[5], sout[6], carry[4], carry[5], product_wire[21]);
+        fa a6(cout[6], sout[7], carry[5], carry[6], product_wire[22]);
+        fa a7(cout[7], sout[8], carry[6], carry[7], product_wire[23]);
+        fa a8(cout[8], sout[9], carry[7], carry[8], product_wire[24]);
+        fa a9(cout[9], sout[10], carry[8], carry[9], product_wire[25]);
+        fa aa(cout[10], sout[11], carry[9], carry[10], product_wire[26]);
+        fa ab(cout[11], sout[12], carry[10], carry[11], product_wire[27]);
+        fa ac(cout[12], sout[13], carry[11], carry[12], product_wire[28]);
+        fa ad(cout[13], sout[14], carry[12], carry[13], product_wire[29]);
+        fa ae(cout[14], sout[15], carry[13], product_wire[31], product_wire[30]);
 	
 endmodule
 

@@ -1,0 +1,129 @@
+
+Checking platform configuration ...
+IPNAME: plb_v46, INSTANCE: mb_plb - 2 master(s) : 6 slave(s) 
+IPNAME: lmb_v10, INSTANCE: ilmb - 1 master(s) : 1 slave(s) 
+IPNAME: lmb_v10, INSTANCE: dlmb - 1 master(s) : 1 slave(s) 
+
+Checking port drivers...
+WARNING:EDK:4180 - PORT: VFBC1_Rd_Clk, CONNECTOR: hdmi_in_0_VFBC_OUT_rd_clk - No
+   driver found. Port will be driven to GND -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1336 
+WARNING:EDK:4180 - PORT: VFBC1_Rd_Reset, CONNECTOR: hdmi_in_0_VFBC_OUT_rd_reset
+   - No driver found. Port will be driven to GND -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1337 
+WARNING:EDK:4180 - PORT: VFBC1_Rd_Read, CONNECTOR: hdmi_in_0_VFBC_OUT_rd_read -
+   No driver found. Port will be driven to GND -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1338 
+WARNING:EDK:4180 - PORT: VFBC1_Rd_End_Burst, CONNECTOR:
+   hdmi_in_0_VFBC_OUT_rd_end_burst - No driver found. Port will be driven to GND
+   -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1339 
+WARNING:EDK:4180 - PORT: VFBC1_Rd_Flush, CONNECTOR: hdmi_in_0_VFBC_OUT_rd_flush
+   - No driver found. Port will be driven to GND -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1340 
+WARNING:EDK:4180 - PORT: VFBC2_Wd_Clk, CONNECTOR: hdmi_out_0_VFBC_OUT_wd_clk -
+   No driver found. Port will be driven to GND -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1531 
+WARNING:EDK:4180 - PORT: VFBC2_Wd_Reset, CONNECTOR: hdmi_out_0_VFBC_OUT_wd_reset
+   - No driver found. Port will be driven to GND -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1532 
+WARNING:EDK:4180 - PORT: VFBC2_Wd_Write, CONNECTOR: hdmi_out_0_VFBC_OUT_wd_write
+   - No driver found. Port will be driven to GND -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1533 
+WARNING:EDK:4180 - PORT: VFBC2_Wd_End_Burst, CONNECTOR:
+   hdmi_out_0_VFBC_OUT_wd_end_burst - No driver found. Port will be driven to
+   GND -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1534 
+WARNING:EDK:4180 - PORT: VFBC2_Wd_Flush, CONNECTOR: hdmi_out_0_VFBC_OUT_wd_flush
+   - No driver found. Port will be driven to GND -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1535 
+WARNING:EDK:4180 - PORT: VFBC2_Wd_Data, CONNECTOR: hdmi_out_0_VFBC_OUT_wd_data -
+   No driver found. Port will be driven to GND -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1536 
+WARNING:EDK:4180 - PORT: VFBC2_Wd_Data_BE, CONNECTOR:
+   hdmi_out_0_VFBC_OUT_wd_data_be - No driver found. Port will be driven to GND
+   -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1537 
+WARNING:EDK:4180 - PORT: bscan_tdo1, CONNECTOR: bscan_tdo1 - No driver found.
+   Port will be driven to GND -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mdm_v2_00_b\data\mdm
+   _v2_1_0.mpd line 239 
+WARNING:EDK:4181 - PORT: VFBC1_Rd_Data, CONNECTOR: hdmi_in_0_VFBC_OUT_rd_data -
+   floating connection -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1341 
+WARNING:EDK:4181 - PORT: VFBC1_Rd_Empty, CONNECTOR: hdmi_in_0_VFBC_OUT_rd_empty
+   - floating connection -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1342 
+WARNING:EDK:4181 - PORT: VFBC1_Rd_Almost_Empty, CONNECTOR:
+   hdmi_in_0_VFBC_OUT_rd_almost_empty - floating connection -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1343 
+WARNING:EDK:4181 - PORT: VFBC2_Wd_Full, CONNECTOR: hdmi_out_0_VFBC_OUT_wd_full -
+   floating connection -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1538 
+WARNING:EDK:4181 - PORT: VFBC2_Wd_Almost_Full, CONNECTOR:
+   hdmi_out_0_VFBC_OUT_wd_almost_full - floating connection -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mpmc_v6_04_a\data\mp
+   mc_v2_1_0.mpd line 1539 
+WARNING:EDK:4181 - PORT: bscan_tdi, CONNECTOR: bscan_tdi - floating connection -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mdm_v2_00_b\data\mdm
+   _v2_1_0.mpd line 232 
+WARNING:EDK:4181 - PORT: bscan_reset, CONNECTOR: bscan_reset - floating
+   connection -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mdm_v2_00_b\data\mdm
+   _v2_1_0.mpd line 233 
+WARNING:EDK:4181 - PORT: bscan_shift, CONNECTOR: bscan_shift - floating
+   connection -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mdm_v2_00_b\data\mdm
+   _v2_1_0.mpd line 234 
+WARNING:EDK:4181 - PORT: bscan_update, CONNECTOR: bscan_update - floating
+   connection -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mdm_v2_00_b\data\mdm
+   _v2_1_0.mpd line 235 
+WARNING:EDK:4181 - PORT: bscan_capture, CONNECTOR: bscan_capture - floating
+   connection -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mdm_v2_00_b\data\mdm
+   _v2_1_0.mpd line 236 
+WARNING:EDK:4181 - PORT: bscan_sel1, CONNECTOR: bscan_sel1 - floating connection
+   -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mdm_v2_00_b\data\mdm
+   _v2_1_0.mpd line 237 
+WARNING:EDK:4181 - PORT: bscan_drck1, CONNECTOR: bscan_drck1 - floating
+   connection -
+   C:\Xilinx\13.2\ISE_DS\EDK\hw\XilinxProcessorIPLib\pcores\mdm_v2_00_b\data\mdm
+   _v2_1_0.mpd line 238 
+
+Performing Clock DRCs...
+
+Performing Reset DRCs...
+
+Overriding system level properties...
+
+Running system level update procedures...
+
+Running UPDATE Tcl procedures for OPTION SYSLEVEL_UPDATE_PROC...
+
+Running system level DRCs...
+
+Performing System level DRCs on properties...
+
+Running DRC Tcl procedures for OPTION SYSLEVEL_DRC_PROC...
+ERROR:EDK:3900 - issued from TCL procedure "check_cache_bus" line 89
+   microblaze_0 (microblaze) - ICACHE address space [0x48000000:0x4FFFFFFF] does
+   not match IP "MCB_DDR2" on bus "microblaze_0_IXCL" 
+ERROR:EDK:3371 - Conversion to XML failed.
