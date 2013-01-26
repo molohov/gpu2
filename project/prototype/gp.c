@@ -95,7 +95,7 @@ void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
     } else if (isnan(y)) {
       y = poly->vertices[0].y + (-poly->normal.x * (x - poly->vertices[0].x) - poly->normal.z * (z - poly->vertices[0].z))/poly->normal.y;
     } else {
-      x = poly->vertices[0].x + (-poly->normal.y * (x - poly->vertices[0].y) - poly->normal.z * (z - poly->vertices[0].z))/poly->normal.x;
+      x = poly->vertices[0].x + (-poly->normal.y * (y - poly->vertices[0].y) - poly->normal.z * (z - poly->vertices[0].z))/poly->normal.x;
     }
     assert(!isnan(x) && !isnan(y) && !isnan(z));
   }
@@ -158,8 +158,8 @@ void gpFillTriangle(gpPoly *poly, unsigned char *img)
   gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
 
   for (int i = 0; i < poly->num_vertices; i++) {
-    vertices[i].x = (int)(poly->t_vertices[i].x * GP_XRES / 2);
-    vertices[i].y = (int)(poly->t_vertices[i].y * GP_YRES / 2);
+    vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2);
+    vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2);
   }
 
   int x_start = MAX(0, GP_XRES/2+MIN(vertices[0].x, MIN(vertices[1].x, vertices[2].x)));
@@ -260,29 +260,39 @@ void gpScalePolyList(gpPolyList *list, float x, float y, float z)
   gpApplyScale(&list->trans, x, y, z);
 }
 
-void gpApplyRotate(gpTMatrix *trans, float yaw, float pitch, float roll)
+void gpApplyRotate(gpTMatrix *trans, float x, float y, float z)
 {
-  float siny = sinf(yaw);
-  float cosy = cosf(yaw);
-  float sinp = sinf(pitch);
-  float cosp = cosf(pitch);
-  float sinr = sinf(roll);
-  float cosr = cosf(roll);
+  float sinx = sinf(x);
+  float cosx = cosf(x);
+  float siny = sinf(y);
+  float cosy = cosf(y);
+  float sinz = sinf(z);
+  float cosz = cosf(z);
 
   // rotate is a transpose!
-  // this matrix applies roll, then pitch, then yaw
-  gpTMatrix rotate = (gpTMatrix){{{cosy*cosp, cosy*sinp*sinr+cosr*siny, -cosy*sinp*cosr+siny*sinr, 0.f}, {-siny*cosp, -siny*sinp*sinr+cosy*cosr, siny*sinp*cosr+cosy*sinr, 0.f}, {sinp, -cosp*sinr, cosp*cosr, 0.f}, {0.f, 0.f, 0.f, 1.f}}};
+  // this matrix applies rotation about x-axis, than y-axis, then z-axis
+  gpTMatrix rotate = (gpTMatrix){{{cosz*cosy, cosz*siny*sinx+cosx*sinz, -cosz*siny*cosx+sinz*sinx, 0.f}, {-sinz*cosy, -sinz*siny*sinx+cosz*cosx, sinz*siny*cosx+cosz*sinx, 0.f}, {siny, -cosy*sinx, cosy*cosx, 0.f}, {0.f, 0.f, 0.f, 1.f}}};
   gpApplyTMatrix(trans, &rotate);
 }
 
-void gpRotatePoly(gpPoly *poly, float yaw, float pitch, float roll)
+void gpRotatePoly(gpPoly *poly, float x, float y, float z)
 {
-  gpApplyRotate(&poly->trans, yaw, pitch, roll);
+  gpApplyRotate(&poly->trans, x, y, z);
 }
 
-void gpRotatePolyList(gpPolyList *list, float yaw, float pitch, float roll)
+void gpRotatePolyList(gpPolyList *list, float x, float y, float z)
 {
-  gpApplyRotate(&list->trans, yaw, pitch, roll);
+  gpApplyRotate(&list->trans, x, y, z);
+}
+
+void gpClearTMatrixPoly(gpPoly *poly)
+{
+  poly->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
+}
+
+void gpClearTMatrixPolyList(gpPolyList *list)
+{
+  list->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
 }
 
 void gpFillPoly(gpPoly *poly, unsigned char *img)
@@ -354,7 +364,7 @@ void gpRender(gpPolyList *list)
 
     float sum_z = 0.f;
     for (int j = 0; j < poly->num_vertices; j++) {
-      sum_z += poly->vertices[j].z;
+      sum_z += poly->t_vertices[j].z;
     }
     poly->avg_z = sum_z / poly->num_vertices;
   }
