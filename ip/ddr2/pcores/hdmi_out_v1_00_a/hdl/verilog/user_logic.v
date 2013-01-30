@@ -55,6 +55,13 @@ module user_logic
 (
   // -- ADD USER PORTS BELOW THIS LINE ---------------
   // --USER ports added here 
+  PXL_CLK_X1,
+  PXL_CLK_X2,
+  PXL_CLK_X10,
+  PXL_PLL_LOCKED,
+
+  TMDS,
+  TMDSB,
   // -- ADD USER PORTS ABOVE THIS LINE ---------------
 
   // -- DO NOT EDIT BELOW THIS LINE ------------------
@@ -116,6 +123,12 @@ parameter C_SLV_DWIDTH                   = 32;
 
 // -- ADD USER PORTS BELOW THIS LINE -----------------
 // --USER ports added here 
+input                                     PXL_CLK_1X;
+input                                     PXL_CLK_X2;
+input                                     PXL_CLK_X10;
+input                                     PXL_PLL_LOCKED;
+output     [3 : 0]                        TMDS;
+output     [3 : 0]                        TMDSB;
 // -- ADD USER PORTS ABOVE THIS LINE -----------------
 
 // -- DO NOT EDIT BELOW THIS LINE --------------------
@@ -289,6 +302,22 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  parameter                                  GO_BYTE_LANE = 15;
  
   // --USER logic implementation added here
+  dvi_out_native_inst dvi_out_native (
+    .reset(1'b0),
+    .pll_lcked(PXL_PLL_LOCKED),
+    .clkin(PXL_CLK_1X),
+    .clkx2in(PXL_CLK_2X),
+    .clkx10in(PXL_CLK_10X),
+    .blue_din(8'd0),
+    .green_din(8'd0),
+    .red_din(8'd0),
+    .hsync(1'b0),
+    .vsync(1'b0),
+    .de(1'b0),
+
+    .TMDS(TMDS),
+    .TMDSB(TMDSB)
+  );
 
   // ------------------------------------------------------
   // Example code to read/write user logic slave model s/w accessible registers

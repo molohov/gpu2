@@ -183,6 +183,13 @@ entity hdmi_out is
   (
     -- ADD USER PORTS BELOW THIS LINE ------------------
     --USER ports added here
+    PXL_CLK_X1                     : in  std_logic;
+    PXL_CLK_X2                     : in  std_logic;
+    PXL_CLK_X10                    : in  std_logic;
+    PXL_PLL_LOCKED                 : in  std_logic;
+
+    TMDS                           : out std_logic_vector(3 downto 0);
+    TMDSB                          : out std_logic_vector(3 downto 0);
     -- ADD USER PORTS ABOVE THIS LINE ------------------
 
     -- DO NOT EDIT BELOW THIS LINE ---------------------
@@ -412,6 +419,13 @@ architecture IMP of hdmi_out is
     (
       -- ADD USER PORTS BELOW THIS LINE ------------------
       --USER ports added here
+      PXL_CLK_X1                     : in  std_logic;
+      PXL_CLK_X2                     : in  std_logic;
+      PXL_CLK_X10                    : in  std_logic;
+      PXL_PLL_LOCKED                 : in  std_logic;
+
+      TMDS                           : out std_logic_vector(3 downto 0);
+      TMDSB                          : out std_logic_vector(3 downto 0);
       -- ADD USER PORTS ABOVE THIS LINE ------------------
 
       -- DO NOT EDIT BELOW THIS LINE ---------------------
@@ -633,6 +647,13 @@ begin
     (
       -- MAP USER PORTS BELOW THIS LINE ------------------
       --USER ports mapped here
+      PXL_CLK_X1                     => PXL_CLK_X1,
+      PXL_CLK_X2                     => PXL_CLK_X2,
+      PXL_CLK_X10                    => PXL_CLK_X10,
+      PXL_PLL_LOCKED                 => PXL_PLL_LOCKED,
+
+      TMDS                           => TMDS,
+      TMDSB                          => TMDSB,
       -- MAP USER PORTS ABOVE THIS LINE ------------------
 
       Bus2IP_Clk                     => ipif_Bus2IP_Clk,

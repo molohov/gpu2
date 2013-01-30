@@ -33,6 +33,8 @@
  PORT RS232_Uart_1_sin = RS232_Uart_1_sin, DIR = I
  PORT RESET = RESET, DIR = I, SIGIS = RST, RST_POLARITY = 0
  PORT GCLK = GCLK, DIR = I, SIGIS = CLK, CLK_FREQ = 100000000
+ PORT hdmi_out_0_TMDS_pin = hdmi_out_0_TMDS, DIR = O, VEC = [3:0]
+ PORT hdmi_out_0_TMDSB_pin = hdmi_out_0_TMDSB, DIR = O, VEC = [3:0]
 
 
 BEGIN proc_sys_reset
@@ -151,6 +153,8 @@ BEGIN clock_generator
  PORT CLKOUT0 = clk_600_0000MHzPLL0_nobuf
  PORT CLKOUT1 = clk_600_0000MHz180PLL0_nobuf
  PORT CLKIN = GCLK
+ PORT CLKOUT3 = clock_generator_0_CLKOUT3
+ PORT CLKOUT4 = clock_generator_0_CLKOUT4
 END
 
 BEGIN axi_interconnect
@@ -240,5 +244,11 @@ BEGIN hdmi_out
  BUS_INTERFACE S_AXI = axi4lite_0
  PORT S_AXI_ACLK = clk_100_0000MHzPLL0
  PORT m_axi_aclk = clk_100_0000MHzPLL0
+ PORT TMDS = hdmi_out_0_TMDS
+ PORT TMDSB = hdmi_out_0_TMDSB
+ PORT PXL_CLK_X10 = clk_100_0000MHzPLL0
+ PORT PXL_CLK_X2 = clock_generator_0_CLKOUT3
+ PORT PXL_CLK_X1 = clock_generator_0_CLKOUT4
+ PORT PXL_PLL_LOCKED = proc_sys_reset_0_Dcm_locked
 END
 
