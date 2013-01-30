@@ -304,7 +304,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   // --USER logic implementation added here
   dvi_out_native dvi_out_native_inst (
     .reset(1'b0),
-    .pll_lcked(PXL_PLL_LOCKED),
+    .pll_lckd(PXL_PLL_LOCKED),
     .clkin(PXL_CLK_X1),
     .clkx2in(PXL_CLK_X2),
     .clkx10in(PXL_CLK_X10),
