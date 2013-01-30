@@ -302,7 +302,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  parameter                                  GO_BYTE_LANE = 15;
  
   // --USER logic implementation added here
-  dvi_out_native_inst dvi_out_native (
+  dvi_out_native dvi_out_native_inst (
     .reset(1'b0),
     .pll_lcked(PXL_PLL_LOCKED),
     .clkin(PXL_CLK_X1),
