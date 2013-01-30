@@ -263,6 +263,6 @@ BEGIN pll_module
  PORT CLKOUT2 = pll_module_0_CLKOUT2
  PORT CLKFBIN = pll_module_0_CLKFBOUT
  PORT CLKIN1 = clk_100_0000MHzPLL0
- PORT RST = net_gnd
+ PORT RST = RESET
 END
 
