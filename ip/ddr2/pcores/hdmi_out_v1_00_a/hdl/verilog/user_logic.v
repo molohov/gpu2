@@ -123,7 +123,7 @@ parameter C_SLV_DWIDTH                   = 32;
 
 // -- ADD USER PORTS BELOW THIS LINE -----------------
 // --USER ports added here 
-input                                     PXL_CLK_1X;
+input                                     PXL_CLK_X1;
 input                                     PXL_CLK_X2;
 input                                     PXL_CLK_X10;
 input                                     PXL_PLL_LOCKED;
@@ -305,9 +305,9 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   dvi_out_native_inst dvi_out_native (
     .reset(1'b0),
     .pll_lcked(PXL_PLL_LOCKED),
-    .clkin(PXL_CLK_1X),
-    .clkx2in(PXL_CLK_2X),
-    .clkx10in(PXL_CLK_10X),
+    .clkin(PXL_CLK_X1),
+    .clkx2in(PXL_CLK_X2),
+    .clkx10in(PXL_CLK_X10),
     .blue_din(8'd0),
     .green_din(8'd0),
     .red_din(8'd0),
