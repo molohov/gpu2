@@ -21,7 +21,7 @@ dvi_stimulate dut (
 	.red (red),
 	.green (green),
 	.blue (blue),
-	.hsync_out (hsync),
+	.hsync (hsync),
 	.vsync (vsync)
 	);
 

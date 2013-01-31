@@ -5,7 +5,7 @@ module dvi_stimulate (
 	output reg [7:0] red,
 	output reg [7:0] blue,
 	output reg [7:0] green,
-	output hsync_out,
+	output reg hsync,
 	output reg vsync
 );
 
@@ -21,10 +21,9 @@ localparam WIDTH = 10, HEIGHT = 10;
 reg [1:0] state, nextstate;
 reg [10:0] hcounter, nexthcounter;
 reg [9:0] vcounter, nextvcounter;
-reg nexthsync, nextvsync, hsync;
+reg nexthsync, nextvsync;
 reg [7:0] nextred, nextgreen, nextblue;
 
-assign hsync_out = hsync & clock;
 
 always @ (posedge clock)
 begin
@@ -90,6 +89,7 @@ begin
 			ACTIVE:
 			begin
 				nextred = 8'b11111111;
+                                nexthcounter = hcounter + 1;
 				if (hcounter == WIDTH)
 				begin
 					nexthcounter = 0;

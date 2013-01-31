@@ -5,8 +5,14 @@ add wave -noupdate /tb/green
 add wave -noupdate /tb/blue
 add wave -noupdate /tb/hsync
 add wave -noupdate /tb/vsync
+add wave -noupdate /tb/clock
+add wave -noupdate /tb/reset
+add wave -noupdate /tb/start
+add wave -noupdate /tb/dut/hcounter
+add wave -noupdate /tb/dut/state
+add wave -noupdate /tb/dut/vcounter
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {15920 ns} 0}
+WaveRestoreCursors {{Cursor 1} {53 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 335
 configure wave -valuecolwidth 40
@@ -22,4 +28,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {0 ns} {21860 ns}
+WaveRestoreZoom {0 ps} {2100 ps}
