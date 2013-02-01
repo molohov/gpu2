@@ -184,6 +184,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire       [8-1 : 0]                      blue;
   wire                                      hsync;
   wire                                      vsync;
+  wire                                      ve;
 
   // Nets for user logic slave model s/w accessible register example
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg0;
@@ -308,7 +309,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  
   // --USER logic implementation added here
   dvi_stimulate dvi_stimulate_inst (
-	 .clock(PXL_CLK_X1),
+    .clock(PXL_CLK_X1),
     .reset(slv_reg0[0]),
     .start(slv_reg0[1]),
     .color(slv_reg1[24-1:0]),
@@ -316,7 +317,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .green(green),
     .blue(blue),
     .hsync(hsync),
-    .vsync(vsync)
+    .vsync(vsync),
+    .ve(ve)
   );
 
   dvi_out_native dvi_out_native_inst (
@@ -330,7 +332,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .red_din(red),
     .hsync(hsync),
     .vsync(vsync),
-    .de(slv_reg0[1]),
+    .de(ve),
 
     .TMDS(TMDS),
     .TMDSB(TMDSB)
