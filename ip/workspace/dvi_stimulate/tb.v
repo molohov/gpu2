@@ -3,7 +3,8 @@ module tb (
 	output [7:0] green,
 	output [7:0] blue,
 	output hsync,
-	output vsync
+	output vsync,
+        output ve
 );
 
 reg clock;
@@ -22,7 +23,8 @@ dvi_stimulate dut (
 	.green (green),
 	.blue (blue),
 	.hsync (hsync),
-	.vsync (vsync)
+	.vsync (vsync),
+        .ve (ve)
 	);
 
 initial
