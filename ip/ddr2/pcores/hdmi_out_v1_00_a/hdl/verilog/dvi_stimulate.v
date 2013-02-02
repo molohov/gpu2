@@ -11,7 +11,6 @@ module dvi_stimulate (
 );
 
 localparam RESET = 2'b00, HSYNC = 2'b01, ACTIVE = 2'b10, DONE = 2'b11; 
-localparam WIDTH = 10, HEIGHT = 10;
 
 localparam H_1280_720p_S = 40;		//sync
 localparam H_1280_720p_FP = 110; 	//front porch
