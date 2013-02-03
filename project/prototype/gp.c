@@ -285,6 +285,23 @@ void gpRotatePolyList(gpPolyList *list, float x, float y, float z)
   gpApplyRotate(&list->trans, x, y, z);
 }
 
+void gpApplyPerspective(gpTMatrix *trans, float near, float far)
+{
+  // rotate is a transpose!
+  gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1+far/near, 1/near}, {0.f, 0.f, -far, 0.f}}};
+  gpApplyTMatrix(trans, &perspective);
+}
+
+void gpPerspectivePoly(gpPoly *poly, float near, float far)
+{
+  gpApplyPerspective(&poly->trans, near, far);
+}
+
+void gpPerspectivePolyList(gpPolyList *list, float near, float far)
+{
+  gpApplyPerspective(&list->trans, near, far);
+}
+
 void gpClearTMatrixPoly(gpPoly *poly)
 {
   poly->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity

@@ -179,6 +179,12 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 //----------------------------------------------------------------------------
 
   // --USER nets declarations added here, as needed for user logic
+  wire       [8-1 : 0]                      red;
+  wire       [8-1 : 0]                      green;
+  wire       [8-1 : 0]                      blue;
+  wire                                      hsync;
+  wire                                      vsync;
+  wire                                      ve;
 
   // Nets for user logic slave model s/w accessible register example
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg0;
@@ -302,18 +308,31 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  parameter                                  GO_BYTE_LANE = 15;
  
   // --USER logic implementation added here
+  dvi_stimulate dvi_stimulate_inst (
+    .clock(PXL_CLK_X1),
+    .reset(slv_reg0[0]),
+    .start(slv_reg0[1]),
+    .color(slv_reg1[24-1:0]),
+    .red(red),
+    .green(green),
+    .blue(blue),
+    .hsync(hsync),
+    .vsync(vsync),
+    .ve(ve)
+  );
+
   dvi_out_native dvi_out_native_inst (
     .reset(1'b0),
     .pll_lckd(PXL_PLL_LOCKED),
     .clkin(PXL_CLK_X1),
     .clkx2in(PXL_CLK_X2),
     .clkx10in(PXL_CLK_X10),
-    .blue_din(8'd0),
-    .green_din(8'd0),
-    .red_din(8'd0),
-    .hsync(1'b0),
-    .vsync(1'b0),
-    .de(1'b0),
+    .blue_din(blue),
+    .green_din(green),
+    .red_din(red),
+    .hsync(hsync),
+    .vsync(vsync),
+    .de(ve),
 
     .TMDS(TMDS),
     .TMDSB(TMDSB)
@@ -383,7 +402,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
       case ( slv_reg_read_sel )
         3'b100 : slv_ip2bus_data <= slv_reg0;
         3'b010 : slv_ip2bus_data <= slv_reg1;
-        3'b001 : slv_ip2bus_data <= slv_reg2;
+        3'b001 : slv_ip2bus_data <= {hsync, vsync};
         default : slv_ip2bus_data <= 0;
       endcase
 
