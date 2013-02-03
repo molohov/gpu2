@@ -120,6 +120,10 @@ int main()
     gpRender(cube);
   }
 
+  gpTranslatePolyList(cube, 0.f, 0.f, 5.f);
+  gpPerspectivePolyList(cube, 2.f, 8.f);
+  gpRender(cube);
+
   gpDeletePolyList(cube);
 
   return 0;
