@@ -184,9 +184,6 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 //----------------------------------------------------------------------------
 
   // --USER nets declarations added here, as needed for user logic
-  wire       [8-1 : 0]                      red;
-  wire       [8-1 : 0]                      green;
-  wire       [8-1 : 0]                      blue;
   wire                                      hsync;
   wire                                      vsync;
   wire                                      ve;
@@ -317,12 +314,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .clock(PXL_CLK_X1),
     .reset(slv_reg0[0]),
     .start(slv_reg0[1]),
-    .color(slv_reg1[24-1:0]),
-    .red(red),
-    .green(green),
-    .blue(blue),
-    .hsync(hsync),
-    .vsync(vsync),
+    .hsync_out(hsync),
+    .vsync_out(vsync),
     .ve(ve)
   );
 
@@ -332,9 +325,9 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .clkin(PXL_CLK_X1),
     .clkx2in(PXL_CLK_X2),
     .clkx10in(PXL_CLK_X10),
-    .blue_din(blue),
-    .green_din(green),
-    .red_din(red),
+    .blue_din(slv_reg1[24-1:16]),
+    .green_din(slv_reg1[16-1:8]),
+    .red_din(slv_reg1[8-1:0]),
     .hsync(hsync),
     .vsync(vsync),
     .de(ve),

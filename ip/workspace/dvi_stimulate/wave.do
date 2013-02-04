@@ -1,8 +1,5 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
-add wave -noupdate /tb/red
-add wave -noupdate /tb/green
-add wave -noupdate /tb/blue
 add wave -noupdate /tb/hsync
 add wave -noupdate /tb/vsync
 add wave -noupdate /tb/clock

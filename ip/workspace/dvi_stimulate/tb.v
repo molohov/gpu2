@@ -1,7 +1,4 @@
 module tb (
-	output [7:0] red,
-	output [7:0] green,
-	output [7:0] blue,
 	output hsync,
 	output vsync,
         output ve
@@ -19,11 +16,8 @@ dvi_stimulate dut (
 	.clock (clock),
 	.reset (reset),
 	.start (start),
-	.red (red),
-	.green (green),
-	.blue (blue),
-	.hsync (hsync),
-	.vsync (vsync),
+	.hsync_out (hsync),
+	.vsync_out (vsync),
         .ve (ve)
 	);
 

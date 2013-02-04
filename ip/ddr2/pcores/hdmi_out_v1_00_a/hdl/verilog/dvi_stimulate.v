@@ -2,11 +2,8 @@ module dvi_stimulate (
 	input clock,
 	input reset,
 	input start,
-	output reg [7:0] red,
-	output reg [7:0] blue,
-	output reg [7:0] green,
-	output reg hsync,
-	output reg vsync,
+	output hsync_out,
+	output vsync_out,
 	output reg ve
 );
 
@@ -22,26 +19,56 @@ localparam V_1280_720p_FP = 5; 	//front porch
 localparam V_1280_720p_AV = 720; 	//active video
 localparam V_1280_720p_BP = 20;	//back porch
 
+localparam H_1280_720p_POL = 1; // positive polarity
+localparam V_1280_720p_POL = 1; // positive polarity
+
+localparam H_800_600p_S = 128;		//sync
+localparam H_800_600p_FP = 40; 	//front porch
+localparam H_800_600p_AV = 800; 	//active video
+localparam H_800_600p_BP = 88;	//back porch
+
+localparam V_800_600p_S = 4;		//sync
+localparam V_800_600p_FP = 1; 	//front porch
+localparam V_800_600p_AV = 600; 	//active video
+localparam V_800_600p_BP = 23;	//back porch
+
+localparam H_800_600p_POL = 1; // positive polarity
+localparam V_800_600p_POL = 1; // positive polarity
+
+/*
 localparam H_AV = H_1280_720p_AV;
 localparam H_AV_FP = H_1280_720p_AV + H_1280_720p_FP;
 localparam H_AV_FP_S = H_1280_720p_AV + H_1280_720p_FP + H_1280_720p_S;
 localparam H_AV_FP_S_BP = H_1280_720p_AV + H_1280_720p_FP + H_1280_720p_S + H_1280_720p_BP;
+localparam H_POL = H_1280_720p_POL; 
 
 localparam V_AV = V_1280_720p_AV;
 localparam V_AV_FP = V_1280_720p_AV + V_1280_720p_FP;
 localparam V_AV_FP_S = V_1280_720p_AV + V_1280_720p_FP + V_1280_720p_S;
 localparam V_AV_FP_S_BP = V_1280_720p_AV + V_1280_720p_FP + V_1280_720p_S + V_1280_720p_BP;
+localparam V_POL = V_1280_720p_POL; 
+*/
 
-//localparam H_1280_720p_POL : BOOLEAN := true; // positive polarity
-//localparam V_1280_720p_POL : BOOLEAN := true; // positive polarity
+localparam H_AV = H_800_600p_AV;
+localparam H_AV_FP = H_800_600p_AV + H_800_600p_FP;
+localparam H_AV_FP_S = H_800_600p_AV + H_800_600p_FP + H_800_600p_S;
+localparam H_AV_FP_S_BP = H_800_600p_AV + H_800_600p_FP + H_800_600p_S + H_800_600p_BP;
+localparam H_POL = H_800_600p_POL; 
 
+localparam V_AV = V_800_600p_AV;
+localparam V_AV_FP = V_800_600p_AV + V_800_600p_FP;
+localparam V_AV_FP_S = V_800_600p_AV + V_800_600p_FP + V_800_600p_S;
+localparam V_AV_FP_S_BP = V_800_600p_AV + V_800_600p_FP + V_800_600p_S + V_800_600p_BP;
+localparam V_POL = V_800_600p_POL; 
 
 reg [1:0] state, nextstate;
 reg [10:0] hcounter, nexthcounter;
 reg [9:0] vcounter, nextvcounter;
 reg nexthsync, nextvsync;
-reg [7:0] nextred, nextgreen, nextblue;
-reg nextve;
+reg nextve, hsync, vsync;
+
+assign hsync_out = hsync ^ H_POL;
+assign vsync_out = vsync ^ V_POL;
 
 always @ (posedge clock)
 begin
@@ -50,9 +77,6 @@ begin
         state <= RESET;
         hsync <= 1;
         vsync <= 1;
-        red <= 0;
-        green <= 0;
-        blue <= 0;
         hcounter <= H_AV_FP_S_BP - 1;
         vcounter <= V_AV_FP_S_BP - 1;
         ve <= 0;
@@ -62,9 +86,6 @@ begin
         state <= nextstate;
         hsync <= nexthsync;
         vsync <= nextvsync;
-        red <= nextred;
-        green <= nextgreen;
-        blue <= nextblue;
         hcounter <= nexthcounter;
         vcounter <= nextvcounter;
         ve <= nextve;
@@ -76,9 +97,6 @@ begin
     nextstate = state;
     nexthsync = hsync;
     nextvsync = vsync;
-    nextred = red;
-    nextblue = blue;
-    nextgreen = green;
     nexthcounter = hcounter;
     nextvcounter = vcounter;
     nextve = ve;
