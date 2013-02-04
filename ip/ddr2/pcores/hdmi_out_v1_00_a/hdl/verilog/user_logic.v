@@ -133,9 +133,11 @@ output     [3 : 0]                        TMDSB;
 
 // -- DO NOT EDIT BELOW THIS LINE --------------------
 // -- Bus protocol ports, do not add to or delete
+
+//************* INTERFACE WITH AXI_LITE *********************
 input                                     Bus2IP_Clk;
 input                                     Bus2IP_Resetn;
-input      [C_SLV_DWIDTH-1 : 0]           Bus2IP_Data;
+input      [C_SLV_DWIDTH-1 : 0]           Bus2IP_Data;			//32-bit data bus between user and AXI_LITE bus
 input      [C_SLV_DWIDTH/8-1 : 0]         Bus2IP_BE;
 input      [C_NUM_REG-1 : 0]              Bus2IP_RdCE;
 input      [C_NUM_REG-1 : 0]              Bus2IP_WrCE;
@@ -143,10 +145,13 @@ output     [C_SLV_DWIDTH-1 : 0]           IP2Bus_Data;
 output                                    IP2Bus_RdAck;
 output                                    IP2Bus_WrAck;
 output                                    IP2Bus_Error;
+//***********************************************************
+
+//************  INTERFACE WITH AXI_MASTER_BURST **************
 output                                    ip2bus_mstrd_req;
 output                                    ip2bus_mstwr_req;
 output     [C_MST_AWIDTH-1 : 0]           ip2bus_mst_addr;
-output     [(C_MST_NATIVE_DATA_WIDTH/8)-1 : 0] ip2bus_mst_be;
+output     [(C_MST_NATIVE_DATA_WIDTH/8)-1 : 0] ip2bus_mst_be;	
 output     [C_LENGTH_WIDTH-1 : 0]         ip2bus_mst_length;
 output                                    ip2bus_mst_type;
 output                                    ip2bus_mst_lock;
@@ -156,7 +161,7 @@ input                                     bus2ip_mst_cmplt;
 input                                     bus2ip_mst_error;
 input                                     bus2ip_mst_rearbitrate;
 input                                     bus2ip_mst_cmd_timeout;
-input      [C_MST_NATIVE_DATA_WIDTH-1 : 0] bus2ip_mstrd_d;
+input      [C_MST_NATIVE_DATA_WIDTH-1 : 0] bus2ip_mstrd_d;				//32 bit data bus between user and AXI4_master burst
 input      [(C_MST_NATIVE_DATA_WIDTH)/8-1 : 0] bus2ip_mstrd_rem;
 input                                     bus2ip_mstrd_sof_n;
 input                                     bus2ip_mstrd_eof_n;
@@ -274,7 +279,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  reg                                        mst_cmd_sm_reset;
  reg                                        mst_cmd_sm_bus_lock;
  reg        [C_MST_AWIDTH-1 : 0]            mst_cmd_sm_ip2bus_addr;
- reg        [(C_MST_NATIVE_DATA_WIDTH/8)-1 : 0]mst_cmd_sm_ip2bus_be;
+ reg        [(C_MST_NATIVE_DATA_WIDTH/8)-1 : 0]mst_cmd_sm_ip2bus_be; //we probably don't need byte enable
  reg                                        mst_cmd_sm_xfer_type;
  reg        [C_LENGTH_WIDTH-1 : 0]      mst_cmd_sm_xfer_length;
  reg                                        mst_cmd_sm_start_rd_llink;
