@@ -398,8 +398,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     begin: SLAVE_REG_READ_PROC
 
       case ( slv_reg_read_sel )
-        3'b100 : slv_ip2bus_data <= slv_reg0;
-        3'b010 : slv_ip2bus_data <= slv_reg1;
+        3'b100 : slv_ip2bus_data <= bus2ip_mstrd_d;
+        3'b010 : slv_ip2bus_data <= mst_fifo_valid_read_xfer;
         3'b001 : slv_ip2bus_data <= {hsync, vsync};
         default : slv_ip2bus_data <= 0;
       endcase
