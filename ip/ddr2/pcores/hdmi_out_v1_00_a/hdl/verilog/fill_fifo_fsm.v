@@ -3,6 +3,7 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 					  input start_fill_fifo,
 					  input hsync,							//obtain hsync and vsync from hdmi_core
 					  input vsync,
+					  input half_full,
 					  input [31:0] FRAME_BASE_ADDR,			//obtain these from software (slv_reg in user_logic)
 					  input [31:0] LINE_STRIDE,
 					  input [31:0] NUM_PIXELS_PER_LINE,
@@ -25,8 +26,8 @@ module fill_fifo_fsm( input Bus2IP_Clk,
  reg 		[2:0] fill_fifo_fsm_nextstate;
  //reg		[31:0] ddr_addr_to_read;
  reg		[31:0] addr_inc;
- wire		half_full;
- assign 	half_full = !(hsync%'d64); //if hdmi_core reading 64th word, we have filled up half the buffer
+ //wire		half_full;
+ //assign 	half_full = !(hsync%'d64); //if hdmi_core reading 64th word, we have filled up half the buffer
  ///////////////////////////////
 
  
@@ -36,12 +37,13 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 		if (reset_fill_fifo) 
 			begin
 			fill_fifo_fsm_state <= RESET_fill_fifo;
-			ddr_addr_to_read <= 32'b0;
+			//ddr_addr_to_read <= 32'b0;
 			end
 		else 
 			begin
 			fill_fifo_fsm_state <= fill_fifo_fsm_nextstate;
-			ddr_addr_to_read <= ddr_addr_to_read + addr_inc;
+			 	  if (fill_fifo_fsm_state == RESET_fill_fifo) ddr_addr_to_read <= 32'b0; //reset address register when in reset state
+     	    else	ddr_addr_to_read <= ddr_addr_to_read + addr_inc; //otherwise, increment address reg by addr_inc (value depends on state)
 			end
 	end
 	
@@ -62,17 +64,17 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 											fill_fifo_fsm_nextstate = IDLE_fill_fifo;
 			IDLE_fill_fifo:
 				begin
-					if (vsync) 				fill_fifo_fsm_nextstate = RESET_fill_fifo; 		//done frame, go back to reset state
-					else if (hsync) 		fill_fifo_fsm_nextstate = DONE_LINE_fill_fifo; 	
+					if (vsync) 				      fill_fifo_fsm_nextstate = RESET_fill_fifo; 		//done frame, go back to reset state
+					else if (hsync) 		   fill_fifo_fsm_nextstate = DONE_LINE_fill_fifo; 	
 					else if (half_full)		fill_fifo_fsm_nextstate = DONE_HALF_fill_fifo;
-					else					fill_fifo_fsm_nextstate = IDLE_fill_fifo;
+					else					           fill_fifo_fsm_nextstate = IDLE_fill_fifo;
 				end
 			DONE_HALF_fill_fifo:
 											fill_fifo_fsm_nextstate = IDLE_fill_fifo;
 			DONE_LINE_fill_fifo:
 											fill_fifo_fsm_nextstate = IDLE_fill_fifo;
 			default:
-											fill_fifo_fsm_nextstate = RESET_fill_fifo;
+											fill_fifo_fsm_nextstate = 3'b111; //error, should not go to default
 		endcase
 	end
 	
