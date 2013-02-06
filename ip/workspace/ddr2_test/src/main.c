@@ -26,6 +26,12 @@ int main() {
 
 #ifdef TEST_DDR
 	volatile int *hdmi_offset_addr = hdmi_addr + 0x100;
+
+	int i;
+	for (i = 0; i < 16; i++) {
+		ddr_addr[i] = 0xdead0000 | i;
+	}
+
 	hdmi_offset_addr[0] = 0x1 | 0x8; // read and burst
 	hdmi_offset_addr[1] = ddr_addr;
 	hdmi_offset_addr[2] = 0x0000ffff; // byte enable
