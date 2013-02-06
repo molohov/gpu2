@@ -22,6 +22,9 @@ int main() {
 
 	volatile int *hdmi_addr = (int *)XPAR_HDMI_OUT_0_BASEADDR;
 
+	hdmi_addr[0] =
+
+#ifdef TEST_HDMI
 	printf("sync: %x\n\r", hdmi_addr[2]);
 
 	hdmi_addr[0] = 1;
@@ -39,6 +42,7 @@ int main() {
 	printf("sync: %x\n\r", hdmi_addr[2]);
 
 	hdmi_addr[0] = 1;
+#endif
 
 	printf("Exiting\n\r");
 
