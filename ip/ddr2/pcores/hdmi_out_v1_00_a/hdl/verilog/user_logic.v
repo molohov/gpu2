@@ -420,7 +420,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 
       case ( slv_reg_read_sel )
         3'b100 : slv_ip2bus_data <= bus2ip_mstrd_d;
-        3'b010 : slv_ip2bus_data <= mst_fifo_valid_read_xfer;
+        3'b010 : slv_ip2bus_data <= ip2bus_mstwr_d;
         3'b001 : slv_ip2bus_data <= {hsync, vsync};
         default : slv_ip2bus_data <= 0;
       endcase
@@ -982,7 +982,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
      .Reset(bus2ip_Reset),
      .FIFO_Write(mst_fifo_valid_write_xfer),
      .Data_In(bus2ip_mstrd_d),
-     .FIFO_Read(mst_fifo_valid_read_xfer),
+     .FIFO_Read(mst_fifo_valid_read_xfer | slv_reg2[0]),
      .Data_Out(ip2bus_mstwr_d),
      .FIFO_Full(),
      .FIFO_Empty(),
