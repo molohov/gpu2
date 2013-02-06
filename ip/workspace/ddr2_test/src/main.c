@@ -40,13 +40,9 @@ int main() {
 	// poll on done signal
 	while ((hdmi_offset_addr[0] & 0x100) == 0) {
 	}
+	hdmi_offset_addr[0] = hdmi_offset_addr[0] & ~0x100;
 
 	printf("%x %x\n\r", hdmi_addr[0], hdmi_addr[1]);
-
-	// Clear FIFO
-	hdmi_offset_addr[2] = 1;
-	while (hdmi_addr[1] != 0) {}
-	hdmi_offset_addr[2] = 0;
 
 	// Increment address
 	hdmi_offset_addr[1] = ddr_addr + 64;
@@ -55,13 +51,9 @@ int main() {
 	// poll on done signal
 	while ((hdmi_offset_addr[0] & 0x100) == 0) {
 	}
+	hdmi_offset_addr[0] = hdmi_offset_addr[0] & ~0x100;
 
 	printf("%x %x\n\r", hdmi_addr[0], hdmi_addr[1]);
-
-	// Clear FIFO
-	hdmi_offset_addr[2] = 1;
-	while (hdmi_addr[1] != 0) {}
-	hdmi_offset_addr[2] = 0;
 
 	// Increment address
 	hdmi_offset_addr[1] = ddr_addr + 128;
@@ -70,6 +62,7 @@ int main() {
 	// poll on done signal
 	while ((hdmi_offset_addr[0] & 0x100) == 0) {
 	}
+	hdmi_offset_addr[0] = hdmi_offset_addr[0] & ~0x100;
 
 	printf("%x %x\n\r", hdmi_addr[0], hdmi_addr[1]);
 #endif
