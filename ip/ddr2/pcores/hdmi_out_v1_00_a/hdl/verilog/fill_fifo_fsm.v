@@ -1,4 +1,5 @@
-module fill_fifo_fsm( input reset_fill_fifo,	
+module fill_fifo_fsm( input Bus2IP_Clk,
+					  input reset_fill_fifo,	
 					  input start_fill_fifo,
 					  input hsync,							//obtain hsync and vsync from hdmi_core
 					  input vsync,
