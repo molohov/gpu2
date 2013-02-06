@@ -187,6 +187,9 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire                                      hsync;
   wire                                      vsync;
   wire                                      ve;
+  wire					    [7:0] red;
+  wire					    [7:0] green;
+  wire					    [7:0] blue;
 
   // Nets for user logic slave model s/w accessible register example
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg0;
@@ -310,6 +313,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  parameter                                  GO_BYTE_LANE = 15;
  
   // --USER logic implementation added here
+  /*
   dvi_stimulate dvi_stimulate_inst (
     .clock(PXL_CLK_X1),
     .reset(slv_reg0[0]),
@@ -318,6 +322,23 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .vsync_out(vsync),
     .ve(ve)
   );
+  */
+
+  hdmi_core hdmi_core_inst (
+    .reset(slv_reg0[0]),
+    .start(slv_reg0[1]),
+    .clock(PXL_CLK_X1),
+    .hres(11'd800),
+    .vres(10'd600),
+    .color(slv_reg1[23:0]),
+    .red(red),
+    .blue(blue),
+    .green(green),
+    .hsync(hsync),
+    .vsync(vsync),
+    .ve(ve)
+    );
+
 
   dvi_out_native dvi_out_native_inst (
     .reset(1'b0),
@@ -325,9 +346,9 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .clkin(PXL_CLK_X1),
     .clkx2in(PXL_CLK_X2),
     .clkx10in(PXL_CLK_X10),
-    .blue_din(slv_reg1[24-1:16]),
-    .green_din(slv_reg1[16-1:8]),
-    .red_din(slv_reg1[8-1:0]),
+    .blue_din(blue),
+    .green_din(green),
+    .red_din(red),
     .hsync(hsync),
     .vsync(vsync),
     .de(ve),

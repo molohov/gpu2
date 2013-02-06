@@ -15,4 +15,4 @@ lib hdmi_out_v1_00_a dvi_encoder verilog
 lib hdmi_out_v1_00_a dvi_out_native verilog
 lib hdmi_out_v1_00_a encode verilog
 lib hdmi_out_v1_00_a serdes_n_to_1 verilog
-lib hdmi_out_v1_00_a dvi_stimulate verilog
+lib hdmi_out_v1_00_a hdmi_core verilog

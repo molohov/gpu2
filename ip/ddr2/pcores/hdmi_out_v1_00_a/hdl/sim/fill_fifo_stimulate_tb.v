@@ -5,10 +5,10 @@ module fill_fifo_stimulate_tb (
 
   //wire fill_half_fifo_O;
   //wire hsync_O, vsync_O;
-  parameter FRAME_BASE_ADDR = ??;
-  parameter LINE_STRIDE = ??;
-  parameter NUM_PIXELS_PER_LINE = ??;
-  parameter NUM_BYTES_PER_PIXEL = ??;
+  parameter FRAME_BASE_ADDR = 32'h80000000;
+  parameter LINE_STRIDE = 32'h00006000;
+  parameter NUM_PIXELS_PER_LINE = 32'h00000400;
+  parameter NUM_BYTES_PER_PIXEL = 32'h00000002;
   
   wire [31:0] ddr_addr_to_read;
   wire go_fill_fifo;
@@ -21,7 +21,7 @@ module fill_fifo_stimulate_tb (
   //fill_fifo_stimulate fill_fifo_stimulate_inst(clk, fill_half_fifo_I, hsync_I, vsync_I, fill_half_fifo_O, hsync_O, vsync_O);
 
   fill_fifo_fsm fill_fifo_stimulate(clk, reset, start, hsync_I, vsync_I, 
-									FRAME_BASE_ADDR, LINE_STRIDE, NUM_PIXELS_PER_LINE, NUM_BYTES_PER_LINE, 
+									FRAME_BASE_ADDR, LINE_STRIDE, NUM_PIXELS_PER_LINE, NUM_BYTES_PER_PIXEL, 
 									ddr_addr_to_read, go_fill_fifo);			
   
   initial clk = 0;
