@@ -25,19 +25,47 @@ int main() {
 #define TEST_DDR
 
 #ifdef TEST_DDR
-	volatile int *hdmi_offset_addr = hdmi_addr + 0x100;
+	volatile int *hdmi_offset_addr = hdmi_addr + 0x40;
 
 	int i;
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < 1024; i++) {
 		ddr_addr[i] = 0xdead0000 | i;
 	}
 
 	hdmi_offset_addr[0] = 0x1 | 0x8; // read and burst
 	hdmi_offset_addr[1] = ddr_addr;
 	hdmi_offset_addr[2] = 0x0000ffff; // byte enable
-	hdmi_offset_addr[3] = 0x0a000000 | 0x80; // go and transfer length of 128 = 4 * 32-bit words
+	hdmi_offset_addr[3] = 0x0a000000 | (64 * 4); // go and transfer length of 64 32-bit words
+
+	// poll on done signal
+	while ((hdmi_offset_addr[0] & 0x100) == 0) {
+	}
 
 	printf("%x %x\n\r", hdmi_addr[0], hdmi_addr[1]);
+
+	// Clear FIFO
+	hdmi_offset_addr[2] = 1;
+	while (hdmi_addr[1] != 0) {}
+	hdmi_offset_addr[2] = 0;
+
+	// Increment address
+	hdmi_offset_addr[1] = ddr_addr + 64;
+	hdmi_offset_addr[3] = 0x0a000000 | (64 * 4); // go and transfer length of 64 32-bit words
+
+	// poll on done signal
+	while ((hdmi_offset_addr[0] & 0x100) == 0) {
+	}
+
+	printf("%x %x\n\r", hdmi_addr[0], hdmi_addr[1]);
+
+	// Clear FIFO
+	hdmi_offset_addr[2] = 1;
+	while (hdmi_addr[1] != 0) {}
+	hdmi_offset_addr[2] = 0;
+
+	// Increment address
+	hdmi_offset_addr[1] = ddr_addr + 128;
+	hdmi_offset_addr[3] = 0x0a000000 | (64 * 4); // go and transfer length of 64 32-bit words
 
 	// poll on done signal
 	while ((hdmi_offset_addr[0] & 0x100) == 0) {
