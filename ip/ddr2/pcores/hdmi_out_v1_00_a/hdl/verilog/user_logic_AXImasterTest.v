@@ -285,6 +285,26 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  reg                                        mst_cmd_sm_start_rd_llink;
  reg                                        mst_cmd_sm_start_wr_llink;
  
+ ///////////////////////////////
+ //signals for fill fifo FSM
+ parameter 	RESET_fill_fifo 	= 3'b000;
+ parameter 	BEGIN_fill_fifo 	= 3'b001;
+ parameter 	IDLE_fill_fifo 		= 3'b010;
+ parameter 	DONE_HALF_fill_fifo = 3'b011;
+ parameter 	DONE_LINE_fill_fifo = 3'b100;
+ reg		[2:0] fill_fifo_fsm_state;
+ reg 		[2:0] fill_fifo_fsm_nextstate;
+ reg		[31:0] ddr_addr_to_read;
+ reg		[31:0] addr_inc;
+ reg		go_fill_fifo;
+ wire 		reset_fill_fifo;
+ wire 		hsync;
+ wire		vsync;
+ wire		half_full;
+ assign 	half_full = !(hsync%'d64); //if hdmi_core reading 64th word, we have filled up half the buffer
+ ///////////////////////////////
+ 
+ 
 // signals for master model read locallink interface state machine
  parameter                                  LLRD_IDLE = 1'b0,
                                             LLRD_GO = 1'b1;
@@ -495,6 +515,93 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_xfer_reg_len  = {mst_reg[14][3 : 0], mst_reg[13], mst_reg[12]};// changed to 20 bits 
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
 
+  /////////////////////////////////////////////////////////
+  //FILL FIFO FSM
+  always @ (Bus2IP_Clk)
+	begin
+		if (reset_fill_fifo) 
+			begin
+			fill_fifo_fsm_state <= RESET_fill_fifo;
+			ddr_addr_to_read <= 32'b0;
+			end
+		else 
+			begin
+			fill_fifo_fsm_state <= fill_fifo_fsm_nextstate;
+			ddr_addr_to_read <= ddr_addr_to_read + addr_inc;
+			end
+	end
+	
+	always @ (Bus2IP_Clk)
+	begin
+		if (reset_fill_fifo) 
+			fill_fifo_fsm_state <= RESET_fill_fifo;
+		else fill_fifo_fsm_state <= fill_fifo_fsm_nextstate;
+	end
+  
+  //next state logic
+  always @ (*)
+	begin
+		case (fill_fifo_fsm_state)
+			RESET_fill_fifo:
+											fill_fifo_fsm_nextstate = (fill_fifo_start) ? BEGIN_fill_fifo : RESET_fill_fifo;
+			BEGIN_fill_fifo:
+											fill_fifo_fsm_nextstate = IDLE_fill_fifo;
+			IDLE_fill_fifo:
+				begin
+					if (vsync) 				fill_fifo_fsm_nextstate = RESET_fill_fifo; 		//done frame, go back to reset state
+					else if (hsync) 		fill_fifo_fsm_nextstate = DONE_LINE_fill_fifo; 	
+					else if (half_full)		fill_fifo_fsm_nextstate = DONE_HALF_fill_fifo;
+					else					fill_fifo_fsm_nextstate = IDLE_fill_fifo;
+				end
+			DONE_HALF_fill_fifo:
+											fill_fifo_fsm_nextstate = IDLE_fill_fifo;
+			DONE_LINE_fill_fifo:
+											fill_fifo_fsm_nextstate = IDLE_fill_fifo;
+			default:
+											fill_fifo_fsm_nextstate = RESET_fill_fifo;
+		endcase
+	end
+	
+  //output logic
+  always @ (*)
+	begin
+		case (fill_fifo_fsm_state)
+			RESET_fill_fifo:
+				begin
+				addr_inc			= 32'b0;
+				go_fill_fifo 		= 1'b0;
+				end
+			BEGIN_fill_fifo:
+				begin
+				addr_inc		 	= FRAME_BASE_ADDR; //start reading from beginning of frame -->this will actually be from slv_reg (Software)
+				go_fill_fifo 		= 1'b1;
+				end							
+			IDLE_fill_fifo:
+				begin
+				addr_inc		 	= 32'b0; 
+				go_fill_fifo 		= 1'b0;
+				end
+			DONE_HALF_fill_fifo:
+				begin
+				addr_inc		 	= 32'd256; //64 words * 4 bytes/word = 256 bytes = half fifo
+				go_fill_fifo 		= 1'b1;
+				end
+			DONE_LINE_fill_fifo:
+				begin
+				addr_inc		 	= LINE_STRIDE - (NUM_PIXEL*2); //stride - (#pixels)(#bytes/pixel) --> will get info from slv_reg (Software)
+				go_fill_fifo 		= 1'b1;
+				end
+			default:
+				begin
+				addr_inc			= 32'b0;
+				go_fill_fifo 		= 1'b0;
+				end			
+		endcase
+	end
+  ////////////////////////////////////////////////////////
+  
+  
+  
   // implement byte write enable for each byte slice of the master model registers
   always @ (Bus2IP_BE or mst_reg_write_req or mst_reg_write_sel)
     begin
@@ -655,7 +762,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
                    if ( mst_cntl_rd_req == 1'b1 )
                      begin
                        // Master read local link
-                       mst_cmd_sm_start_rd_llink <= 1'b1;			//start local link state machine
+                       mst_cmd_sm_start_rd_llink <= 1'b1;			//start local link state machine for read
                      end
                    else if ( mst_cntl_wr_req == 1'b1 )
                      begin
