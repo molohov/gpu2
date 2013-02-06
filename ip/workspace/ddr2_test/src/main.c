@@ -29,7 +29,7 @@ int main() {
 	hdmi_offset_addr[0] = 0x1 | 0x8; // read and burst
 	hdmi_offset_addr[1] = ddr_addr;
 	hdmi_offset_addr[2] = 0x0000ffff; // byte enable
-	hdmi_offset_addr[3] = 0x0a000000 | 0x4; // go and transfer length of 4
+	hdmi_offset_addr[3] = 0x0a000000 | 0x80; // go and transfer length of 128 = 4 * 32-bit words
 
 	printf("%x %x\n\r", hdmi_addr[0], hdmi_addr[1]);
 
