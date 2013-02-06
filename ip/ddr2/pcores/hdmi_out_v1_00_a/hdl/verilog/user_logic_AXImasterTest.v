@@ -285,6 +285,9 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  reg                                        mst_cmd_sm_start_rd_llink;
  reg                                        mst_cmd_sm_start_wr_llink;
  
+
+ 
+ 
 // signals for master model read locallink interface state machine
  parameter                                  LLRD_IDLE = 1'b0,
                                             LLRD_GO = 1'b1;
@@ -495,6 +498,9 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_xfer_reg_len  = {mst_reg[14][3 : 0], mst_reg[13], mst_reg[12]};// changed to 20 bits 
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
 
+  
+  
+  
   // implement byte write enable for each byte slice of the master model registers
   always @ (Bus2IP_BE or mst_reg_write_req or mst_reg_write_sel)
     begin
@@ -655,7 +661,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
                    if ( mst_cntl_rd_req == 1'b1 )
                      begin
                        // Master read local link
-                       mst_cmd_sm_start_rd_llink <= 1'b1;			//start local link state machine
+                       mst_cmd_sm_start_rd_llink <= 1'b1;			//start local link state machine for read
                      end
                    else if ( mst_cntl_wr_req == 1'b1 )
                      begin
