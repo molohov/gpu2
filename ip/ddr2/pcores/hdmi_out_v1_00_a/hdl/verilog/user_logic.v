@@ -349,7 +349,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
 			.sig_I(slv_reg0[30:28]),
 			.toggle_O({vsync_fifo, hsync_fifo, half_full_fifo}),
 			.posedge_O(),
-			.nedgedge_O()
+			.negedge_O()
 			);
 
   hdmi_core hdmi_core_inst (
