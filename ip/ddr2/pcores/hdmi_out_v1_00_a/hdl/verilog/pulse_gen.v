@@ -1,27 +1,29 @@
-// Assuming the inputs are read from user slave registers, turn a toggle into a one-cycle pulse
+// Assuming the inputs are read from user slave registers, generat pulses on a toggle, posedge, or negedge
 
-module fill_fifo_stimulate (
-  input clk,
-  input fill_half_fifo_I,
-  input hsync_I,
-  input vsync_I,
-  output reg fill_half_fifo_O,
-  output reg hsync_O,
-  output reg vsync_O
+module pulse_gen (
+  clk,
+  sig_I,
+  toggle_O,
+  posedge_O,
+  negedge_O
 );
 
-  reg prev_fill_half_fifo;
-  reg prev_hsync;
-  reg prev_vsync;
+  parameter NUM = 1;
+
+  input                clk;
+  input      [NUM-1:0] sig_I;
+  output reg [NUM-1:0] toggle_O;
+  output reg [NUM-1:0] posedge_O;
+  output reg [NUM-1:0] negedge_O;
+
+  reg [NUM-1:0] prev;
 
   always @(posedge clk)
   begin
-    prev_fill_half_fifo <= fill_half_fifo_I;
-    prev_hsync <= hsync_I;
-    prev_vsync <= vsync_I;
-    fill_half_fifo_O <= (fill_half_fifo_I != prev_fill_half_fifo);
-    hsync_O <= (hsync_I != prev_hsync);
-    vsync_O <= (vsync_I != prev_vsync);
+    prev <= sig_I;
+    toggle_O <= prev ^ sig_I;
+    posedge_O <= ~prev & sig_I;
+    negedge_O <= prev & ~sig_I;
   end
 
 endmodule

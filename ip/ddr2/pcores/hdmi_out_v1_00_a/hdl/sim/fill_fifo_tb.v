@@ -5,7 +5,7 @@ module fill_fifo_tb (
 
   parameter FRAME_BASE_ADDR = 32'h80000000;
   parameter LINE_STRIDE = 32'h00004000;
-  parameter NUM_PIXELS_PER_LINE = 32'h00000080;
+  parameter NUM_PIXELS_PER_LINE = 32'h00000100;
   parameter NUM_BYTES_PER_PIXEL = 32'h00000004;
   
   wire [31:0] ddr_addr_to_read;
@@ -46,6 +46,10 @@ module fill_fifo_tb (
     fill_half_fifo_I = 1;
     @ (negedge clk)
     fill_half_fifo_I = 0;
+    @ (negedge clk)
+    fill_half_fifo_I = 1;
+    @ (negedge clk)
+    fill_half_fifo_I = 0;
     @ (negedge clk) ;
     @ (negedge clk) ;
     @ (negedge clk)
@@ -64,6 +68,10 @@ module fill_fifo_tb (
     fill_half_fifo_I = 1;
     @ (negedge clk)
     fill_half_fifo_I = 0;
+    @ (negedge clk)
+    fill_half_fifo_I = 1;
+    @ (negedge clk)
+    fill_half_fifo_I = 0;
     @ (negedge clk) ;
     @ (negedge clk) ;
     @ (negedge clk)
@@ -74,6 +82,10 @@ module fill_fifo_tb (
     @ (negedge clk) ;
     @ (negedge clk) ;
     @ (negedge clk) ;
+    @ (negedge clk)
+    fill_half_fifo_I = 1;
+    @ (negedge clk)
+    fill_half_fifo_I = 0;
     @ (negedge clk)
     fill_half_fifo_I = 1;
     @ (negedge clk)

@@ -1,9 +1,9 @@
 vlib work
-vlog ../verilog/fill_fifo_fsm.v
-vlog fill_fifo_stimulate_tb.v
+vlog ../verilog/pulse_gen.v
+vlog pulse_gen_tb.v
 
-vsim -novopt work.fill_fifo_stimulate_tb
+vsim -novopt work.pulse_gen_tb
 
-add wave -position insertpoint sim:/fill_fifo_stimulate_tb/*
+add wave -position insertpoint sim:/pulse_gen_tb/*
 
 run 400

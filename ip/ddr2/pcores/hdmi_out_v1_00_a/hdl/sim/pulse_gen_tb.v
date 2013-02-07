@@ -1,28 +1,16 @@
-// Assuming the inputs are read from user slave registers, turn a toggle into a one-cycle pulse
-
-module fill_fifo_stimulate_tb (
+module pulse_gen_tb (
 );
 
-  //wire fill_half_fifo_O;
-  //wire hsync_O, vsync_O;
-  parameter FRAME_BASE_ADDR = 32'h80000000;
-  parameter LINE_STRIDE = 32'h00006000;
-  parameter NUM_PIXELS_PER_LINE = 32'h00000400;
-  parameter NUM_BYTES_PER_PIXEL = 32'h00000002;
-  
-  wire [31:0] ddr_addr_to_read;
-  wire go_fill_fifo;
-  
-  
-  reg clk, reset, start;
-  reg fill_half_fifo_I; //hmm Victor, what was this signal intended for?
-  reg hsync_I, vsync_I;
+  parameter NUM = 3;
 
-  //fill_fifo_stimulate fill_fifo_stimulate_inst(clk, fill_half_fifo_I, hsync_I, vsync_I, fill_half_fifo_O, hsync_O, vsync_O);
+  reg            clk;
+  reg  [NUM-1:0] in;
 
-  fill_fifo_fsm fill_fifo_stimulate(clk, reset, start, hsync_I, vsync_I, 
-									FRAME_BASE_ADDR, LINE_STRIDE, NUM_PIXELS_PER_LINE, NUM_BYTES_PER_PIXEL, 
-									ddr_addr_to_read, go_fill_fifo);			
+  wire [NUM-1:0] toggle_O;
+  wire [NUM-1:0] posedge_O;
+  wire [NUM-1:0] negedge_O;
+
+  pulse_gen #(3) pulse_gen_inst (clk, in, toggle_O, posedge_O, negedge_O);
   
   initial clk = 0;
 
@@ -31,31 +19,24 @@ module fill_fifo_stimulate_tb (
   initial
   begin
     @ (negedge clk)
-	reset = 1;
-	start = 0;
-    fill_half_fifo_I = 0;
-    hsync_I = 0;
-    vsync_I = 0;
-    @ (negedge clk) ;
-	reset = 0;
-	start = 1;
+    in = {NUM{1'b0}};
     @ (negedge clk)
-    fill_half_fifo_I = ~fill_half_fifo_I;
+    in[0] = 1'b1;
     @ (negedge clk) ;
     @ (negedge clk)
-    hsync_I = ~hsync_I;
+    in[1] = 1'b1;
     @ (negedge clk) ;
     @ (negedge clk)
-    vsync_I = ~vsync_I;
+    in[2] = 1'b1;
     @ (negedge clk) ;
     @ (negedge clk)
-    fill_half_fifo_I = ~fill_half_fifo_I;
+    in[2] = 1'b0;
     @ (negedge clk) ;
     @ (negedge clk)
-    hsync_I = ~hsync_I;
+    in[1] = 1'b0;
     @ (negedge clk) ;
     @ (negedge clk)
-    vsync_I = ~vsync_I;
+    in[0] = 1'b0;
     @ (negedge clk) ;
   end
 

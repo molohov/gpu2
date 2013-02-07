@@ -20,20 +20,21 @@ module fill_fifo_fsm( input Bus2IP_Clk,
  parameter 	IDLE_fill_fifo 		= 3'b010;
  parameter 	DONE_HALF_fill_fifo = 3'b011;
  parameter 	DONE_LINE_fill_fifo = 3'b100;
+
+ parameter      HALF_FIFO = 32'h100;
  
  //signals
  reg		[2:0] fill_fifo_fsm_state;
  reg 		[2:0] fill_fifo_fsm_nextstate;
- //reg		[31:0] ddr_addr_to_read;
  reg		[31:0] addr_inc;
- //wire		half_full;
- //assign 	half_full = !(hsync%'d64); //if hdmi_core reading 64th word, we have filled up half the buffer
+ reg            go_fill_fifo_next;
  ///////////////////////////////
 
  
   //combinational logic
-  always @ (Bus2IP_Clk)
+  always @ (posedge Bus2IP_Clk)
 	begin
+		go_fill_fifo <= go_fill_fifo_next;
 		if (reset_fill_fifo) 
 			begin
 			fill_fifo_fsm_state <= RESET_fill_fifo;
@@ -47,7 +48,7 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 			end
 	end
 	
-	always @ (Bus2IP_Clk)
+	always @ (posedge Bus2IP_Clk)
 	begin
 		if (reset_fill_fifo) 
 			fill_fifo_fsm_state <= RESET_fill_fifo;
@@ -85,32 +86,32 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 			RESET_fill_fifo:
 				begin
 				addr_inc			= 32'b0;
-				go_fill_fifo 		= 1'b0;
+				go_fill_fifo_next 		= 1'b0;
 				end
 			BEGIN_fill_fifo:
 				begin
 				addr_inc		 	= FRAME_BASE_ADDR; //start reading from beginning of frame -->this will actually be from slv_reg (Software)
-				go_fill_fifo 		= 1'b1;
+				go_fill_fifo_next 		= 1'b1;
 				end							
 			IDLE_fill_fifo:
 				begin
 				addr_inc		 	= 32'b0; 
-				go_fill_fifo 		= 1'b0;
+				go_fill_fifo_next 		= 1'b0;
 				end
 			DONE_HALF_fill_fifo:
 				begin
-				addr_inc		 	= 32'h100; //64 words * 4 bytes/word = 256 bytes = half fifo
-				go_fill_fifo 		= 1'b1;
+				addr_inc		 	= HALF_FIFO; //64 words * 4 bytes/word = 256 bytes = half fifo
+				go_fill_fifo_next 		= 1'b1;
 				end
 			DONE_LINE_fill_fifo:
 				begin
-				addr_inc		 	= NUM_BYTES_PER_PIXEL*(LINE_STRIDE - NUM_PIXELS_PER_LINE); //(stride in pixels - #pixels per line)(#bytes/pixel) --> will get info from slv_reg (Software)
-				go_fill_fifo 		= 1'b1;
+				addr_inc		 	= NUM_BYTES_PER_PIXEL*(LINE_STRIDE - NUM_PIXELS_PER_LINE) + HALF_FIFO; //(stride in pixels - #pixels per line)(#bytes/pixel) + half fifo --> will get info from slv_reg (Software)
+				go_fill_fifo_next 		= 1'b1;
 				end
 			default:
 				begin
 				addr_inc			= 32'b0;
-				go_fill_fifo 		= 1'b0;
+				go_fill_fifo_next 		= 1'b0;
 				end			
 		endcase
 	end
