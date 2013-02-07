@@ -104,7 +104,7 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 				end
 			DONE_LINE_fill_fifo:
 				begin
-				addr_inc		 	= NUM_BYTES_PER_PIXEL*(LINE_STRIDE - NUM_PIXELS_PER_LINE); //stride - (#pixels)(#bytes/pixel) --> will get info from slv_reg (Software)
+				addr_inc		 	= NUM_BYTES_PER_PIXEL*(LINE_STRIDE - NUM_PIXELS_PER_LINE); //(stride in pixels - #pixels per line)(#bytes/pixel) --> will get info from slv_reg (Software)
 				go_fill_fifo 		= 1'b1;
 				end
 			default:
