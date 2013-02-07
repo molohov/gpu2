@@ -324,6 +324,46 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   );
   */
 
+  wire hsync_fifo;
+  wire vsync_fifo;
+  wire half_full_fifo;
+
+//software control bits:
+//slv_reg0[2] = restart for fifo fsm
+//slv_reg0[3] = start for fifo fsm
+//slv_reg1 = FRAME_BASE_ADDR
+//slv_reg0[13:4] is LINE_STRIDE (10 bits)
+//slv_reg0[23:14] is PIXELS_PER_LINE (10 bits)
+//slv_reg0[27:24] is num bytes per pixel (4 bits)
+
+fill_fifo_fsm fill_fifo(
+			.Bus2IP_Clk(Bus2IP_Clk),
+			.reset_fill_fifo(slv_reg0[2]),	
+			.start_fill_fifo(slv_reg0[3]),
+			.hsync(hsync_fifo),			//obtain hsync and vsync from hdmi_core
+			.vsync(vsync_fifo),
+			.half_full(half_full_fifo),
+			.FRAME_BASE_ADDR(slv_reg1[31:0]),		//obtain these from software (slv_reg in user_logic)
+			.LINE_STRIDE(slv_reg0[13:4]),
+			.NUM_PIXELS_PER_LINE(slv_reg0[23:14]),
+			.NUM_BYTES_PER_PIXEL(slv_reg0[27:24]),
+			.ddr_addr_to_read( mst_ip2bus_addr /*{mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]}*/),
+			.go_fill_fifo(mst_cntl_rd_req /*mst_reg[0][0]*/) //control bit that will drive master burst read request		
+		      	);		
+
+//this module stimulates signals because fill_fifo_fsm expects hsync, vsync, and half_full to last only one clk cycle
+fill_fifo_stimulate stimulate_signals4_fifo_fsm(
+  			.clk(Bus2IP_Clk),
+			.fill_half_fifo_I(hsync), //note: I AM NOT SURE WHAT SIGNAL TO PUT HERE!!!????????????????????
+			.hsync_I(ve),	//using video enable from hdmi_core instead of hsync, as Bryce suggested
+			.vsync_I(vsync),	
+			.fill_half_fifo_O(half_full_fifo),
+			.hsync_O(hsync_fifo),
+			.vsync_O(vsync_fifo)
+			);
+
+
+
   hdmi_core hdmi_core_inst (
     .reset(slv_reg0[0]),
     .start(slv_reg0[1]),
@@ -500,11 +540,11 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_read_ack      = mst_reg_read_req;
 
   // rip control bits from master model registers
-  assign mst_cntl_rd_req   = mst_reg[0][0];
+  //assign mst_cntl_rd_req   = mst_reg[0][0];
   assign mst_cntl_wr_req   = mst_reg[0][1];
   assign mst_cntl_bus_lock = mst_reg[0][2];
   assign mst_cntl_burst    = mst_reg[0][3];
-  assign mst_ip2bus_addr   = {mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]};
+  //assign mst_ip2bus_addr   = {mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]};
   assign mst_ip2bus_be     = {mst_reg[9], mst_reg[8]};
   assign mst_xfer_reg_len  = {mst_reg[14][3 : 0], mst_reg[13], mst_reg[12]};// changed to 20 bits 
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
@@ -982,7 +1022,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
      .Reset(bus2ip_Reset),
      .FIFO_Write(mst_fifo_valid_write_xfer),
      .Data_In(bus2ip_mstrd_d),
-     .FIFO_Read(mst_fifo_valid_read_xfer | slv_reg2[0]),
+     .FIFO_Read(mst_fifo_valid_read_xfer /*| slv_reg2[0]*/), //note: not sure why we had slv_reg2[0] here before!!!
      .Data_Out(ip2bus_mstwr_d),
      .FIFO_Full(),
      .FIFO_Empty(),

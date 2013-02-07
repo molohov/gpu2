@@ -32,6 +32,15 @@ int main() {
 		ddr_addr[i] = 0xdead0000 | i;
 	}
 
+	//software control bits for fill_fifo_fsm:
+	//hdmi_addr[0] bit [2] = restart for fifo fsm
+	//hdmi_addr[0]  bit [3] = start for fifo fsm
+	//hdmi_addr[1] = FRAME_BASE_ADDR
+	//hdmi_addr[0] bits [13:4] is LINE_STRIDE (10 bits)
+	//hdmi_addr[0] bits [23:14] is PIXELS_PER_LINE (10 bits)
+	//hdmi_addr[0] bits [27:24] is num bytes per pixel (4 bits)
+
+
 	hdmi_offset_addr[0] = 0x1 | 0x8; // read and burst
 	hdmi_offset_addr[1] = ddr_addr;
 	hdmi_offset_addr[2] = 0x0000ffff; // byte enable

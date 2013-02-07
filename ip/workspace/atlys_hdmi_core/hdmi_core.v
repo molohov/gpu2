@@ -97,15 +97,15 @@ always @ (posedge clock)
 begin
     if (reset || !start)
     begin
-        hsync_d2 <= 0;
-        vsync_d2 <= 0;
-        hsync_d1 <= 0;
-        vsync_d1 <= 0;
-        active_video_d2 <= 0;
-        active_video_d1 <= 0;
-        video_data_d1 <= 0;
-        hcnt <= 0;
-        vcnt <= 0;
+        hsync_d2 = 0;
+        vsync_d2 = 0;
+        hsync_d1 = 0;
+        vsync_d1 = 0;
+        active_video_d2 = 0;
+        active_video_d1 = 0;
+        video_data_d1 = 0;
+        hcnt = 0;
+        vcnt = 0;
     end
     else
     begin
@@ -117,14 +117,14 @@ begin
         active_video_d1 = active_video_i;
         video_data_d1 = color;
         if (hcnt < htr)
-            hcnt <= hcnt + 1;
+            hcnt = hcnt + 1;
         else
             begin
-            hcnt <= 0;
+            hcnt = 0;
             if (vcnt < vtr)
-                vcnt <= vcnt + 1;
+                vcnt = vcnt + 1;
             else
-                vcnt <= 0;
+                vcnt = 0;
             end
     end
 end
