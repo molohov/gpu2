@@ -1,0 +1,100 @@
+m255
+K3
+13
+cModel Technology
+Z0 d/home/maximus/gpu2/ip/workspace/digilent_hdmi_core
+Edvitransmitter
+Z1 w1360203904
+Z2 DPx3 std 6 textio 0 22 5>J:;AW>W0[[dW0I6EN1Q0
+Z3 DPx4 ieee 14 std_logic_1164 0 22 5=aWaoGZSMWIcH0i^f`XF1
+Z4 d/home/maximus/gpu2/ip/workspace/digilent_hdmi_core
+Z5 8DVITransmitter.vhd
+Z6 FDVITransmitter.vhd
+l0
+L35
+VQ=[@2[C;ckhc[mCB@WdHj0
+!s100 ^ZB;zjKBI1L28A5`k_MXP1
+Z7 OV;C;10.1b;51
+32
+!i10b 1
+Z8 !s108 1360207761.881127
+Z9 !s90 -reportprogress|300|DVITransmitter.vhd|Video.vhd|VideoTimingCtl.vhd|clk_gen.vhd|
+Z10 !s107 clk_gen.vhd|VideoTimingCtl.vhd|Video.vhd|DVITransmitter.vhd|
+o-O0
+Z11 tExplicit 1
+Abehavioral
+R2
+R3
+DEx4 work 14 dvitransmitter 0 22 Q=[@2[C;ckhc[mCB@WdHj0
+l85
+L56
+V=I6YR6MY]^N0fZ`nDAz<E2
+!s100 _[lzd[]b9M@IBOAXcVA782
+R7
+32
+!i10b 1
+R8
+R9
+R10
+o-O0
+R11
+Pvideo
+R2
+R3
+R1
+R4
+8Video.vhd
+FVideo.vhd
+l0
+L29
+VeX:lFN145KVTPS`4:oQ3W0
+!s100 zJJS8YXn;VfkgOZ9YKKU10
+R7
+32
+!i10b 1
+R8
+R9
+R10
+o-O0
+R11
+Evideotimingctl
+R1
+Z12 DPx4 work 5 video 0 22 eX:lFN145KVTPS`4:oQ3W0
+Z13 DPx4 ieee 15 std_logic_arith 0 22 4`Y?g_lkdn;7UL9IiJck01
+Z14 DPx4 ieee 18 std_logic_unsigned 0 22 RYmj;=TK`k=k>D@Cz`zoB3
+R2
+R3
+R4
+Z15 8VideoTimingCtl.vhd
+Z16 FVideoTimingCtl.vhd
+l0
+L35
+V<APMZATeI:_W=f8O;^X]S1
+!s100 oZzSZ^7=NHPB[HZX;7Xif0
+R7
+32
+!i10b 1
+R8
+R9
+R10
+o-O0
+R11
+Abehavioral
+R12
+R13
+R14
+R2
+R3
+DEx4 work 14 videotimingctl 0 22 <APMZATeI:_W=f8O;^X]S1
+l70
+L47
+VK1mnbn1age;ijmm<U]WbV2
+!s100 bb7FGfFObBE0oi2gW:GTg3
+R7
+32
+!i10b 1
+R8
+R9
+R10
+o-O0
+R11

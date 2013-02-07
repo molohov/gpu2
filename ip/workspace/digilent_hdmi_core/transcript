@@ -1,0 +1,22 @@
+do tb.do
+# Model Technology ModelSim ALTERA vcom 10.1b Compiler 2012.04 Apr 27 2012
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Compiling entity DVITransmitter
+# -- Compiling architecture Behavioral of DVITransmitter
+# -- Compiling package Video
+# -- Loading package std_logic_arith
+# -- Loading package STD_LOGIC_UNSIGNED
+# -- Loading package Video
+# -- Compiling entity VideoTimingCtl
+# -- Compiling architecture Behavioral of VideoTimingCtl
+# -- Loading package MATH_REAL
+# ** Error: clk_gen.vhd(26): Library unisim not found.
+# ** Error: clk_gen.vhd(27): (vcom-1136) Unknown identifier "unisim".
+# ** Error: clk_gen.vhd(32): VHDL Compiler exiting
+# ** Error: /home/maximus/altera/12.1/modelsim_ase/linux/vcom failed.
+# Error in macro ./tb.do line 2
+# /home/maximus/altera/12.1/modelsim_ase/linux/vcom failed.
+#     while executing
+# "vcom *.vhd"
