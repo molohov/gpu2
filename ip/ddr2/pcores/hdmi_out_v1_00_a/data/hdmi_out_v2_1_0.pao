@@ -17,4 +17,4 @@ lib hdmi_out_v1_00_a encode verilog
 lib hdmi_out_v1_00_a serdes_n_to_1 verilog
 lib hdmi_out_v1_00_a hdmi_core verilog
 lib hdmi_out_v1_00_a fill_fifo_fsm verilog
-lib hdmi_out_v1_00_a fill_fifo_stimulate verilog
+lib hdmi_out_v1_00_a pulse_gen verilog
