@@ -190,6 +190,10 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire					    [7:0] red;
   wire					    [7:0] green;
   wire					    [7:0] blue;
+  wire                                      hsync_fifo;
+  wire                                      vsync_fifo;
+  wire                                      half_full_fifo;
+  wire                                      fifo_write_go;
 
   // Nets for user logic slave model s/w accessible register example
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg0;
@@ -313,21 +317,6 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  parameter                                  GO_BYTE_LANE = 15;
  
   // --USER logic implementation added here
-  /*
-  dvi_stimulate dvi_stimulate_inst (
-    .clock(PXL_CLK_X1),
-    .reset(slv_reg0[0]),
-    .start(slv_reg0[1]),
-    .hsync_out(hsync),
-    .vsync_out(vsync),
-    .ve(ve)
-  );
-  */
-
-  wire hsync_fifo;
-  wire vsync_fifo;
-  wire half_full_fifo;
-
 //software control bits:
 //slv_reg0[2] = restart for fifo fsm
 //slv_reg0[3] = start for fifo fsm
@@ -335,6 +324,9 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 //slv_reg0[13:4] is LINE_STRIDE (10 bits)
 //slv_reg0[23:14] is PIXELS_PER_LINE (10 bits)
 //slv_reg0[27:24] is num bytes per pixel (4 bits)
+//slv_reg0[28] is fill_half_fifo_I when toggled
+//slv_reg0[29] is hsync_I when toggled
+//slv_reg0[30] is vsync_I when toggled
 
 fill_fifo_fsm fill_fifo(
 			.Bus2IP_Clk(Bus2IP_Clk),
@@ -348,21 +340,19 @@ fill_fifo_fsm fill_fifo(
 			.NUM_PIXELS_PER_LINE(slv_reg0[23:14]),
 			.NUM_BYTES_PER_PIXEL(slv_reg0[27:24]),
 			.ddr_addr_to_read( mst_ip2bus_addr /*{mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]}*/),
-			.go_fill_fifo(mst_cntl_rd_req /*mst_reg[0][0]*/) //control bit that will drive master burst read request		
+			.go_fill_fifo(fifo_write_go /*mst_reg[0][0]*/) //control bit that will drive master burst read request		
 		      	);		
 
 //this module stimulates signals because fill_fifo_fsm expects hsync, vsync, and half_full to last only one clk cycle
 fill_fifo_stimulate stimulate_signals4_fifo_fsm(
   			.clk(Bus2IP_Clk),
-			.fill_half_fifo_I(hsync), //note: I AM NOT SURE WHAT SIGNAL TO PUT HERE!!!????????????????????
-			.hsync_I(ve),	//using video enable from hdmi_core instead of hsync, as Bryce suggested
-			.vsync_I(vsync),	
+			.fill_half_fifo_I(slv_reg0[28]),
+			.hsync_I(slv_reg0[29]),
+			.vsync_I(slv_reg0[30]),
 			.fill_half_fifo_O(half_full_fifo),
 			.hsync_O(hsync_fifo),
 			.vsync_O(vsync_fifo)
 			);
-
-
 
   hdmi_core hdmi_core_inst (
     .reset(slv_reg0[0]),
@@ -540,7 +530,7 @@ fill_fifo_stimulate stimulate_signals4_fifo_fsm(
   assign mst_read_ack      = mst_reg_read_req;
 
   // rip control bits from master model registers
-  //assign mst_cntl_rd_req   = mst_reg[0][0];
+  assign mst_cntl_rd_req   = mst_reg[0][0];
   assign mst_cntl_wr_req   = mst_reg[0][1];
   assign mst_cntl_bus_lock = mst_reg[0][2];
   assign mst_cntl_burst    = mst_reg[0][3];
@@ -607,7 +597,7 @@ fill_fifo_stimulate stimulate_signals4_fifo_fsm(
           mst_go <= 1'b0;
         end
       else  
-        if ( mst_cmd_sm_busy == 1'b0 && mst_byte_we[GO_BYTE_LANE] == 1'b1 && Bus2IP_Data[(GO_BYTE_LANE-(GO_BYTE_LANE/BE_WIDTH)*BE_WIDTH)*8 +: 8] == GO_DATA_KEY)
+        if ( mst_cmd_sm_busy == 1'b0 && fifo_write_go)
           begin
             mst_go   <= 1'b1;
           end
@@ -1022,7 +1012,7 @@ fill_fifo_stimulate stimulate_signals4_fifo_fsm(
      .Reset(bus2ip_Reset),
      .FIFO_Write(mst_fifo_valid_write_xfer),
      .Data_In(bus2ip_mstrd_d),
-     .FIFO_Read(mst_fifo_valid_read_xfer /*| slv_reg2[0]*/), //note: not sure why we had slv_reg2[0] here before!!!
+     .FIFO_Read(mst_fifo_valid_read_xfer),
      .Data_Out(ip2bus_mstwr_d),
      .FIFO_Full(),
      .FIFO_Empty(),
