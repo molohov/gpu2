@@ -344,14 +344,12 @@ fill_fifo_fsm fill_fifo(
 		      	);		
 
 //this module stimulates signals because fill_fifo_fsm expects hsync, vsync, and half_full to last only one clk cycle
-fill_fifo_stimulate stimulate_signals4_fifo_fsm(
+pulse_gen #(3) stimulate_signals4_fifo_fsm(
   			.clk(Bus2IP_Clk),
-			.fill_half_fifo_I(slv_reg0[28]),
-			.hsync_I(slv_reg0[29]),
-			.vsync_I(slv_reg0[30]),
-			.fill_half_fifo_O(half_full_fifo),
-			.hsync_O(hsync_fifo),
-			.vsync_O(vsync_fifo)
+			.sig_I(slv_reg0[30:28]),
+			.toggle_O({vsync_fifo, hsync_fifo, half_full_fifo}),
+			.posedge_O(),
+			.nedgedge_O()
 			);
 
   hdmi_core hdmi_core_inst (
