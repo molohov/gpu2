@@ -10,7 +10,7 @@ typedef struct {
 #else
 typedef struct {
   int xres, yres;
-  char *imageData;
+  unsigned char *imageData;
 } gpImg;
 #endif
 
