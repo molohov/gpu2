@@ -149,6 +149,19 @@ bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
   return (b1 == b2) && (b2 == b3);
 }
 
+// compare x,y coordinates
+int vertex_2_cmp(const void *a, const void *b)
+{
+  const gpVertex2Fixed va = *(const gpVertex2Fixed *)a;
+  const gpVertex2Fixed vb = *(const gpVertex2Fixed *)b;
+
+  if (va.x < vb.x) return -1;
+  else if (va.x > vb.x) return 1;
+
+  return va.y - vb.y;
+}
+
+
 void gpFillTriangle(gpPoly *poly, unsigned char *img)
 {
   assert(poly);
@@ -161,6 +174,8 @@ void gpFillTriangle(gpPoly *poly, unsigned char *img)
     vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2);
     vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2);
   }
+
+  qsort(vertices, poly->num_vertices, sizeof(gpVertex2Fixed), vertex_2_cmp);
 
   int x_start = MAX(0, GP_XRES/2+MIN(vertices[0].x, MIN(vertices[1].x, vertices[2].x)));
   int x_end   = MIN(GP_XRES, GP_XRES/2+1+MAX(vertices[0].x, MAX(vertices[1].x, vertices[2].x)));
@@ -180,6 +195,8 @@ void gpFillTriangle(gpPoly *poly, unsigned char *img)
       }
     }
   }
+
+  free(vertices);
 }
 
 void gpMatrixMult(float *x, float *y, float *result, int a, int b)
