@@ -364,7 +364,10 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     .green(green),
     .hsync(hsync),
     .vsync(vsync),
-    .ve(ve)
+    .ve(ve),
+    .read_go(),
+    .read_next_line(),
+    .read_done()
     );
 
 

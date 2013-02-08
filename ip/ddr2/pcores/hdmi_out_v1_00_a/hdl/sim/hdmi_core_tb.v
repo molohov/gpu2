@@ -1,7 +1,10 @@
 module hdmi_core_tb (
 	output hsync,
 	output vsync,
-        output ve
+        output ve,
+        output read_go,
+        output read_line,
+        output read_done
 );
 
 reg clock;
@@ -24,7 +27,10 @@ hdmi_core dut (
         .blue (),
 	.hsync (hsync),
 	.vsync (vsync),
-        .ve (ve)
+        .ve (ve),
+        .read_go(read_go),
+        .read_next_line(read_line),
+        .read_done(read_done)
 	);
 
 initial

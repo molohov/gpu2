@@ -28,7 +28,10 @@ module hdmi_core (
     output [7:0] blue,
     output hsync,
     output vsync,
-    output ve
+    output ve,
+    output read_go,
+    output read_next_line,
+    output read_done
     );
 
 reg [15:0] htr, hsr, hfpr, hbpr, vtr, vsr, vfpr, vbpr;
@@ -50,6 +53,22 @@ assign blue = video_data_d1[7:0];
 assign ve = active_video_d2;
 assign hsync = hsync_d2;
 assign vsync = vsync_d2;
+
+wire pre_video_hsync;
+wire video_hsync;
+wire post_video_hsync;
+
+assign pre_video_hsync = (hsync_i ^ ~polarity) && (vcnt == vbpr);
+assign video_hsync = (hsync_i ^ ~polarity) && (vcnt > vbpr) & (vcnt < vfpr);
+assign post_video_hsync = (hsync_i ^ ~polarity) && (vcnt == vfpr);
+
+pulse_gen #(3) pulse_gen_inst(
+  .clk(clock),
+  .sig_I({pre_video_hsync, video_hsync, post_video_hsync}),
+  .toggle_O(),
+  .posedge_O(),
+  .negedge_O({read_go, read_next_line, read_done})
+);
 
 always @ (*)
 begin
@@ -109,13 +128,13 @@ begin
     end
     else
     begin
-        hsync_d2 = hsync_d1;
-        hsync_d1 = hsync_i;
-        vsync_d2 = vsync_d1;
-        vsync_d1 = vsync_i;
-        active_video_d2 = active_video_d1;
-        active_video_d1 = active_video_i;
-        video_data_d1 = color;
+        hsync_d2 <= hsync_d1;
+        hsync_d1 <= hsync_i;
+        vsync_d2 <= vsync_d1;
+        vsync_d1 <= vsync_i;
+        active_video_d2 <= active_video_d1;
+        active_video_d1 <= active_video_i;
+        video_data_d1 <= color;
         if (hcnt < htr)
             hcnt <= hcnt + 1;
         else
