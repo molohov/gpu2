@@ -1,4 +1,4 @@
-module dvi_stimulate_tb (
+module hdmi_core_tb (
 	output hsync,
 	output vsync,
         output ve
@@ -12,12 +12,18 @@ initial clock = 0;
 
 always #10 clock = ~clock;
 
-dvi_stimulate dut (
+hdmi_core dut (
 	.clock (clock),
 	.reset (reset),
 	.start (start),
-	.hsync_out (hsync),
-	.vsync_out (vsync),
+        .hres (11'd1280),
+        .vres (10'd720),
+        .color (24'hffffff),
+        .red (),
+        .green (),
+        .blue (),
+	.hsync (hsync),
+	.vsync (vsync),
         .ve (ve)
 	);
 
