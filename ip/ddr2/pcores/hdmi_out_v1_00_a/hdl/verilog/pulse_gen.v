@@ -1,4 +1,4 @@
-// Assuming the inputs are read from user slave registers, generat pulses on a toggle, posedge, or negedge
+// Assuming the inputs are read from user slave registers, generate pulses on a toggle, posedge, or negedge
 
 module pulse_gen (
   clk,
