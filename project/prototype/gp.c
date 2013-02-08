@@ -10,6 +10,11 @@
 
 #define POLY_LIST_CHUNK_SIZE 16
 
+#ifndef SW
+// Hack to reduce code size by half by removing asserts (ignore warning)
+#define assert(x)
+#endif
+
 /* Struct definitions */
 
 // 2-d fixed point for rendering
