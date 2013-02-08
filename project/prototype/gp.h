@@ -1,7 +1,6 @@
 #include <math.h>
 
-#define GP_DISPLAY_TIMEOUT_IN_MS -1
-#define GP_BG_COLOR (CV_RGB(0x60, 0x00, 0xe0))
+#define GP_BG_COLOR (unsigned char [3]){0x60, 0x00, 0xe0}
 #define GP_XRES 1280
 #define GP_YRES 720
 #define GP_INFER_COORD NAN

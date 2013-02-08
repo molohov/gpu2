@@ -1,16 +1,14 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 #include <assert.h>
 
-#include <cv.h>
-#include <highgui.h>
-
 #include "gp.h"
+#include "display.h"
 
 #define POLY_LIST_CHUNK_SIZE 16
-#define EPSILON 0.00001f
 
 /* Struct definitions */
 
@@ -161,8 +159,15 @@ int vertex_2_cmp(const void *a, const void *b)
   return va.y - vb.y;
 }
 
+#ifndef MAX
+#define MAX(a,b) (a > b ? a : b)
+#endif
 
-void gpFillTriangle(gpPoly *poly, unsigned char *img)
+#ifndef MIN
+#define MIN(a,b) (a < b ? a : b)
+#endif
+
+void gpFillTriangle(gpPoly *poly, gpImg *img)
 {
   assert(poly);
   assert(poly->num_vertices == 3);
@@ -189,9 +194,7 @@ void gpFillTriangle(gpPoly *poly, unsigned char *img)
     for (int y = y_start; y < y_end; y++) {
       int y_coord = GP_YRES/2 - y; // flip y
       if (inTriangle(x_coord, y_coord, vertices)) {
-        img[3*(y*GP_XRES+x)] = poly->color.b;
-        img[3*(y*GP_XRES+x)+1] = poly->color.g;
-        img[3*(y*GP_XRES+x)+2] = poly->color.r;
+        gpSetImagePixel(img, x, y, poly->color.r, poly->color.g, poly->color.b);
       }
     }
   }
@@ -329,7 +332,7 @@ void gpClearTMatrixPolyList(gpPolyList *list)
   list->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
 }
 
-void gpFillPoly(gpPoly *poly, unsigned char *img)
+void gpFillPoly(gpPoly *poly, gpImg *img)
 {
   assert(poly);
 
@@ -353,20 +356,18 @@ void gpRenderPoly(gpPoly *poly)
 {
   assert(poly);
 
-  IplImage *img = cvCreateImage(cvSize(GP_XRES, GP_YRES), IPL_DEPTH_8U, 3);
-  cvSet(img, GP_BG_COLOR, NULL);
+  gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
+  gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
 
   // apply transformations
   gpApplyTMatrixToCoord(poly, &poly->trans);
 
   // fill polygon algorithm
-  gpFillPoly(poly, img->imageData);
+  gpFillPoly(poly, img);
 
-  // display image
-  cvNamedWindow("GP display", CV_WINDOW_AUTOSIZE);
+  gpDisplayImage(img);
 
-  cvShowImage("GP display", img);
-  cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
+  gpReleaseImage(&img);
 }
 
 // compare z-coordinate of polygon a and b in descending order
@@ -384,8 +385,8 @@ void gpRender(gpPolyList *list)
 {
   assert(list);
 
-  IplImage *img = cvCreateImage(cvSize(GP_XRES, GP_YRES), IPL_DEPTH_8U, 3);
-  cvSet(img, GP_BG_COLOR, NULL);
+  gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
+  gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
 
   // compute avg_z for each polygon
   for (int i = 0; i < list->num_polys; i++) {
@@ -408,12 +409,10 @@ void gpRender(gpPolyList *list)
 
   // fill polygon algorithm for each polygon
   for (int i = 0; i < list->num_polys; i++) {
-    gpFillPoly(list->polys[i], img->imageData);
+    gpFillPoly(list->polys[i], img);
   }
 
-  // display image
-  cvNamedWindow("GP display", CV_WINDOW_AUTOSIZE);
+  gpDisplayImage(img);
 
-  cvShowImage("GP display", img);
-  cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
+  gpReleaseImage(&img);
 }
