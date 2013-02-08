@@ -4,6 +4,7 @@ module hdmi_core_tb (
         output ve,
         output read_go,
         output read_line,
+        output read_chunk,
         output read_done
 );
 
@@ -30,6 +31,7 @@ hdmi_core dut (
         .ve (ve),
         .read_go(read_go),
         .read_next_line(read_line),
+        .read_next_chunk(read_chunk),
         .read_done(read_done)
 	);
 
