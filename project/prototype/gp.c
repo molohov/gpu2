@@ -128,7 +128,7 @@ void gpDeletePoly(gpPoly *poly)
   free(poly);
 }
 
-int sign(int x, int y, int ax, int ay, int bx, int by)
+int cross_product(int x, int y, int ax, int ay, int bx, int by)
 {
   return (x - bx) * (ay - by) - (ax - bx) * (y - by);
 }
@@ -142,9 +142,9 @@ bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
   int cx = vertices[2].x;
   int cy = vertices[2].y;
 
-  bool b1 = sign(x, y, ax, ay, bx, by) < 0;
-  bool b2 = sign(x, y, bx, by, cx, cy) < 0;
-  bool b3 = sign(x, y, cx, cy, ax, ay) < 0;
+  bool b1 = cross_product(x, y, ax, ay, bx, by) < 0;
+  bool b2 = cross_product(x, y, bx, by, cx, cy) < 0;
+  bool b3 = cross_product(x, y, cx, cy, ax, ay) < 0;
 
   return (b1 == b2) && (b2 == b3);
 }
