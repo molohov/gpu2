@@ -57,17 +57,19 @@ assign vsync = vsync_d2;
 wire pre_video_hsync;
 wire video_hsync;
 wire post_video_hsync;
+wire read_next_linez;
 
 assign pre_video_hsync = (hsync_i ^ ~polarity) && (vcnt == vbpr);
 assign video_hsync = (hsync_i ^ ~polarity) && (vcnt > vbpr) & (vcnt < vfpr);
 assign post_video_hsync = (hsync_i ^ ~polarity) && (vcnt == vfpr);
+assign read_next_line = ((((hcnt - hbpr - 2) & 32'h3f) == 0)& ve) | (hcnt == 1542);
 
 pulse_gen #(3) pulse_gen_inst(
   .clk(clock),
   .sig_I({pre_video_hsync, video_hsync, post_video_hsync}),
   .toggle_O(),
   .posedge_O(),
-  .negedge_O({read_go, read_next_line, read_done})
+  .negedge_O({read_go, read_next_linez, read_done})
 );
 
 always @ (*)

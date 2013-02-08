@@ -194,6 +194,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire                                      vsync_fifo;
   wire                                      half_full_fifo;
   wire                                      fifo_write_go;
+  wire					    [31:0] ddr_addr_to_read;
 
   // Nets for user logic slave model s/w accessible register example
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg0;
@@ -339,9 +340,11 @@ fill_fifo_fsm fill_fifo(
 			.LINE_STRIDE(slv_reg0[13:4]),
 			.NUM_PIXELS_PER_LINE(slv_reg0[23:14]),
 			.NUM_BYTES_PER_PIXEL(slv_reg0[27:24]),
-			.ddr_addr_to_read( mst_ip2bus_addr /*{mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]}*/),
+			.ddr_addr_to_read(ddr_addr_to_read /*{mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]}*/),
 			.go_fill_fifo(fifo_write_go /*mst_reg[0][0]*/) //control bit that will drive master burst read request		
 		      	);		
+			
+
 
 //this module stimulates signals because fill_fifo_fsm expects hsync, vsync, and half_full to last only one clk cycle
 pulse_gen #(3) stimulate_signals4_fifo_fsm(
@@ -358,16 +361,16 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     .clock(PXL_CLK_X1),
     .hres(11'd1280),
     .vres(10'd720),
-    .color(slv_reg1[23:0]),
+    .color(ip2bus_mstwr_d /*slv_reg1[23:0]*/),
     .red(red),
     .blue(blue),
     .green(green),
     .hsync(hsync),
     .vsync(vsync),
-    .ve(ve),
     .read_go(),
     .read_next_line(),
-    .read_done()
+    .read_done(),
+    .ve(ve)
     );
 
 
@@ -452,7 +455,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
       case ( slv_reg_read_sel )
         3'b100 : slv_ip2bus_data <= bus2ip_mstrd_d;
         3'b010 : slv_ip2bus_data <= ip2bus_mstwr_d;
-        3'b001 : slv_ip2bus_data <= {hsync, vsync};
+        3'b001 : slv_ip2bus_data <= mst_reg[1][0]; //{hsync, vsync};
         default : slv_ip2bus_data <= 0;
       endcase
 
@@ -531,11 +534,11 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
   assign mst_read_ack      = mst_reg_read_req;
 
   // rip control bits from master model registers
-  assign mst_cntl_rd_req   = mst_reg[0][0];
+  assign mst_cntl_rd_req   = fifo_write_go || mst_reg[0][0];
   assign mst_cntl_wr_req   = mst_reg[0][1];
   assign mst_cntl_bus_lock = mst_reg[0][2];
   assign mst_cntl_burst    = mst_reg[0][3];
-  //assign mst_ip2bus_addr   = {mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]};
+  assign mst_ip2bus_addr   = ddr_addr_to_read[31:0]; //{mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]};
   assign mst_ip2bus_be     = {mst_reg[9], mst_reg[8]};
   assign mst_xfer_reg_len  = {mst_reg[14][3 : 0], mst_reg[13], mst_reg[12]};// changed to 20 bits 
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
@@ -548,6 +551,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     end // MASTER_REG_BYTE_WR_EN
   // implement master model registers
   // The master registers are written to initialize master transfer.
+  
   always @ ( posedge Bus2IP_Clk)
     begin
     if (Bus2IP_Resetn == 1'b0 )
@@ -590,6 +594,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
              end
       end
     end // MASTER_REG_WRITE_PROC
+    
   // implement master model write only 'go' port to trigger start of master rd/wr transaction
   always @ ( posedge Bus2IP_Clk)
     begin
@@ -1013,7 +1018,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
      .Reset(bus2ip_Reset),
      .FIFO_Write(mst_fifo_valid_write_xfer),
      .Data_In(bus2ip_mstrd_d),
-     .FIFO_Read(mst_fifo_valid_read_xfer),
+     .FIFO_Read(ve/*mst_fifo_valid_read_xfer*/),
      .Data_Out(ip2bus_mstwr_d),
      .FIFO_Full(),
      .FIFO_Empty(),
