@@ -1,13 +1,14 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
-add wave -noupdate /tb/hsync
-add wave -noupdate /tb/vsync
-add wave -noupdate /tb/clock
-add wave -noupdate /tb/reset
-add wave -noupdate /tb/start
-add wave -noupdate /tb/dut/hcounter
-add wave -noupdate /tb/dut/state
-add wave -noupdate /tb/dut/vcounter
+add wave -noupdate /dvi_stimulate_tb/hsync
+add wave -noupdate /dvi_stimulate_tb/vsync
+add wave -noupdate /dvi_stimulate_tb/ve
+add wave -noupdate /dvi_stimulate_tb/clock
+add wave -noupdate /dvi_stimulate_tb/reset
+add wave -noupdate /dvi_stimulate_tb/start
+add wave -noupdate /dvi_stimulate_tb/dut/hcounter
+add wave -noupdate /dvi_stimulate_tb/dut/state
+add wave -noupdate /dvi_stimulate_tb/dut/vcounter
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {53 ps} 0}
 quietly wave cursor active 1

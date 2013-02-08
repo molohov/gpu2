@@ -1,4 +1,4 @@
-module tb (
+module dvi_stimulate_tb (
 	output hsync,
 	output vsync,
         output ve
