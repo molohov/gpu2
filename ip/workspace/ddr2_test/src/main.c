@@ -34,7 +34,7 @@ int main() {
 	// fill up off-chip memory with known values
 	int i;
 	for (i = 0; i < 1024; i++) {
-		ddr_addr[i] = 0xdead0000 | i;
+		ddr_addr[i] = 0xdead0000 | (i * 4);
 	}
 
 	// set register values
