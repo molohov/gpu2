@@ -187,6 +187,10 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire                                      hsync;
   wire                                      vsync;
   wire                                      ve;
+  wire                                      read_go;
+  wire                                      read_next_line;
+  wire                                      read_next_chunk;
+  wire                                      read_done;
   wire					    [7:0] red;
   wire					    [7:0] green;
   wire					    [7:0] blue;
@@ -367,10 +371,10 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     .green(green),
     .hsync(hsync),
     .vsync(vsync),
-    .read_go(),
-    .read_next_line(),
-    .read_next_chunk(),
-    .read_done(),
+    .read_go(read_go),
+    .read_next_line(read_next_line),
+    .read_next_chunk(read_next_chunk),
+    .read_done(read_done),
     .ve(ve)
     );
 
