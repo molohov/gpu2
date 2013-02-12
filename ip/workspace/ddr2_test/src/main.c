@@ -16,7 +16,6 @@
 #define TEST_VECTOR 0x12345678 /* random word */
 
 #define TEST_FIFO
-#define TEST_HDMI
 
 int main() {
 	volatile u32 *ddr_addr = (volatile u32 *) XPAR_S6DDR_0_S0_AXI_BASEADDR;
@@ -32,9 +31,11 @@ int main() {
 	volatile int *hdmi_offset_addr = hdmi_addr + 0x40;
 
 	// fill up off-chip memory with known values
-	int i;
-	for (i = 0; i < 1024; i++) {
-		ddr_addr[i] = 0xdead0000 | (i * 4);
+	int i, j;
+	for (j = 0; j < 720; j++) {
+		for (i = 0; i < 1280; i++) {
+			ddr_addr[j * 1280 + i] = j*1280 + i;
+		}
 	}
 
 	// set register values
@@ -55,29 +56,17 @@ int main() {
 	hdmi_offset_addr[0] = 0x1 | 0x8; // read and burst
 	hdmi_addr[1] = ddr_addr; // hdmi_addr[1] corresponds to slv_reg1
 	hdmi_offset_addr[2] = 0x0000ffff; // byte enable
-	hdmi_offset_addr[3] = (64 * 4); // set transfer length of 64 32-bit words
+	hdmi_offset_addr[3] = (1280 * 4); // set transfer length of one line of 32-bit words
 
 	// reset high
 
-	hdmi_addr[0] = 1 << 2; // slv_reg0[2] = 1'b1
+	hdmi_addr[0] = 1 << 2 | (1 << 0); // slv_reg0[2] = 1'b1
 
-	int write_val = (0 << 2) /* restart = 0 */| (1 << 3)
-			/* start = 1 */| (0x4000 << 4) /* set line_stride */| (4 << 14)
-			/* 4 pixels per line */| (4 << 24) /*4 bytes per pixel */;
+	int write_val = (1 << 1) | (0 << 2) /* restart = 0 */| (1 << 3)
+	/* start = 1 */| (1280 << 4) /* set line_stride */| (64 << 14)
+	/* pixels per line */| (4 << 24) /* 4 bytes per pixel */;
 
 	hdmi_addr[0] = write_val; // start FSM, it should now trigger the first read of 64 pixels.
-
-	// may need a delay for the FSM to trigger go signal
-	printf("Started FSM, now waiting to be done! \n\r");
-
-	// poll on done signal
-	while ((hdmi_offset_addr[0] & 0x100) == 0) { //done bit is bit 9--> ie: mst_reg[1][0]
-	}
-	hdmi_offset_addr[0] = hdmi_offset_addr[0] & ~0x100; //clear done bit
-
-	printf("Last read: %x FIFO head: %x\n\r", hdmi_addr[0], hdmi_addr[1]);
-
-	// We expect 64 bytes to  be read, so it should output 0xdead003f 0xdead0000
 #endif
 
 #ifdef TEST_DDR
