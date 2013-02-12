@@ -175,7 +175,7 @@ entity hdmi_out is
     C_M_AXI_DATA_WIDTH             : integer              := 32;
     C_MAX_BURST_LEN                : integer              := 16;
     C_NATIVE_DATA_WIDTH            : integer              := 32;
-    C_LENGTH_WIDTH                 : integer              := 12;
+    C_LENGTH_WIDTH                 : integer              := 13;
     C_ADDR_PIPE_DEPTH              : integer              := 1
     -- DO NOT EDIT ABOVE THIS LINE ---------------------
   );
@@ -409,7 +409,7 @@ architecture IMP of hdmi_out is
       -- DO NOT EDIT BELOW THIS LINE ---------------------
       -- Bus protocol parameters, do not add to or delete
       C_MST_NATIVE_DATA_WIDTH        : integer              := 32;
-      C_LENGTH_WIDTH                 : integer              := 12;
+      C_LENGTH_WIDTH                 : integer              := 13;
       C_MST_AWIDTH                   : integer              := 32;
       C_NUM_REG                      : integer              := 4;
       C_SLV_DWIDTH                   : integer              := 32
