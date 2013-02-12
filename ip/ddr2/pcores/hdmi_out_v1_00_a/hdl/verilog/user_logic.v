@@ -337,9 +337,9 @@ fill_fifo_fsm fill_fifo(
 			.Bus2IP_Clk(Bus2IP_Clk),
 			.reset_fill_fifo(slv_reg0[2]),	
 			.start_fill_fifo(slv_reg0[3]),
-			.hsync(hsync_fifo),			//obtain hsync and vsync from hdmi_core
-			.vsync(vsync_fifo),
-			.half_full(half_full_fifo),
+			.hsync(read_next_line),			//obtain hsync and vsync from hdmi_core
+			.vsync(read_done),
+			.half_full(1'b0),
 			.FRAME_BASE_ADDR(slv_reg1[31:0]),		//obtain these from software (slv_reg in user_logic)
 			.LINE_STRIDE(slv_reg0[13:4]),
 			.NUM_PIXELS_PER_LINE(slv_reg0[23:14]),
@@ -1017,7 +1017,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
   // FIFO depth is 128 words. User can modify the depth based on their requirement.
    srl_fifo_f #(
      .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
-     .C_DEPTH(128))
+     .C_DEPTH(256))
    DATA_CAPTURE_FIFO_I (
      .Clk(Bus2IP_Clk),
      .Reset(bus2ip_Reset),
