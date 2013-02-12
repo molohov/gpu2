@@ -336,7 +336,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 fill_fifo_fsm fill_fifo(
 			.Bus2IP_Clk(Bus2IP_Clk),
 			.reset_fill_fifo(slv_reg0[2]),	
-			.start_fill_fifo(slv_reg0[3]),
+			.start_fill_fifo(slv_reg0[3] | read_go),
 			.hsync(read_next_line),			//obtain hsync and vsync from hdmi_core
 			.vsync(read_done),
 			.half_full(1'b0),
@@ -460,7 +460,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
       case ( slv_reg_read_sel )
         3'b100 : slv_ip2bus_data <= bus2ip_mstrd_d;
         3'b010 : slv_ip2bus_data <= ip2bus_mstwr_d;
-        3'b001 : slv_ip2bus_data <= mst_reg[1][0]; //{hsync, vsync};
+        3'b001 : slv_ip2bus_data <= ddr_addr_to_read;
         default : slv_ip2bus_data <= 0;
       endcase
 
