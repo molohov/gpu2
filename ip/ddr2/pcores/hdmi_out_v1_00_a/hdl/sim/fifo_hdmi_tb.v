@@ -76,8 +76,6 @@ DATA_CAPTURE_FIFO_I (
     .Addr()); // DATA_CAPTURE_FIFO_I
 ); */
 
-  assign fifo_write_go = 1'b0;
-
   initial clk = 0;
 
   always #10 clk = ~clk;
