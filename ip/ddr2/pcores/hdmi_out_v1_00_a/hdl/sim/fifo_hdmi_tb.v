@@ -20,12 +20,11 @@ module fifo_hdmi_tb (
   wire read_next_line;
   wire read_next_chunk;
   wire read_done;
+  wire [7:0] red;
+  wire [7:0] green;
+  wire [7:0] blue;
 
- wire [31:0] fifo_out_data; //output data of fifo
- 
- reg [31:0] fifo_in_data;  //data to write to fifo
- reg mst_fifo_valid_write_xfer; //tell fifo to start writing data 
- reg bus2ip_Reset; //reset for xilinx fifo
+  reg [31:0] fifo_out_data = 32'h80808000; //output data of fifo
 
 fill_fifo_fsm fill_fifo(
             .Bus2IP_Clk(clk),
@@ -48,9 +47,9 @@ hdmi_core hdmi_core_inst (
     .hres(11'd1280),
     .vres(10'd720),
     .color(fifo_out_data),
-    .red(),
-    .blue(),
-    .green(),
+    .red(red),
+    .green(green),
+    .blue(blue),
     .hsync(hsync),
     .vsync(vsync),
     .read_go(read_go),
@@ -59,22 +58,13 @@ hdmi_core hdmi_core_inst (
     .read_done(read_done),
     .ve(ve)
 );
- 
-  // FIFO depth is 256 words. User can modify the depth based on their requirement.
-/*srl_fifo_f #(
-    .C_DWIDTH(32),
-    .C_DEPTH(256))
-DATA_CAPTURE_FIFO_I (
-    .Clk(clk),
-    .Reset(bus2ip_Reset),
-    .FIFO_Write(mst_fifo_valid_write_xfer | fifo_write_go), //note: fifo_write_go is not used in this way in user_logic
-    .Data_In(fifo_in_data),
-    .FIFO_Read(ve),
-    .Data_Out(fifo_out_data),
-    .FIFO_Full(),
-    .FIFO_Empty(),
-    .Addr()); // DATA_CAPTURE_FIFO_I
-); */
+
+// simulate a FIFO, with ve as the read signal
+always @ (posedge clk)
+begin
+  if (ve)
+    fifo_out_data = fifo_out_data + 32'h100;
+end
 
   initial clk = 0;
 
@@ -87,36 +77,11 @@ DATA_CAPTURE_FIFO_I (
     start_fifo = 0;
     reset_hdmi = 1;
     start_hdmi = 0;
-    mst_fifo_valid_write_xfer = 1; //give fifo head start to fill up data
-    fifo_in_data = 32'h000000ff;
-    bus2ip_Reset = 0;
     @ (negedge clk) ;
     @ (negedge clk)
     reset_fifo = 0;
     reset_hdmi = 0;
-    mst_fifo_valid_write_xfer = 0; //does this signal need to stay high? probably not (we can test this)
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk)
-    fifo_in_data = 32'h0000ff00;    //new data ready
     start_hdmi = 1;
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk)
-    fifo_in_data = 32'h00ff0000;    //new data available to write to fifo
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk) ;
-    @ (negedge clk)
-    fifo_in_data = 32'h000000aa;
   end
 
 endmodule
