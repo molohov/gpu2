@@ -22,7 +22,7 @@ module hdmi_core (
     input reset,
     input [10:0] hres,
     input [9:0] vres,
-    input [23:0] color,
+    input [31:0] color,
     output [7:0] red,
     output [7:0] green,
     output [7:0] blue,
@@ -40,17 +40,17 @@ reg polarity;
 reg [15:0] hcnt, vcnt;
 wire hblank_i, vblank_i, active_video_i, hsync_i, vsync_i;
 reg active_video_d2, active_video_d1, hsync_d2, hsync_d1, vsync_d2, vsync_d1;
-reg [23:0] video_data_d1 ;
-wire [23:0] video_data_i;
+reg [31:0] video_data_d1 ;
+wire [31:0] video_data_i;
 
 assign hsync_i = (hcnt < hsr) ? polarity : ~polarity;
 assign vsync_i = (vcnt < vsr) ? polarity : ~polarity;
 assign hblank_i = ((hcnt >= hbpr) && (hcnt < hfpr)) ? 1 : 0;
 assign vblank_i = ((vcnt >= vbpr) && (vcnt < vfpr)) ? 1 : 0;
 assign active_video_i = hblank_i && vblank_i;
-assign red = video_data_d1[7:0];
-assign green = video_data_d1[15:8];
-assign blue = video_data_d1[23:16];
+assign red = video_data_d1[31:24];
+assign green = video_data_d1[23:16];
+assign blue = video_data_d1[15:8];
 assign ve = active_video_d2;
 assign hsync = hsync_d2;
 assign vsync = vsync_d2;
