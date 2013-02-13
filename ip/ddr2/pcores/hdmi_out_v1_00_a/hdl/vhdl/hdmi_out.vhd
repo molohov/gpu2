@@ -173,7 +173,7 @@ entity hdmi_out is
     C_SLV_DWIDTH                   : integer              := 32;
     C_M_AXI_ADDR_WIDTH             : integer              := 32;
     C_M_AXI_DATA_WIDTH             : integer              := 32;
-    C_MAX_BURST_LEN                : integer              := 16;
+    C_MAX_BURST_LEN                : integer              := 256;
     C_NATIVE_DATA_WIDTH            : integer              := 32;
     C_LENGTH_WIDTH                 : integer              := 13;
     C_ADDR_PIPE_DEPTH              : integer              := 1
