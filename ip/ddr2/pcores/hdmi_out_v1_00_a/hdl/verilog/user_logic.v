@@ -337,9 +337,9 @@ fill_fifo_fsm fill_fifo(
 			.Bus2IP_Clk(Bus2IP_Clk),
 			.reset_fill_fifo(slv_reg0[2]),	
 			.start_fill_fifo(slv_reg0[3] | read_go),
-			.hsync(read_next_line),			//obtain hsync and vsync from hdmi_core
-			.vsync(read_done),
-			.half_full(1'b0),
+			.hsync(hsync_fifo | read_next_line),			//obtain hsync and vsync from hdmi_core
+			.vsync(vsync_fifo | read_done),
+			.half_full(half_full_fifo),
 			.FRAME_BASE_ADDR(slv_reg1[31:0]),		//obtain these from software (slv_reg in user_logic)
 			.LINE_STRIDE(slv_reg0[13:4]),
 			.NUM_PIXELS_PER_LINE(slv_reg0[23:14]),

@@ -24,12 +24,24 @@ module fill_fifo_fsm( input Bus2IP_Clk,
  parameter      HALF_FIFO = 32'h100;
  
  //signals
+ reg            start_fill_fifo_reg;
+ reg            hsync_reg;
+ reg            vsync_reg;
+ reg            half_full_reg;
+
  reg		[2:0] fill_fifo_fsm_state;
  reg 		[2:0] fill_fifo_fsm_nextstate;
  reg		[31:0] addr_inc;
  reg            go_fill_fifo_next;
  ///////////////////////////////
 
+  always @ (posedge Bus2IP_Clk)
+	begin
+		start_fill_fifo_reg <= start_fill_fifo;
+		hsync_reg <= hsync;
+		vsync_reg <= vsync;
+		half_full_reg <= half_full;
+	end
  
   //combinational logic
   always @ (posedge Bus2IP_Clk)
@@ -60,14 +72,14 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 	begin
 		case (fill_fifo_fsm_state)
 			RESET_fill_fifo:
-											fill_fifo_fsm_nextstate = (start_fill_fifo) ? BEGIN_fill_fifo : RESET_fill_fifo;
+											fill_fifo_fsm_nextstate = (start_fill_fifo_reg) ? BEGIN_fill_fifo : RESET_fill_fifo;
 			BEGIN_fill_fifo:
 											fill_fifo_fsm_nextstate = IDLE_fill_fifo;
 			IDLE_fill_fifo:
 				begin
-					if (vsync) 				      fill_fifo_fsm_nextstate = RESET_fill_fifo; 		//done frame, go back to reset state
-					else if (hsync) 		   fill_fifo_fsm_nextstate = DONE_LINE_fill_fifo; 	
-					else if (half_full)		fill_fifo_fsm_nextstate = DONE_HALF_fill_fifo;
+					if (vsync_reg) 				      fill_fifo_fsm_nextstate = RESET_fill_fifo; 		//done frame, go back to reset state
+					else if (hsync_reg) 		   fill_fifo_fsm_nextstate = DONE_LINE_fill_fifo; 	
+					else if (half_full_reg)		fill_fifo_fsm_nextstate = DONE_HALF_fill_fifo;
 					else					           fill_fifo_fsm_nextstate = IDLE_fill_fifo;
 				end
 			DONE_HALF_fill_fifo:
