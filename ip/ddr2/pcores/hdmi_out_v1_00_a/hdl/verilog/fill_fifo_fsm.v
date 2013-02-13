@@ -86,7 +86,7 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 			DONE_LINE_fill_fifo:
 											fill_fifo_fsm_nextstate = IDLE_fill_fifo;
 			default:
-											fill_fifo_fsm_nextstate = 3'b111; //error, should not go to default
+											fill_fifo_fsm_nextstate = RESET_fill_fifo; //error, should not go to default
 		endcase
 	end
 	
