@@ -326,8 +326,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 //slv_reg0[2] = restart for fifo fsm
 //slv_reg0[3] = start for fifo fsm
 //slv_reg1 = FRAME_BASE_ADDR
-//slv_reg0[13:4] is LINE_STRIDE (10 bits)
-//slv_reg0[23:14] is PIXELS_PER_LINE (10 bits)
+//slv_reg0[19:4] is LINE_STRIDE (16 bits)
 //slv_reg0[27:24] is num bytes per pixel (4 bits)
 //slv_reg0[28] is fill_half_fifo_I when toggled
 //slv_reg0[29] is hsync_I when toggled
@@ -341,8 +340,7 @@ fill_fifo_fsm fill_fifo(
 			.vsync(vsync_fifo | read_done),
 			.half_full(half_full_fifo),
 			.FRAME_BASE_ADDR(slv_reg1[31:0]),		//obtain these from software (slv_reg in user_logic)
-			.LINE_STRIDE(slv_reg0[13:4]),
-			.NUM_PIXELS_PER_LINE(slv_reg0[23:14]),
+			.LINE_STRIDE(slv_reg0[19:4]),
 			.NUM_BYTES_PER_PIXEL(slv_reg0[27:24]),
 			.ddr_addr_to_read(ddr_addr_to_read /*{mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]}*/),
 			.go_fill_fifo(fifo_write_go /*mst_reg[0][0]*/) //control bit that will drive master burst read request		

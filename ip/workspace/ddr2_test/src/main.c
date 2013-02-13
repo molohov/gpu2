@@ -64,9 +64,7 @@ int main() {
 	// reset high
 	hdmi_addr[0] = 1 << 2 | (1 << 0);
 
-	write_val = (0 << 2) /* restart */| (1 << 3)
-	/* start */| (1280 << 4) /* set line_stride */| (64 << 14)
-	/* pixels per line */| (4 << 24) /* 4 bytes per pixel */;
+	write_val = (0 << 2) /* restart */| (1 << 3) /* start */| (1280 << 4) /* set line_stride */| (4 << 24) /* 4 bytes per pixel */;
 
 	hdmi_addr[0] = write_val; // start FSM, it should now trigger the first read of 64 pixels.
 

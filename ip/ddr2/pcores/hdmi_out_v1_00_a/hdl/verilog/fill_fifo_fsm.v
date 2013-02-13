@@ -6,7 +6,6 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 					  input half_full,
 					  input [31:0] FRAME_BASE_ADDR,			//obtain these from software (slv_reg in user_logic)
 					  input [31:0] LINE_STRIDE,
-					  input [31:0] NUM_PIXELS_PER_LINE,
 					  input	[31:0] NUM_BYTES_PER_PIXEL,
 					  output reg [31:0] ddr_addr_to_read,
 					  output reg 		go_fill_fifo);		//use to control FIFO write_xfer signal in user_logic
@@ -117,7 +116,7 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 				end
 			DONE_LINE_fill_fifo:
 				begin
-				addr_inc		 	= NUM_BYTES_PER_PIXEL*(LINE_STRIDE - NUM_PIXELS_PER_LINE) + HALF_FIFO; //(stride in pixels - #pixels per line)(#bytes/pixel) + half fifo --> will get info from slv_reg (Software)
+				addr_inc		 	= NUM_BYTES_PER_PIXEL*(LINE_STRIDE); //(stride in pixels)(#bytes/pixel)
 				go_fill_fifo_next 		= 1'b1;
 				end
 			default:
