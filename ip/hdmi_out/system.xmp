@@ -37,5 +37,5 @@ DCacheAddr: MCB_DDR2,C_S3_AXI_BASEADDR
 DCacheAddr: MCB_DDR2,C_S4_AXI_BASEADDR
 DCacheAddr: MCB_DDR2,C_S5_AXI_BASEADDR
 Processor: microblaze_0
-ElfImp: ../workspace/ddr2_test/Debug/ddr2_test.elf
-ElfSim: ../workspace/ddr2_test/Debug/ddr2_test.elf
+ElfImp: ../workspace/hdmi_out_test/Debug/ddr2_test.elf
+ElfSim: ../workspace/hdmi_out_test/Debug/ddr2_test.elf
