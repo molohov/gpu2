@@ -59,7 +59,7 @@ int main() {
 	hdmi_offset_addr[0] = 0x1 | 0x8; // read and burst
 	hdmi_addr[1] = ddr_addr; // hdmi_addr[1] corresponds to slv_reg1
 	hdmi_offset_addr[2] = 0x0000ffff; // byte enable
-	hdmi_offset_addr[3] = (1280 * 4); // set transfer length of one line of 32-bit words
+	hdmi_offset_addr[3] = (640 * 4); // set transfer length of one line of 32-bit words
 
 	// reset high
 	hdmi_addr[0] = 1 << 2 | (1 << 0);
