@@ -23,7 +23,7 @@ int main() {
 
 	printf(
 			"32-bit test: %s\n\r",
-			(XST_SUCCESS == XUtil_MemoryTest32(ddr_addr, NUM_TEST_WORDS,
+			(XST_SUCCESS == XUtil_MemoryTest32((u32 *)ddr_addr, NUM_TEST_WORDS,
 					TEST_VECTOR, XUT_ALLMEMTESTS)) ? "passed" : "failed");
 
 	volatile int *hdmi_addr = (int *) XPAR_HDMI_OUT_0_BASEADDR;
@@ -57,7 +57,7 @@ int main() {
 	//			hdmi_offset_set maps to mst_reg in hardware!!
 
 	hdmi_offset_addr[0] = 0x1 | 0x8; // read and burst
-	hdmi_addr[1] = ddr_addr; // hdmi_addr[1] corresponds to slv_reg1
+	hdmi_addr[1] = (int)ddr_addr; // hdmi_addr[1] corresponds to slv_reg1
 	hdmi_offset_addr[2] = 0x0000ffff; // byte enable
 	hdmi_offset_addr[3] = (1280 * 4); // set transfer length of one line of 32-bit words
 
@@ -68,7 +68,7 @@ int main() {
 
 	hdmi_addr[0] = write_val; // start FSM, it should now trigger the first read of 64 pixels.
 
-	while (!hdmi_offset_addr[0] & 0x100)
+	while (!(hdmi_offset_addr[0] & 0x100))
 		; // poll done signal
 	hdmi_offset_addr[0] &= ~0x100; // reset done
 
@@ -79,7 +79,7 @@ int main() {
 
 	hdmi_addr[0] = write_val; // start FSM, it should now trigger the first read of 64 pixels.
 
-	while (!hdmi_offset_addr[0] & 0x100)
+	while (!(hdmi_offset_addr[0] & 0x100))
 		; // poll done signal
 	hdmi_offset_addr[0] &= ~0x100; // reset done
 
@@ -90,7 +90,7 @@ int main() {
 
 	hdmi_addr[0] = write_val; // start FSM, it should now trigger the first read of 64 pixels.
 
-	while (!hdmi_offset_addr[0] & 0x100)
+	while (!(hdmi_offset_addr[0] & 0x100))
 		; // poll done signal
 	hdmi_offset_addr[0] &= ~0x100; // reset done
 
@@ -116,7 +116,7 @@ int main() {
 	//			hdmi_offset_set maps to mst_reg in hardware!!
 
 	hdmi_offset_addr[0] = 0x1 | 0x8; // read and burst
-	hdmi_addr[1] = ddr_addr; // hdmi_addr[1] corresponds to slv_reg1
+	hdmi_addr[1] = (int)ddr_addr; // hdmi_addr[1] corresponds to slv_reg1
 	hdmi_offset_addr[2] = 0x0000ffff; // byte enable
 	hdmi_offset_addr[3] = (1280 * 4); // set transfer length of one line of 32-bit words
 
