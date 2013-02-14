@@ -21,7 +21,6 @@ module hdmi_core (
     input start,
     input reset,
     input [10:0] hres,
-    input [9:0] vres,
     input [31:0] color,
     output [7:0] red,
     output [7:0] green,

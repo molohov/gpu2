@@ -46,7 +46,6 @@ hdmi_core hdmi_core_inst (
     .start(start_hdmi),
     .clock(clk), //note: assuming same clock for bus2ip and PXL_CLK_X1!!! is that a valid assumption...?
     .hres(11'd1280),
-    .vres(10'd720),
     .color(fifo_out_data),
     .red(red),
     .green(green),

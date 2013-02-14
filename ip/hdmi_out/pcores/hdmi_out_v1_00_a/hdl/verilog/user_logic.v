@@ -110,6 +110,8 @@ module user_logic
 
 // -- ADD USER PARAMETERS BELOW THIS LINE ------------
 // --USER parameters added here 
+parameter HDMI_HRES                      = 1280;
+parameter HDMI_BYTES_PER_PIXEL           = 4;
 // -- ADD USER PARAMETERS ABOVE THIS LINE ------------
 
 // -- DO NOT EDIT BELOW THIS LINE --------------------
@@ -363,7 +365,6 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     .start(slv_reg0[1]),
     .clock(PXL_CLK_X1),
     .hres(11'd1280),
-    .vres(10'd720),
     .color(ip2bus_mstwr_d /*slv_reg1[23:0]*/),
     .red(red),
     .green(green),
