@@ -21,7 +21,6 @@ hdmi_core dut (
 	.reset (reset),
 	.start (start),
         .hres (11'd1280),
-        .vres (10'd720),
         .color (32'hffffff00),
         .red (),
         .green (),

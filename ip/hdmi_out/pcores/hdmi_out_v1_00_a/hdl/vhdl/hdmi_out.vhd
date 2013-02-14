@@ -155,6 +155,8 @@ entity hdmi_out is
   (
     -- ADD USER GENERICS BELOW THIS LINE ---------------
     --USER generics added here
+    HDMI_HRES                      : integer              := 1280;
+    HDMI_BYTES_PER_PIXEL           : integer              := 4;
     -- ADD USER GENERICS ABOVE THIS LINE ---------------
 
     -- DO NOT EDIT BELOW THIS LINE ---------------------
@@ -404,6 +406,8 @@ architecture IMP of hdmi_out is
     (
       -- ADD USER GENERICS BELOW THIS LINE ---------------
       --USER generics added here
+      HDMI_HRES                      : integer              := 1280;
+      HDMI_BYTES_PER_PIXEL           : integer              := 4;
       -- ADD USER GENERICS ABOVE THIS LINE ---------------
 
       -- DO NOT EDIT BELOW THIS LINE ---------------------
