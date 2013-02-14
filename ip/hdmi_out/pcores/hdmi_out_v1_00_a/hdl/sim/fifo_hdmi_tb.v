@@ -16,6 +16,7 @@ module fifo_hdmi_tb (
   wire hsync;
   wire vsync;
   wire ve;
+  wire read_fifo;
   wire read_go;
   wire read_next_line;
   wire read_next_chunk;
@@ -52,6 +53,7 @@ hdmi_core hdmi_core_inst (
     .blue(blue),
     .hsync(hsync),
     .vsync(vsync),
+    .read_fifo(read_fifo),
     .read_go(read_go),
     .read_next_line(read_next_line),
     .read_next_chunk(read_next_chunk),
@@ -62,7 +64,7 @@ hdmi_core hdmi_core_inst (
 // simulate a FIFO, with ve as the read signal
 always @ (posedge clk)
 begin
-  if (ve)
+  if (read_fifo)
     fifo_out_data = fifo_out_data + 32'h100;
 end
 

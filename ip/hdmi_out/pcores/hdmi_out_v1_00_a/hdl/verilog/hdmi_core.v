@@ -29,6 +29,7 @@ module hdmi_core (
     output hsync,
     output vsync,
     output ve,
+    output read_fifo,
     output read_go,
     output read_next_line,
     output read_next_chunk,
@@ -50,6 +51,7 @@ assign active_video_i = hblank_i && vblank_i;
 assign red = video_data_d1[31:24];
 assign green = video_data_d1[23:16];
 assign blue = video_data_d1[15:8];
+assign read_fifo = active_video_d1;
 assign ve = active_video_d2;
 assign hsync = hsync_d2;
 assign vsync = vsync_d2;

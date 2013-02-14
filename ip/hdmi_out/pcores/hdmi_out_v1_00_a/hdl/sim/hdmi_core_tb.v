@@ -29,6 +29,7 @@ hdmi_core dut (
 	.hsync (hsync),
 	.vsync (vsync),
         .ve (ve),
+        .read_fifo(),
         .read_go(read_go),
         .read_next_line(read_line),
         .read_next_chunk(read_chunk),

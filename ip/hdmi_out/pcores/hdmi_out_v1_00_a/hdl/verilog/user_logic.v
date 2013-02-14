@@ -187,6 +187,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire                                      hsync;
   wire                                      vsync;
   wire                                      ve;
+  wire                                      read_fifo;
   wire                                      read_go;
   wire                                      read_next_line;
   wire                                      read_next_chunk;
@@ -369,6 +370,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     .blue(blue),
     .hsync(hsync),
     .vsync(vsync),
+    .read_fifo(read_fifo),
     .read_go(read_go),
     .read_next_line(read_next_line),
     .read_next_chunk(read_next_chunk),
@@ -1021,7 +1023,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
      .Reset(bus2ip_Reset),
      .FIFO_Write(mst_fifo_valid_write_xfer),
      .Data_In(bus2ip_mstrd_d),
-     .FIFO_Read(ve/*mst_fifo_valid_read_xfer*/),
+     .FIFO_Read(read_fifo),
      .Data_Out(ip2bus_mstwr_d),
      .FIFO_Full(),
      .FIFO_Empty(),
