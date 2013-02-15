@@ -37,5 +37,5 @@ DCacheAddr: MCB_DDR2,C_S3_AXI_BASEADDR
 DCacheAddr: MCB_DDR2,C_S4_AXI_BASEADDR
 DCacheAddr: MCB_DDR2,C_S5_AXI_BASEADDR
 Processor: microblaze_0
-ElfImp: ../workspace/hdmi_out_test/Debug/hdmi_out_test.elf
-ElfSim: ../workspace/hdmi_out_test/Debug/hdmi_out_test.elf
+ElfImp: 
+ElfSim: 

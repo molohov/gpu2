@@ -68,8 +68,8 @@ pulse_gen #(3) pulse_gen_inst(
   .clk(clock),
   .sig_I({pre_video_hsync, video_hsync, post_video_hsync}),
   .toggle_O(),
-  .posedge_O(),
-  .negedge_O({read_go, read_next_line, read_done})
+  .posedge_O({read_go, read_next_line, read_done}),
+  .negedge_O()
 );
 
 always @ (*)

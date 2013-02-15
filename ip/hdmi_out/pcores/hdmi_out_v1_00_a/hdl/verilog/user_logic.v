@@ -344,7 +344,7 @@ fill_fifo_fsm fill_fifo(
 			.half_full(half_full_fifo),
 			.FRAME_BASE_ADDR(slv_reg1[31:0]),		//obtain these from software (slv_reg in user_logic)
 			.LINE_STRIDE(slv_reg0[19:4]),
-			.NUM_BYTES_PER_PIXEL(slv_reg0[27:24]),
+			.NUM_BYTES_PER_PIXEL(HDMI_BYTES_PER_PIXEL /*slv_reg0[27:24]*/),
 			.ddr_addr_to_read(ddr_addr_to_read /*{mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]}*/),
 			.go_fill_fifo(fifo_write_go /*mst_reg[0][0]*/) //control bit that will drive master burst read request		
 		      	);		
@@ -364,7 +364,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     .reset(slv_reg0[0]),
     .start(slv_reg0[1]),
     .clock(PXL_CLK_X1),
-    .hres(11'd640),
+    .hres(HDMI_HRES /*11'd640*/),
     .color(ip2bus_mstwr_d /*slv_reg1[23:0]*/),
     .red(red),
     .green(green),
@@ -540,13 +540,13 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
   assign mst_read_ack      = mst_reg_read_req;
 
   // rip control bits from master model registers
-  assign mst_cntl_rd_req   = fifo_write_go || mst_reg[0][0];
-  assign mst_cntl_wr_req   = mst_reg[0][1];
-  assign mst_cntl_bus_lock = mst_reg[0][2];
-  assign mst_cntl_burst    = mst_reg[0][3];
+  assign mst_cntl_rd_req   = fifo_write_go || 1'b1; //mst_reg[0][0]; //hmmmmmmm should this be fifo_write_go or always 1??????????????????
+  assign mst_cntl_wr_req   = 1'b0; //mst_reg[0][1];
+  assign mst_cntl_bus_lock = 1'b0; //mst_reg[0][2];
+  assign mst_cntl_burst    = 1'b1; //mst_reg[0][3];
   assign mst_ip2bus_addr   = ddr_addr_to_read[31:0]; //{mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]};
-  assign mst_ip2bus_be     = {mst_reg[9], mst_reg[8]};
-  assign mst_xfer_reg_len  = {mst_reg[14][3 : 0], mst_reg[13], mst_reg[12]};// changed to 20 bits 
+  assign mst_ip2bus_be     = 16'hffff; // {mst_reg[9], mst_reg[8]};
+  assign mst_xfer_reg_len  = HDMI_BYTES_PER_PIXEL * HDMI_HRES; //{mst_reg[14][3 : 0], mst_reg[13], mst_reg[12]};// changed to 20 bits 
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
 
   // implement byte write enable for each byte slice of the master model registers
