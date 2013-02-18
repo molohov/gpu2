@@ -17,9 +17,14 @@
 
 #define TEST_FIFO
 #define TEST_SYSTEM
+#define RGB565
 
 int main() {
+#ifdef RGB565
+	volatile u16 *ddr_addr = (volatile u16 *) XPAR_S6DDR_0_S0_AXI_BASEADDR;
+#else
 	volatile u32 *ddr_addr = (volatile u32 *) XPAR_S6DDR_0_S0_AXI_BASEADDR;
+#endif
 
 	printf(
 			"32-bit test: %s\n\r",
@@ -32,12 +37,21 @@ int main() {
 	int write_val = 0;
 
 	// fill up off-chip memory with known values
+#ifdef RGB565
 	int i, j;
 	for (j = 0; j < 720; j++) {
 		for (i = 0; i < 1280; i++) {
-			ddr_addr[j * 1280 + i] = j << 24 /* red */ | (i * 50 / 256) << 16 /* green */ | (i % 256) << 8 /* blue */;
+			ddr_addr[j * 1280 + i] = (j % 32) << 11 /* red */ | (i * 50 / 32) << 6 /* green */ | (i % 32) /* blue */;
 		}
 	}
+#else
+	int i, j;
+	for (j = 0; j < 720; j++) {
+		for (i = 0; i < 1280; i++) {
+			ddr_addr[j * 1280 + i] = j << 24 /* red */ | (i * 50 / 512) << 16 /* green */ | (i % 256) << 8 /* blue */;
+		}
+	}
+#endif
 
 #ifdef TEST_FIFO
 
