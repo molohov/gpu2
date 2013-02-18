@@ -6,7 +6,7 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 					  input half_full,
 					  input [31:0] FRAME_BASE_ADDR,			//obtain these from software (slv_reg in user_logic)
 					  input [31:0] LINE_STRIDE,
-					  input	[31:0] NUM_BYTES_PER_PIXEL,
+					  //input	[31:0] NUM_BYTES_PER_PIXEL,
 					  output reg [31:0] ddr_addr_to_read,
 					  output reg 		go_fill_fifo);		//use to control FIFO write_xfer signal in user_logic
 					
@@ -14,7 +14,11 @@ module fill_fifo_fsm( input Bus2IP_Clk,
 
  ///////////////////////////////
  //parameters
- parameter 	RESET_fill_fifo 	= 3'b000;
+
+parameter NUM_BYTES_PER_PIXEL = 32'd4;
+
+
+parameter 	RESET_fill_fifo 	= 3'b000;
  parameter 	BEGIN_fill_fifo 	= 3'b001;
  parameter 	IDLE_fill_fifo 		= 3'b010;
  parameter 	DONE_HALF_fill_fifo = 3'b011;
