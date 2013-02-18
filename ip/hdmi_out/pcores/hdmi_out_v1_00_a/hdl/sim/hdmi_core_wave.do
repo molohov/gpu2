@@ -7,6 +7,7 @@ add wave -noupdate /hdmi_core_tb/read_go
 add wave -noupdate /hdmi_core_tb/read_line
 add wave -noupdate /hdmi_core_tb/read_chunk
 add wave -noupdate /hdmi_core_tb/read_done
+add wave -noupdate /hdmi_core_tb/read_fifo
 add wave -noupdate /hdmi_core_tb/clock
 add wave -noupdate /hdmi_core_tb/reset
 add wave -noupdate /hdmi_core_tb/start
