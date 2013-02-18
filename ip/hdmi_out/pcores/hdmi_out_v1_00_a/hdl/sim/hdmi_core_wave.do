@@ -2,6 +2,9 @@ onerror {resume}
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /hdmi_core_tb/hsync
 add wave -noupdate /hdmi_core_tb/vsync
+add wave -noupdate -radix hexadecimal /hdmi_core_tb/red
+add wave -noupdate -radix hexadecimal /hdmi_core_tb/green
+add wave -noupdate -radix hexadecimal /hdmi_core_tb/blue
 add wave -noupdate /hdmi_core_tb/ve
 add wave -noupdate /hdmi_core_tb/read_go
 add wave -noupdate /hdmi_core_tb/read_line

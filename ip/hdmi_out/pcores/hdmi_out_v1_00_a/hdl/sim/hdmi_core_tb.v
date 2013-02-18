@@ -5,8 +5,11 @@ module hdmi_core_tb (
     output read_go,
     output read_line,
     output read_chunk,
-output read_done,
-output read_fifo
+    output read_done,
+    output read_fifo,
+    output [7:0] red,
+    output [7:0] green, 
+    output [7:0] blue 
 );
 
 reg clock;
@@ -22,11 +25,11 @@ hdmi_core dut (
 	.reset (reset),
 	.start (start),
     .hres (11'd1280),
-    .color (32'hffffff00),
-	.num_bytes_per_pixel(0),
-    .red (),
-    .green (),
-    .blue (),
+    .color (32'hF102A39E), //when concatenated with 0's, should see alternating |F0|20|10| and |A0|70|F0|
+	.num_bytes_per_pixel(1'b0),
+    .red (red),
+    .green (green),
+    .blue (blue),
 	.hsync (hsync),
 	.vsync (vsync),
     .ve (ve),

@@ -55,8 +55,8 @@ wire is_odd = ((hcnt & 1'b1) && active_video_d1);
 // RGB 888 |   RED(8)  |  GREEN(8) |  BLUE(8)  |  UNUSED   |
 // RGB 565 |RED(5)|GREEN(6)|BLUE(5)|RED(5)|GREEN(6)|BLUE(5)|
 assign red = num_bytes_per_pixel ? video_data_d1[31:24] : (is_odd ? {video_data_d1[31:27], 3'b0} : {video_data_d1[15:11], 3'b0});
-assign green = num_bytes_per_pixel ? video_data_d1[23:16] : (is_odd ? {video_data_d1[26:21], 2'b0} : (video_data_d1[10:5], 2'b0));
-assign blue = num_bytes_per_pixel ? video_data_d1[15:8] : (is_odd ? {video_data_d1[20:16], 3'b0} : (video_data_d1[4:0], 3'b0));
+assign green = num_bytes_per_pixel ? video_data_d1[23:16] : (is_odd ? {video_data_d1[26:21], 2'b0} : {video_data_d1[10:5], 2'b0});
+assign blue = num_bytes_per_pixel ? video_data_d1[15:8] : (is_odd ? {video_data_d1[20:16], 3'b0} : {video_data_d1[4:0], 3'b0});
 // make read_fifo have a 50% duty cycle ONLY if num_bytes_per_pixel is 0 (therefore RGB565)
 assign read_fifo = num_bytes_per_pixel ? active_video_d1 : (is_odd ? active_video_d1 : ~active_video_d1);
 assign ve = active_video_d2;
