@@ -111,7 +111,7 @@ module user_logic
 // -- ADD USER PARAMETERS BELOW THIS LINE ------------
 // --USER parameters added here 
 parameter HDMI_HRES                      = 1280;
-parameter HDMI_BYTES_PER_PIXEL           = 4;
+parameter HDMI_BYTES_PER_PIXEL           = 2;
 // -- ADD USER PARAMETERS ABOVE THIS LINE ------------
 
 // -- DO NOT EDIT BELOW THIS LINE --------------------
@@ -367,7 +367,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     .clock(PXL_CLK_X1),
     .hres(HDMI_HRES), //11'd1280),
     .color(ip2bus_mstwr_d /*slv_reg1[23:0]*/),
-    .num_bytes_per_pixel(1), //1 for RGB888, 0 for RGB565
+    .num_bytes_per_pixel(0), //1 for RGB888, 0 for RGB565
     .red(red),
     .green(green),
     .blue(blue),
@@ -1020,7 +1020,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
   // FIFO depth is 128 words. User can modify the depth based on their requirement.
    srl_fifo_f #(
      .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
-     .C_DEPTH(256))
+     .C_DEPTH(640))
    DATA_CAPTURE_FIFO_I (
      .Clk(Bus2IP_Clk),
      .Reset(bus2ip_Reset),
