@@ -197,8 +197,6 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire					    [7:0] red;
   wire					    [7:0] green;
   wire					    [7:0] blue;
-  wire                                      hsync_fifo;
-  wire                                      vsync_fifo;
   wire                                      half_full_fifo;
   wire                                      fifo_write_go;
   wire					    [31:0] ddr_addr_to_read;
@@ -325,49 +323,33 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  parameter                                  GO_BYTE_LANE = 15;
  
   // --USER logic implementation added here
+
 //software control bits:
-//slv_reg0[2] = restart for fifo fsm
-//slv_reg0[3] = start for fifo fsm
-//slv_reg1 = FRAME_BASE_ADDR
-//slv_reg0[19:4] is LINE_STRIDE (16 bits)
-//slv_reg0[27:24] is num bytes per pixel (4 bits)
-//slv_reg0[28] is fill_half_fifo_I when toggled
-//slv_reg0[29] is hsync_I when toggled
-//slv_reg0[30] is vsync_I when toggled
+//slv_reg0 is LINE_STRIDE (16 bits)
+//slv_reg1 is FRAME_BASE_ADDR
+//slv_reg2[0] is the enable signal
 
 fill_fifo_fsm #(.NUM_BYTES_PER_PIXEL(HDMI_BYTES_PER_PIXEL))
 		fill_fifo(
 			.Bus2IP_Clk(Bus2IP_Clk),
-			.reset_fill_fifo(slv_reg0[2]),	
-			.start_fill_fifo(slv_reg0[3] | read_go),
-			.hsync(hsync_fifo | read_next_line),			//obtain hsync and vsync from hdmi_core
-			.vsync(vsync_fifo | read_done),
+			.reset_fill_fifo(1'b0),
+			.start_fill_fifo(read_go),
+			.hsync(read_next_line),
+			.vsync(read_done),
 			.half_full(half_full_fifo),
-			.FRAME_BASE_ADDR(slv_reg1[31:0]),		//obtain these from software (slv_reg in user_logic)
-			.LINE_STRIDE(slv_reg0[19:4]),
-			//.NUM_BYTES_PER_PIXEL(HDMI_BYTES_PER_PIXEL),
-			.ddr_addr_to_read(ddr_addr_to_read /*{mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]}*/),
-			.go_fill_fifo(fifo_write_go /*mst_reg[0][0]*/) //control bit that will drive master burst read request		
-		      	);		
-			
+			.FRAME_BASE_ADDR(slv_reg1[31:0]),
+			.LINE_STRIDE(slv_reg0[19:0]),
+			.ddr_addr_to_read(ddr_addr_to_read),
+			.go_fill_fifo(fifo_write_go) //control bit that will drive master burst read request		
+);		
 
-
-//this module stimulates signals because fill_fifo_fsm expects hsync, vsync, and half_full to last only one clk cycle
-pulse_gen #(3) stimulate_signals4_fifo_fsm(
-  			.clk(Bus2IP_Clk),
-			.sig_I(slv_reg0[30:28]),
-			.toggle_O({vsync_fifo, hsync_fifo, half_full_fifo}),
-			.posedge_O(),
-			.negedge_O()
-			);
-
-  hdmi_core hdmi_core_inst (
-    .reset(slv_reg0[0]),
-    .start(slv_reg0[1]),
+hdmi_core hdmi_core_inst (
+    .reset(1'b0),
+    .start(slv_reg2[0]),
     .clock(PXL_CLK_X1),
-    .hres(HDMI_HRES), //11'd1280),
-    .color(ip2bus_mstwr_d /*slv_reg1[23:0]*/),
-    .num_bytes_per_pixel(0), //1 for RGB888, 0 for RGB565
+    .hres(HDMI_HRES),
+    .color(ip2bus_mstwr_d),
+    .num_bytes_per_pixel(0),
     .red(red),
     .green(green),
     .blue(blue),
@@ -379,10 +361,10 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     .read_next_chunk(read_next_chunk),
     .read_done(read_done),
     .ve(ve)
-    );
+);
 
 
-  dvi_out_native dvi_out_native_inst (
+dvi_out_native dvi_out_native_inst (
     .reset(1'b0),
     .pll_lckd(PXL_PLL_LOCKED),
     .clkin(PXL_CLK_X1),
@@ -397,7 +379,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
 
     .TMDS(TMDS),
     .TMDSB(TMDSB)
-  );
+);
 
   // ------------------------------------------------------
   // Example code to read/write user logic slave model s/w accessible registers
@@ -461,9 +443,9 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     begin: SLAVE_REG_READ_PROC
 
       case ( slv_reg_read_sel )
-        3'b100 : slv_ip2bus_data <= bus2ip_mstrd_d;
-        3'b010 : slv_ip2bus_data <= ip2bus_mstwr_d;
-        3'b001 : slv_ip2bus_data <= ddr_addr_to_read;
+        3'b100 : slv_ip2bus_data <= slv_reg0;
+        3'b010 : slv_ip2bus_data <= slv_reg1;
+        3'b001 : slv_ip2bus_data <= slv_reg2;
         default : slv_ip2bus_data <= 0;
       endcase
 
@@ -542,7 +524,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
   assign mst_read_ack      = mst_reg_read_req;
 
   // rip control bits from master model registers
-  assign mst_cntl_rd_req   = fifo_write_go || 1'b1; //mst_reg[0][0];
+  assign mst_cntl_rd_req   = 1'b1; //mst_reg[0][0];
   assign mst_cntl_wr_req   = 1'b0; //mst_reg[0][1];
   assign mst_cntl_bus_lock = 1'b0; //mst_reg[0][2];
   assign mst_cntl_burst    = 1'b1; //mst_reg[0][3];
