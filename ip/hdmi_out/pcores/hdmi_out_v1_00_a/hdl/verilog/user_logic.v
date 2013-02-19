@@ -343,13 +343,13 @@ fill_fifo_fsm #(.NUM_BYTES_PER_PIXEL(HDMI_BYTES_PER_PIXEL))
 			.go_fill_fifo(fifo_write_go) //control bit that will drive master burst read request		
 );		
 
-hdmi_core hdmi_core_inst (
+hdmi_core #(.NUM_BYTES_PER_PIXEL(HDMI_BYTES_PER_PIXEL)
+) hdmi_core_inst (
     .reset(1'b0),
     .start(slv_reg2[0]),
     .clock(PXL_CLK_X1),
     .hres(HDMI_HRES),
     .color(ip2bus_mstwr_d),
-    .num_bytes_per_pixel(0),
     .red(red),
     .green(green),
     .blue(blue),
