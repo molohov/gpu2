@@ -364,7 +364,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     .reset(slv_reg0[0]),
     .start(slv_reg0[1]),
     .clock(PXL_CLK_X1),
-    .hres(HDMI_HRES /*11'd640*/),
+    .hres(11'd640),
     .color(ip2bus_mstwr_d /*slv_reg1[23:0]*/),
     .red(red),
     .green(green),
