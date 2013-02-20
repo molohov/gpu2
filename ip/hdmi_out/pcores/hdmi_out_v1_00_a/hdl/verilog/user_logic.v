@@ -111,7 +111,7 @@ module user_logic
 // -- ADD USER PARAMETERS BELOW THIS LINE ------------
 // --USER parameters added here 
 parameter HDMI_HRES                      = 1280;
-parameter HDMI_BYTES_PER_PIXEL           = 2;
+parameter HDMI_BYTES_PER_PIXEL           = 4;
 // -- ADD USER PARAMETERS ABOVE THIS LINE ------------
 
 // -- DO NOT EDIT BELOW THIS LINE --------------------

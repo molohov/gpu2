@@ -37,7 +37,7 @@ int main() {
 	int i, j;
 	for (j = 0; j < 720; j++) {
 		for (i = 0; i < 1280; i++) {
-			ddr_addr[j * 1280 + i] = (j % 32) << 11 /* red */ | (i * 2 % 32) << 5 /* green */ | (i % 32) /* blue */;
+			ddr_addr[j * 1280 + i] = (j / 8 % 32) << 11 /* red */ | (i * 6 / 256 % 64) << 5 /* green */ | (i / 8 % 32) /* blue */;
 		}
 	}
 #else
