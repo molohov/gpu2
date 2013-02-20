@@ -89,13 +89,13 @@ void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g,
 
 void gpDisplayImage(gpImg *img)
 {
-  static bool initialized = FALSE;
+  static bool initialized = false;
 
   volatile unsigned char *ddr_addr1 = (volatile unsigned char *) XPAR_S6DDR_0_S0_AXI_BASEADDR;
   volatile unsigned char *ddr_addr2 = (volatile unsigned char *) (XPAR_S6DDR_0_S0_AXI_BASEADDR + img->xres * img->yres * BYTES_PER_PIXEL);
   volatile unsigned char *hdmi_addr = (volatile unsigned char *) XPAR_HDMI_OUT_0_BASEADDR;
 
-  static bool render_addr1 = FALSE;
+  static bool render_addr1 = false;
 
   render_addr1 = !render_addr1;
 
@@ -108,7 +108,7 @@ void gpDisplayImage(gpImg *img)
     hdmi_addr[0] = img->xres; // stride length in pixels
     hdmi_addr[1] = (int)render_addr; // set frame base address
     hdmi_addr[2] = 1; // go
-    initialized = TRUE;
+    initialized = true;
   } else {
     getchar(); // wait for user input
 
