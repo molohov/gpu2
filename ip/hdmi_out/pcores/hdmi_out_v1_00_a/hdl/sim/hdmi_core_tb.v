@@ -1,6 +1,6 @@
 module hdmi_core_tb (
-	output hsync,
-	output vsync,
+    output hsync,
+    output vsync,
     output ve,
     output read_go,
     output read_line,
@@ -20,13 +20,13 @@ initial clock = 0;
 
 always #10 clock = ~clock;
 
-hdmi_core dut (
+hdmi_core #(.NUM_BYTES_PER_PIXEL(2)
+) dut (
     .clock (clock),
     .reset (reset),
     .start (start),
     .hres (11'd1280),
     .color (32'hF102A39E), //when concatenated with 0's, should see alternating |F0|20|10| and |A0|70|F0|
-    .num_bytes_per_pixel(1'b0),
     .red (red),
     .green (green),
     .blue (blue),

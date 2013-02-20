@@ -10,7 +10,7 @@ module fifo_hdmi_tb (
   wire [31:0] ddr_addr_to_read;
   wire fifo_write_go;
   
-  reg clk, reset_fifo, start_fifo;
+  reg clk, reset_fifo;
   reg reset_hdmi, start_hdmi;
   
   wire hsync;
@@ -27,21 +27,22 @@ module fifo_hdmi_tb (
 
   reg [31:0] fifo_out_data = 32'h80808000; //output data of fifo
 
-fill_fifo_fsm fill_fifo(
+fill_fifo_fsm #(.NUM_BYTES_PER_PIXEL(NUM_BYTES_PER_PIXEL)
+) fill_fifo(
             .Bus2IP_Clk(clk),
             .reset_fill_fifo(reset_fifo),
-            .start_fill_fifo(start_fifo | read_go),
+            .start_fill_fifo(read_go),
             .hsync(read_next_line), //obtain hsync and vsync from hdmi_core
             .vsync(read_done),
             .half_full(1'b0 /*read_next_chunk*/), //unused for now
             .FRAME_BASE_ADDR(FRAME_BASE_ADDR), //obtain these from software (slv_reg in user_logic)
             .LINE_STRIDE(LINE_STRIDE),
-            .NUM_BYTES_PER_PIXEL(NUM_BYTES_PER_PIXEL),
             .ddr_addr_to_read(ddr_addr_to_read),
             .go_fill_fifo(fifo_write_go) //control bit that will drive master burst read request
 );
 
-hdmi_core hdmi_core_inst (
+hdmi_core #(.NUM_BYTES_PER_PIXEL(NUM_BYTES_PER_PIXEL)
+) hdmi_core_inst (
     .reset(reset_hdmi),
     .start(start_hdmi),
     .clock(clk), //note: assuming same clock for bus2ip and PXL_CLK_X1!!! is that a valid assumption...?
@@ -75,7 +76,6 @@ end
   begin
     @ (negedge clk)
     reset_fifo = 1;
-    start_fifo = 0;
     reset_hdmi = 1;
     start_hdmi = 0;
     @ (negedge clk) ;
