@@ -41,12 +41,12 @@ fill_fifo_fsm #(.NUM_BYTES_PER_PIXEL(NUM_BYTES_PER_PIXEL)
             .go_fill_fifo(fifo_write_go) //control bit that will drive master burst read request
 );
 
-hdmi_core #(.NUM_BYTES_PER_PIXEL(NUM_BYTES_PER_PIXEL)
+hdmi_core #(.NUM_BYTES_PER_PIXEL(NUM_BYTES_PER_PIXEL),
+.HRES(LINE_STRIDE) //line stride happens to be the same, haha
 ) hdmi_core_inst (
     .reset(reset_hdmi),
     .start(start_hdmi),
-    .clock(clk), //note: assuming same clock for bus2ip and PXL_CLK_X1!!! is that a valid assumption...?
-    .hres(11'd1280),
+    .clock(clk), 
     .color(fifo_out_data),
     .red(red),
     .green(green),

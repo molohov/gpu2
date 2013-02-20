@@ -20,7 +20,6 @@ module hdmi_core (
     input clock,
     input start,
     input reset,
-    input [10:0] hres,
     input [31:0] color,
     output [7:0] red,
     output [7:0] green,
@@ -36,6 +35,7 @@ module hdmi_core (
     );
 
 parameter NUM_BYTES_PER_PIXEL = 4;
+parameter HRES = 1280;
 
 reg [15:0] htr, hsr, hfpr, hbpr, vtr, vsr, vfpr, vbpr;
 reg polarity;
@@ -83,7 +83,19 @@ pulse_gen #(3) pulse_gen_inst(
 
 always @ (*)
 begin
-    case (hres)
+    case (HRES)
+        640:
+        begin
+            htr <= 800;
+            hsr <= 96;
+            hfpr <= 792;
+            hbpr <= 152;
+            vtr <= 525;
+            vsr <= 2;
+            vfpr <= 523;
+            vbpr <= 43;
+            polarity <= 0;
+        end
         800:
         begin
             htr <= 1056;
