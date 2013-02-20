@@ -14,8 +14,9 @@ module fill_fifo_tb (
   reg fill_half_fifo_I;
   reg hsync_I, vsync_I;
 
-  fill_fifo_fsm fill_fifo_stimulate(clk, reset, start, hsync_I, vsync_I, fill_half_fifo_I,
-      FRAME_BASE_ADDR, LINE_STRIDE, NUM_BYTES_PER_PIXEL, ddr_addr_to_read, go_fill_fifo);			
+  fill_fifo_fsm #(.NUM_BYTES_PER_PIXEL(NUM_BYTES_PER_PIXEL)
+  ) fill_fifo_stimulate(clk, reset, start, hsync_I, vsync_I, fill_half_fifo_I,
+      FRAME_BASE_ADDR, LINE_STRIDE, ddr_addr_to_read, go_fill_fifo);			
   
   initial clk = 0;
 

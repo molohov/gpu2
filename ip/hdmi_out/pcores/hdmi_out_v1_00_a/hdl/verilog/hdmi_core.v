@@ -81,7 +81,7 @@ pulse_gen #(3) pulse_gen_inst(
   .negedge_O({read_go, read_next_line, read_done})
 );
 
-always @ (*)
+always @ (posedge clock)
 begin
     case (HRES)
         640:
