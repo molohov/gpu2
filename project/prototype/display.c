@@ -58,16 +58,25 @@ void gpReleaseImage(gpImg **img)
 
 gpImg *gpCreateImage(int xres, int yres)
 {
+  volatile unsigned char *ddr_addr1 = (volatile unsigned char *) XPAR_S6DDR_0_S0_AXI_BASEADDR;
+  volatile unsigned char *ddr_addr2 = (volatile unsigned char *) (XPAR_S6DDR_0_S0_AXI_BASEADDR + xres * yres * BYTES_PER_PIXEL);
+
+  static bool render_addr1 = false;
+
+  render_addr1 = !render_addr1;
+
+  volatile unsigned char *render_addr = (render_addr1) ? ddr_addr1 : ddr_addr2;
+
   gpImg *img = malloc(sizeof(gpImg));
   img->xres = xres;
   img->yres = yres;
-  img->imageData = malloc(sizeof(char) * xres * yres * BYTES_PER_PIXEL);
+  img->imageData = render_addr;
   return img;
 }
 
 void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
 {
-  unsigned char *ptr = img->imageData;
+  volatile unsigned char *ptr = img->imageData;
   for (int i = 0; i < img->yres; i++) {
     for (int j = 0; j < img->xres; j++) {
       ptr[0] = r;
@@ -80,8 +89,8 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
 
 void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
 {
-  unsigned char *ptr = img->imageData;
-  ptr += (y * img->xres + x)*BYTES_PER_PIXEL;
+  volatile unsigned char *ptr = img->imageData;
+  ptr += (y * img->xres + x) * BYTES_PER_PIXEL;
   ptr[0] = r;
   ptr[1] = g;
   ptr[2] = b;
@@ -91,34 +100,24 @@ void gpDisplayImage(gpImg *img)
 {
   static bool initialized = false;
 
-  volatile unsigned char *ddr_addr1 = (volatile unsigned char *) XPAR_S6DDR_0_S0_AXI_BASEADDR;
-  volatile unsigned char *ddr_addr2 = (volatile unsigned char *) (XPAR_S6DDR_0_S0_AXI_BASEADDR + img->xres * img->yres * BYTES_PER_PIXEL);
   volatile unsigned char *hdmi_addr = (volatile unsigned char *) XPAR_HDMI_OUT_0_BASEADDR;
-
-  static bool render_addr1 = false;
-
-  render_addr1 = !render_addr1;
-
-  volatile unsigned char *render_addr = (render_addr1) ? ddr_addr1 : ddr_addr2;
-
-  // copy image to memory
-  memcpy((void *)render_addr, (void *)img->imageData, img->yres * img->xres * BYTES_PER_PIXEL);
 
   if (!initialized) {
     hdmi_addr[0] = img->xres; // stride length in pixels
-    hdmi_addr[1] = (int)render_addr; // set frame base address
+    hdmi_addr[1] = (int)img->imageData; // set frame base address
     hdmi_addr[2] = 1; // go
     initialized = true;
   } else {
-    getchar(); // wait for user input
+    // wait for user input
+    while (!*(volatile int *)(XPAR_RS232_UART_1_BASEADDR))
+      ;
 
-    hdmi_addr[1] = (int)render_addr; // set frame base address
+    hdmi_addr[1] = (int)img->imageData; // set frame base address
   }
 }
 
 void gpReleaseImage(gpImg **img)
 {
-  free((*img)->imageData);
   free(*img);
   *img = NULL;
 }
