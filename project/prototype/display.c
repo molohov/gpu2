@@ -47,7 +47,12 @@ void gpReleaseImage(gpImg **img)
 
 #else
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+
+#include "xparameters.h"
 
 #define BYTES_PER_PIXEL 4
 
@@ -63,8 +68,8 @@ gpImg *gpCreateImage(int xres, int yres)
 void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
 {
   unsigned char *ptr = img->imageData;
-  for (int i = 0; i < img->xres; i++) {
-    for (int j = 0; j < img->yres; j++) {
+  for (int i = 0; i < img->yres; i++) {
+    for (int j = 0; j < img->xres; j++) {
       ptr[0] = r;
       ptr[1] = g;
       ptr[2] = b;
@@ -84,7 +89,31 @@ void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g,
 
 void gpDisplayImage(gpImg *img)
 {
-  // TODO: implement
+  static bool initialized = false;
+
+  volatile unsigned char *ddr_addr1 = (volatile unsigned char *) XPAR_S6DDR_0_S0_AXI_BASEADDR;
+  volatile unsigned char *ddr_addr2 = (volatile unsigned char *) (XPAR_S6DDR_0_S0_AXI_BASEADDR + img->xres * img->yres * BYTES_PER_PIXEL);
+  volatile unsigned char *hdmi_addr = (volatile unsigned char *) XPAR_HDMI_OUT_0_BASEADDR;
+
+  static bool render_addr1 = false;
+
+  render_addr1 = !render_addr1;
+
+  volatile unsigned char *render_addr = (render_addr1) ? ddr_addr1 : ddr_addr2;
+
+  // copy image to memory
+  memcpy((void *)render_addr, (void *)img->imageData, img->yres * img->xres * BYTES_PER_PIXEL);
+
+  if (!initialized) {
+    hdmi_addr[0] = img->xres; // stride length in pixels
+    hdmi_addr[1] = (int)render_addr; // set frame base address
+    hdmi_addr[2] = 1; // go
+    initialized = true;
+  } else {
+    getchar(); // wait for user input
+
+    hdmi_addr[1] = (int)render_addr; // set frame base address
+  }
 }
 
 void gpReleaseImage(gpImg **img)
