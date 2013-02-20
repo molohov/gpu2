@@ -335,7 +335,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 //slv_reg0[29] is hsync_I when toggled
 //slv_reg0[30] is vsync_I when toggled
 
-fill_fifo_fsm fill_fifo(
+fill_fifo_fsm #(.NUM_BYTES_PER_PIXEL(HDMI_BYTES_PER_PIXEL))
+		fill_fifo(
 			.Bus2IP_Clk(Bus2IP_Clk),
 			.reset_fill_fifo(slv_reg0[2]),	
 			.start_fill_fifo(slv_reg0[3] | read_go),
@@ -344,7 +345,6 @@ fill_fifo_fsm fill_fifo(
 			.half_full(half_full_fifo),
 			.FRAME_BASE_ADDR(slv_reg1[31:0]),		//obtain these from software (slv_reg in user_logic)
 			.LINE_STRIDE(slv_reg0[19:4]),
-			.NUM_BYTES_PER_PIXEL(HDMI_BYTES_PER_PIXEL /*slv_reg0[27:24]*/),
 			.ddr_addr_to_read(ddr_addr_to_read /*{mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]}*/),
 			.go_fill_fifo(fifo_write_go /*mst_reg[0][0]*/) //control bit that will drive master burst read request		
 		      	);		
@@ -365,7 +365,9 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
     .start(slv_reg0[1]),
     .clock(PXL_CLK_X1),
     .hres(11'd640),
+    .hres(HDMI_HRES), //11'd1280),
     .color(ip2bus_mstwr_d /*slv_reg1[23:0]*/),
+    .num_bytes_per_pixel(0), //1 for RGB888, 0 for RGB565
     .red(red),
     .green(green),
     .blue(blue),
@@ -540,12 +542,12 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
   assign mst_read_ack      = mst_reg_read_req;
 
   // rip control bits from master model registers
-  assign mst_cntl_rd_req   = fifo_write_go || 1'b1; //mst_reg[0][0]; //hmmmmmmm should this be fifo_write_go or always 1??????????????????
+  assign mst_cntl_rd_req   = fifo_write_go || 1'b1; //mst_reg[0][0];
   assign mst_cntl_wr_req   = 1'b0; //mst_reg[0][1];
   assign mst_cntl_bus_lock = 1'b0; //mst_reg[0][2];
   assign mst_cntl_burst    = 1'b1; //mst_reg[0][3];
   assign mst_ip2bus_addr   = ddr_addr_to_read[31:0]; //{mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]};
-  assign mst_ip2bus_be     = 16'hffff; // {mst_reg[9], mst_reg[8]};
+  assign mst_ip2bus_be     = 16'hffff; //{mst_reg[9], mst_reg[8]};
   assign mst_xfer_reg_len  = HDMI_BYTES_PER_PIXEL * HDMI_HRES; //{mst_reg[14][3 : 0], mst_reg[13], mst_reg[12]};// changed to 20 bits 
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
 
@@ -1018,7 +1020,7 @@ pulse_gen #(3) stimulate_signals4_fifo_fsm(
   // FIFO depth is 128 words. User can modify the depth based on their requirement.
    srl_fifo_f #(
      .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
-     .C_DEPTH(256))
+     .C_DEPTH(640))
    DATA_CAPTURE_FIFO_I (
      .Clk(Bus2IP_Clk),
      .Reset(bus2ip_Reset),

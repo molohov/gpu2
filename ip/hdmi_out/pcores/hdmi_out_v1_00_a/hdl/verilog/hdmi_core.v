@@ -22,6 +22,7 @@ module hdmi_core (
     input reset,
     input [10:0] hres,
     input [31:0] color,
+    input num_bytes_per_pixel, // 1 for RGB888, 0 for RGB565
     output [7:0] red,
     output [7:0] green,
     output [7:0] blue,
@@ -47,10 +48,17 @@ assign vsync_i = (vcnt < vsr) ? polarity : ~polarity;
 assign hblank_i = ((hcnt >= hbpr) && (hcnt < hfpr)) ? 1 : 0;
 assign vblank_i = ((vcnt >= vbpr) && (vcnt < vfpr)) ? 1 : 0;
 assign active_video_i = hblank_i && vblank_i;
-assign red = video_data_d1[31:24];
-assign green = video_data_d1[23:16];
-assign blue = video_data_d1[15:8];
-assign read_fifo = active_video_d1;
+// because all *_d1 signals are delayed by 1 cycle, 
+// then 'even' counter values are actually even when the value is odd 
+wire is_odd = (hcnt[0] && active_video_d1);
+// pictorial representations of RGB888 and RGB565
+// RGB 888 |   RED(8)  |  GREEN(8) |  BLUE(8)  |  UNUSED   |
+// RGB 565 |RED(5)|GREEN(6)|BLUE(5)|RED(5)|GREEN(6)|BLUE(5)|
+assign red = num_bytes_per_pixel ? video_data_d1[31:24] : (is_odd ? {video_data_d1[31:27], 3'b0} : {video_data_d1[15:11], 3'b0});
+assign green = num_bytes_per_pixel ? video_data_d1[23:16] : (is_odd ? {video_data_d1[26:21], 2'b0} : {video_data_d1[10:5], 2'b0});
+assign blue = num_bytes_per_pixel ? video_data_d1[15:8] : (is_odd ? {video_data_d1[20:16], 3'b0} : {video_data_d1[4:0], 3'b0});
+// make read_fifo have a 50% duty cycle ONLY if num_bytes_per_pixel is 0 (therefore RGB565)
+assign read_fifo = num_bytes_per_pixel ? active_video_d1 : (active_video_d1 ? (hcnt[0] ? active_video_d1 : ~active_video_d1) : active_video_d1);
 assign ve = active_video_d2;
 assign hsync = hsync_d2;
 assign vsync = vsync_d2;

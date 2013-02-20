@@ -17,9 +17,14 @@
 
 #define TEST_FIFO
 #define TEST_SYSTEM
+#define RGB565
 
 int main() {
+#ifdef RGB565
+	volatile u16 *ddr_addr = (volatile u16 *) XPAR_S6DDR_0_S0_AXI_BASEADDR;
+#else
 	volatile u32 *ddr_addr = (volatile u32 *) XPAR_S6DDR_0_S0_AXI_BASEADDR;
+#endif
 
 	printf(
 			"32-bit test: %s\n\r",
@@ -32,12 +37,21 @@ int main() {
 	int write_val = 0;
 
 	// fill up off-chip memory with known values
+#ifdef RGB565
 	int i, j;
 	for (j = 0; j < 720; j++) {
 		for (i = 0; i < 1280; i++) {
-			ddr_addr[j * 1280 + i] = j << 24 /* red */ | (i * 50 / 256) << 16 /* green */ | (i % 256) << 8 /* blue */;
+			ddr_addr[j * 1280 + i] = (j % 32) << 11 /* red */ | (i * 2 % 32) << 5 /* green */ | (i % 32) /* blue */;
 		}
 	}
+#else
+	int i, j;
+	for (j = 0; j < 720; j++) {
+		for (i = 0; i < 1280; i++) {
+			ddr_addr[j * 1280 + i] = j << 24 /* red */ | (i * 25 / 256) << 16 /* green */ | (i % 256) << 8 /* blue */;
+		}
+	}
+#endif
 
 #ifdef TEST_FIFO
 
@@ -64,7 +78,11 @@ int main() {
 	// reset high
 	hdmi_addr[0] = 1 << 2 | (1 << 0);
 
+#ifdef RGB565
+	write_val = (0 << 2) /* restart */| (1 << 3) /* start */| (1280 << 4) /* set line_stride */| (2 << 24) /* 2 bytes per pixel */;
+#else
 	write_val = (0 << 2) /* restart */| (1 << 3) /* start */| (1280 << 4) /* set line_stride */| (4 << 24) /* 4 bytes per pixel */;
+#endif
 
 	hdmi_addr[0] = write_val; // start FSM, it should now trigger the first read of 64 pixels.
 
@@ -125,7 +143,11 @@ int main() {
 
 	write_val = (1 << 1) | (0 << 2) /* restart */| (0 << 3)
 	/* start */| (1280 << 4) /* set line_stride */| (64 << 14)
+#ifdef RGB565
+	/* pixels per line */| (2 << 24) /* 2 bytes per pixel */;
+#else
 	/* pixels per line */| (4 << 24) /* 4 bytes per pixel */;
+#endif
 
 	hdmi_addr[0] = write_val; // start FSM, it should now trigger the first read of 64 pixels.
 #endif
