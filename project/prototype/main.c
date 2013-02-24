@@ -1,10 +1,12 @@
 #include <stdlib.h>
 
 #include "gp.h"
+#define PERSPECTIVE_TEST
 
 /* User program */
 int main()
 {
+  #ifndef PERSPECTIVE_TEST
   // Create a triangle
   gpPoly *tri = gpCreatePoly(3);
   gpSetPolyVertex(tri, 0, 0.f, 1.f, 1.f);
@@ -60,6 +62,7 @@ int main()
 
   // Cleanup
   gpDeletePolyList(list);
+#endif
 
   // Cube
   gpPoly *z = gpCreatePoly(4);
@@ -115,14 +118,19 @@ int main()
   gpRotatePolyList(cube, -0.4f, 0.4f, 0.2f);
   gpRender(cube);
 
+#ifndef PERSPECTIVE_TEST
   for (int i = 0; i < 32; i++) {
     gpRotatePolyList(cube, 0.2f, 0.2f, 0.0f);
     gpRender(cube);
   }
-
-  gpTranslatePolyList(cube, 0.f, 0.f, 5.f);
-  gpPerspectivePolyList(cube, 2.f, 8.f);
-  gpRender(cube);
+#else
+  gpTranslatePolyList(cube, 0.f, 0.f, 2.f);
+  for (int i = 0; i < 32; i++) {
+    gpTranslatePolyList(cube, 0.f, 0.f, 1.f);
+    gpPerspectivePolyList(cube, 1.f, 100.f);
+    gpRender(cube);
+  }
+#endif
 
   gpDeletePolyList(cube);
 
