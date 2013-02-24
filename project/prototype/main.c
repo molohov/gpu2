@@ -126,7 +126,7 @@ int main()
 #else
   gpTranslatePolyList(cube, 0.f, 0.f, 2.f);
   for (int i = 0; i < 32; i++) {
-    gpTranslatePolyList(cube, 0.f, 0.f, 1.f);
+    gpTranslatePolyList(cube, 0.f, 0.f, 0.1f);
     gpPerspectivePolyList(cube, 1.f, 100.f);
     gpRender(cube);
   }

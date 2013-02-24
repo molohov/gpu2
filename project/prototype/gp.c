@@ -299,7 +299,8 @@ void gpRotatePolyList(gpPolyList *list, float x, float y, float z)
 void gpApplyPerspective(gpTMatrix *trans, float near, float far)
 {
   // perspective is a transpose!
-  gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, (far+near)/(near*(far - near)), 1/near}, {0.f, 0.f, 2*far/(far - near), 0.f}}};
+  //gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, (far+near)/(near*(far - near)), 1/near}, {0.f, 0.f, 2*far/(far - near), 0.f}}};
+  gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 1/near}, {0.f, 0.f, 0.f, 0.f}}};
   gpApplyTMatrix(trans, &perspective);
 }
 
