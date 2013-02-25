@@ -79,9 +79,9 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
   volatile unsigned char *ptr = img->imageData;
   for (int i = 0; i < img->yres; i++) {
     for (int j = 0; j < img->xres; j++) {
-      ptr[0] = r;
-      ptr[1] = g;
-      ptr[2] = b;
+      ptr[3] = r;
+      ptr[2] = g;
+      ptr[1] = b;
       ptr += BYTES_PER_PIXEL;
     }
   }
@@ -91,16 +91,16 @@ void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g,
 {
   volatile unsigned char *ptr = img->imageData;
   ptr += (y * img->xres + x) * BYTES_PER_PIXEL;
-  ptr[0] = r;
-  ptr[1] = g;
-  ptr[2] = b;
+  ptr[3] = r;
+  ptr[2] = g;
+  ptr[1] = b;
 }
 
 void gpDisplayImage(gpImg *img)
 {
   static bool initialized = false;
 
-  volatile unsigned char *hdmi_addr = (volatile unsigned char *) XPAR_HDMI_OUT_0_BASEADDR;
+  volatile int *hdmi_addr = (volatile int *) XPAR_HDMI_OUT_0_BASEADDR;
 
   if (!initialized) {
     hdmi_addr[0] = img->xres; // stride length in pixels
