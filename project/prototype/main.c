@@ -124,12 +124,22 @@ int main()
     gpRender(cube);
   }
 #else
-  gpTranslatePolyList(cube, 0.f, 0.f, 2.f);
-  for (int i = 0; i < 32; i++) {
+  gpRotatePolyList(cube, 0.8f, 0.0f, 0.0f);
+  gpTranslatePolyList(cube, 0.f, 0.f, 1.5f);
+  gpRender(cube);
+  gpEnable(GP_PERSPECTIVE);
+  gpSetFrustrum(1.0, 10.0);
+  for (int i = 0; i < 16; i++) {
     gpTranslatePolyList(cube, 0.f, 0.f, 0.1f);
-    gpPerspectivePolyList(cube, 1.f, 100.f);
     gpRender(cube);
   }
+  gpDisable(GP_PERSPECTIVE);
+  gpTranslatePolyList(cube, 0.f, 0.f, -1.6f);
+  gpRender(cube);
+  gpEnable(GP_PERSPECTIVE);
+  gpRender(cube);
+  gpDisable(GP_PERSPECTIVE);
+  gpRender(cube);
 #endif
 
   gpDeletePolyList(cube);
