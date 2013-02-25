@@ -16,7 +16,7 @@
 #define TEST_VECTOR 0x12345678 /* random word */
 
 #define TEST_SYSTEM
-#define RGB565
+//#define RGB565
 
 int main() {
 #ifdef RGB565
@@ -63,15 +63,26 @@ int main() {
 		for (j = 0; j < 720; j++) {
 			for (i = 0; i < 1280; i++) {
 				for (k = 0; k < DELAY; k++);
-				ddr_addr[j * 1280 + i] = 0xffff;
+				ddr_addr[j * 1280 + i] = 0xffffffff;
 			}
 		}
-		for (j = 0; j < 720; j++) {
-			for (i = 0; i < 1280; i++) {
-				for (k = 0; k < DELAY; k++);
-				ddr_addr[j * 1280 + i] = (j / 8 % 32) << 11 /* red */ | (i * 25 / 2048 % 64) << 5 /* green */ | (i / 8 % 32) /* blue */;
-			}
+
+#ifdef RGB565
+	int i, j;
+	for (j = 0; j < 720; j++) {
+		for (i = 0; i < 1280; i++) {
+			ddr_addr[j * 1280 + i] = (j / 8 % 32) << 11 /* red */ | (i * 25 / 2048 % 64) << 5 /* green */ | (i / 8 % 32) /* blue */;
 		}
+	}
+#else
+	int i, j;
+	for (j = 0; j < 720; j++) {
+		for (i = 0; i < 1280; i++) {
+			ddr_addr[j * 1280 + i] = j << 24 /* red */ | (i * 25 / 256) << 16 /* green */ | (i % 256) << 8 /* blue */;
+		}
+	}
+#endif
+
 	}
 #endif
 
