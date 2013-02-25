@@ -16,7 +16,7 @@
 #define TEST_VECTOR 0x12345678 /* random word */
 
 #define TEST_SYSTEM
-//#define RGB565
+#define RGB565
 
 int main() {
 #ifdef RGB565
