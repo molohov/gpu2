@@ -42,6 +42,7 @@ typedef struct {
 } gpPolyList;
 
 /* Library functions */
+enum { GP_PERSPECTIVE, GP_OTHER };
 
 gpPolyList * gpCreatePolyList();
 void gpAddPolyToList(gpPolyList *list, gpPoly *poly);
@@ -66,3 +67,6 @@ void gpClearTMatrixPolyList(gpPolyList *list);
 
 void gpRenderPoly(gpPoly *poly);
 void gpRender(gpPolyList *list);
+void gpEnable(int gpFunction);
+void gpDisable(int gpFunction);
+void gpSetFrustrum(float near, float far);

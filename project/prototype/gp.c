@@ -22,6 +22,13 @@ typedef struct {
   int x, y;
 } gpVertex2Fixed;
 
+// global perspective enable
+int GLOBAL_PERSPECTIVE = 0;
+int GLOBAL_PERSPECTIVE_SET = 0;
+float GLOBAL_NEAR;
+float GLOBAL_FAR;
+
+
 /* Library functions */
 
 gpPolyList * gpCreatePolyList()
@@ -298,8 +305,9 @@ void gpRotatePolyList(gpPolyList *list, float x, float y, float z)
 
 void gpApplyPerspective(gpTMatrix *trans, float near, float far)
 {
-  // rotate is a transpose!
-  gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1+far/near, 1/near}, {0.f, 0.f, -far, 0.f}}};
+  // perspective is a transpose!
+  //gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, (far+near)/(near*(far - near)), 1/near}, {0.f, 0.f, 2*far/(far - near), 0.f}}};
+  gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 1/near}, {0.f, 0.f, 0.f, 0.f}}};
   gpApplyTMatrix(trans, &perspective);
 }
 
@@ -386,6 +394,11 @@ void gpRender(gpPolyList *list)
     // apply transformations
     gpTMatrix temp;
     gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4);
+    if (GLOBAL_PERSPECTIVE)
+    {
+        assert(GLOBAL_PERSPECTIVE_SET);
+        gpApplyPerspective(&temp, GLOBAL_NEAR, GLOBAL_FAR);
+    }
     gpApplyTMatrixToCoord(poly, &temp);
 
     float sum_z = 0.f;
@@ -407,3 +420,31 @@ void gpRender(gpPolyList *list)
 
   gpReleaseImage(&img);
 }
+
+void gpEnable(int gpFunction)
+{
+    switch (gpFunction)
+    {
+        case GP_PERSPECTIVE:
+            GLOBAL_PERSPECTIVE = 1;
+            break;
+    }
+}
+
+void gpDisable (int gpFunction)
+{
+    switch (gpFunction)
+    {
+        case GP_PERSPECTIVE:
+            GLOBAL_PERSPECTIVE = 0;
+            break;
+    }
+}
+
+void gpSetFrustrum(float near, float far)
+{
+    GLOBAL_PERSPECTIVE_SET = 1;
+    GLOBAL_NEAR = near;
+    GLOBAL_FAR = far;
+}
+

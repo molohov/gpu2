@@ -1,10 +1,12 @@
 #include <stdlib.h>
 
 #include "gp.h"
+#define PERSPECTIVE_TEST
 
 /* User program */
 int main()
 {
+  #ifndef PERSPECTIVE_TEST
   // Create a triangle
   gpPoly *tri = gpCreatePoly(3);
   gpSetPolyVertex(tri, 0, 0.f, 1.f, 1.f);
@@ -60,6 +62,7 @@ int main()
 
   // Cleanup
   gpDeletePolyList(list);
+#endif
 
   // Cube
   gpPoly *z = gpCreatePoly(4);
@@ -115,14 +118,29 @@ int main()
   gpRotatePolyList(cube, -0.4f, 0.4f, 0.2f);
   gpRender(cube);
 
+#ifndef PERSPECTIVE_TEST
   for (int i = 0; i < 32; i++) {
     gpRotatePolyList(cube, 0.2f, 0.2f, 0.0f);
     gpRender(cube);
   }
-
-  gpTranslatePolyList(cube, 0.f, 0.f, 5.f);
-  gpPerspectivePolyList(cube, 2.f, 8.f);
+#else
+  gpRotatePolyList(cube, 0.8f, 0.0f, 0.0f);
+  gpTranslatePolyList(cube, 0.f, 0.f, 1.5f);
   gpRender(cube);
+  gpEnable(GP_PERSPECTIVE);
+  gpSetFrustrum(1.0, 10.0);
+  for (int i = 0; i < 16; i++) {
+    gpTranslatePolyList(cube, 0.f, 0.f, 0.1f);
+    gpRender(cube);
+  }
+  gpDisable(GP_PERSPECTIVE);
+  gpTranslatePolyList(cube, 0.f, 0.f, -1.6f);
+  gpRender(cube);
+  gpEnable(GP_PERSPECTIVE);
+  gpRender(cube);
+  gpDisable(GP_PERSPECTIVE);
+  gpRender(cube);
+#endif
 
   gpDeletePolyList(cube);
 
