@@ -400,25 +400,28 @@ void gpRender(gpPolyList *list)
   gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
   gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
 
-  // compute avg_z for each polygon
   for (int i = 0; i < list->num_polys; i++) {
     gpPoly *poly = list->polys[i];
 
     // apply transformations
     gpTMatrix temp;
     gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4);
-    if (GLOBAL_PERSPECTIVE)
-    {
-        assert(GLOBAL_PERSPECTIVE_SET);
-        gpApplyPerspective(&temp, GLOBAL_NEAR, GLOBAL_FAR);
-    }
     gpApplyTMatrixToCoord(poly, &temp);
 
+    // compute avg_z for each polygon
     float sum_z = 0.f;
     for (int j = 0; j < poly->num_vertices; j++) {
       sum_z += poly->t_vertices[j].z;
     }
     poly->avg_z = sum_z / poly->num_vertices;
+
+    // avg_z doesn't seem to work after a perspective transform, so do perspective after
+    if (GLOBAL_PERSPECTIVE)
+    {
+        assert(GLOBAL_PERSPECTIVE_SET);
+        gpApplyPerspective(&temp, GLOBAL_NEAR, GLOBAL_FAR);
+        gpApplyTMatrixToCoord(poly, &temp);
+    }
   }
 
   // sort polygons by decreasing z (use average for now)
