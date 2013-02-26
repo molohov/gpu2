@@ -131,6 +131,7 @@ int main()
   gpSetFrustrum(1.0, 10.0);
   for (int i = 0; i < 16; i++) {
     gpTranslatePolyList(cube, 0.f, 0.f, 0.1f);
+    gpRotatePolyList(cube, 0.8f, 0.0f, 0.0f);
     gpRender(cube);
   }
   gpDisable(GP_PERSPECTIVE);

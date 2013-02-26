@@ -300,7 +300,12 @@ void gpRotatePoly(gpPoly *poly, float x, float y, float z)
 
 void gpRotatePolyList(gpPolyList *list, float x, float y, float z)
 {
+  float x_position = list->trans.m[3][0];
+  float y_position = list->trans.m[3][1];
+  float z_position = list->trans.m[3][2];
+  gpTranslatePolyListOrigin(list);
   gpApplyRotate(&list->trans, x, y, z);
+  gpTranslatePolyList(list, x_position, y_position, z_position);
 }
 
 void gpApplyPerspective(gpTMatrix *trans, float near, float far)
@@ -319,6 +324,14 @@ void gpPerspectivePoly(gpPoly *poly, float near, float far)
 void gpPerspectivePolyList(gpPolyList *list, float near, float far)
 {
   gpApplyPerspective(&list->trans, near, far);
+}
+
+void gpTranslatePolyListOrigin(gpPolyList *list)
+{
+    //try to revert all the translations away from original position
+    list->trans.m[3][0] = 0.f;
+    list->trans.m[3][1] = 0.f;
+    list->trans.m[3][2] = 0.f;
 }
 
 void gpClearTMatrixPoly(gpPoly *poly)
