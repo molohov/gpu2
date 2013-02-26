@@ -61,6 +61,7 @@ void gpRotatePoly(gpPoly *poly, float x, float y, float z);
 void gpRotatePolyList(gpPolyList *list, float x, float y, float z);
 void gpPerspectivePoly(gpPoly *poly, float near, float far);
 void gpPerspectivePolyList(gpPolyList *list, float near, float far);
+void gpTranslatePolyListOrigin(gpPolyList *list);
 
 void gpClearTMatrixPoly(gpPoly *poly);
 void gpClearTMatrixPolyList(gpPolyList *list);
