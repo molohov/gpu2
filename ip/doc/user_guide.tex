@@ -1,6 +1,8 @@
 \documentclass[12pt]{article}
+\usepackage{graphicx}
 \title{User Guide: HDMI output peripheral}
 \author{Ana Klimovic, Bryce Long, Victor Zhang}
+
 
 \begin{document}
   \maketitle
@@ -17,10 +19,44 @@
     \item Create a new Xilinx C Project and select Empty Application. Also create a new BSP project.
     \item Copy the source files from \textbf {ip\textbackslash{}workspace\textbackslash{}hdmi\_out\_test\textbackslash{}src} including \textbf {lscript.ld}, the linker file, into your Xilinx C Project.
     \item Compile the project and Program the FPGA using the \textit {.elf} file you just compiled.
-    \item If you have the UART connected, you should see \texttt {passed} being printed. This checks that the off-chip memory is connected properly. You should see an animation on the screen:
+    \item If you have the UART connected, you should see \texttt {passed} being printed. This checks that the off-chip memory is connected properly. On the monitor, you should see an animation of a colourful gradient, slowly being covered with white pixels. This animation cycles continuously.
+      \begin{figure}[h!]
+        \centering
+        \fbox{\includegraphics[width=6in]{ref1.jpg}}
+        \caption{The start of the correct animation (1280x720, RGB888x)}
+      \end{figure}
+      \newpage
+      \begin{figure}[h!]
+        \centering
+        \fbox{\includegraphics[width=6in]{ref2.jpg}}
+        \caption{Later on in the animation (1280x720, RGB888x)}
+      \end{figure}
   \end{enumerate}
   \section{Block Diagram}
-  Here is a block diagram of how the HDMI output peripheral works:
+  This sections presents several block diagrams to illustrate how the HDMI output peripheral
+  works. Figure 2 shows the system architecture involving the MicroBlaze,
+  memory, the AXI bus interconnect, the screen and how they interact with the HDMI out IP.
+  Figure 4 zooms in on the HDMI IP itself, showing the main blocks the IP is
+  composed of. Finally, Figure 5 shows the detailed implementation of the
+  user logic that forms the IP.
+	\begin{figure}
+	\centering
+	\fbox{\includegraphics[width=5in] {hdmi_out_fig_system.jpg}}
+	\caption{System Integration Block Diagram}
+	\end{figure}
+
+
+	\begin{figure}
+	\centering
+	\fbox{\includegraphics[width=5in] {hdmi_out_fig_ip.jpg}}
+	\caption{IP Block Diagram}
+	\end{figure}
+
+	\begin{figure}
+	\centering
+	\fbox{\includegraphics[width=5in] {hdmi_out_fig_userlogic.jpg}}
+	\caption{User Logic block diagram}
+	\end{figure}
   \section{Setting parameters}
   To change resolution, or to change the colour format, open XPS and change the parameters on the hdmi\_out core. \textbf {HDMI\_HRES} refers to the horizontal resolution. For example, 1280 refers to a resolution of 1280x720. \textbf {HDMI\_NUM\_BYTES\_PER\_PIXEL} refers to the colour format. 2 refers to RGB565 and 4 refers to RGB888x. Note that 640x480 and 800x600 need an input clock of 25MHz, while the 1280x720 resolution needs an input clock of 75MHz. The two projects have the correct clock setup. If you change the parameters, you may also need to change the software. Note that line stride is specified in pixels, so line stride may not need to change if only the colour format is different.
   \section{Software registers}
@@ -30,4 +66,8 @@
     \item[Software register 2] This is the enable register. Set it to 1 to enable drawing from the specified frame address.
   \end{description}
   See the C code example in \textbf {ip\textbackslash{}workspace\textbackslash{}hdmi\_out\_test\textbackslash{}src\textbackslash{}main.c} for an example on how to set the software registers.
+  \section{Caveats}
+  Note, the RESET button does not work in resetting the design. The video output will not be stable.
+  \section{Contact}
+  For more information, feature requests, or bug reports, contact us at\\ \textbf {ece532gpu2@googlegroups.com}. For the latest version of the code, go to \textbf {https://github.com/molohov/gpu2} and click ZIP for 1280x720, RGB888x or go to \textbf {https://github.com/molohov/gpu2/tree/bryce\_25mhz} and click ZIP for 640x480, RGB565.
 \end{document}

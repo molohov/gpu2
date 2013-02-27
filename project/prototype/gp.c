@@ -300,7 +300,12 @@ void gpRotatePoly(gpPoly *poly, float x, float y, float z)
 
 void gpRotatePolyList(gpPolyList *list, float x, float y, float z)
 {
+  float x_position = list->trans.m[3][0];
+  float y_position = list->trans.m[3][1];
+  float z_position = list->trans.m[3][2];
+  gpTranslatePolyListOrigin(list);
   gpApplyRotate(&list->trans, x, y, z);
+  gpTranslatePolyList(list, x_position, y_position, z_position);
 }
 
 void gpApplyPerspective(gpTMatrix *trans, float near, float far)
@@ -319,6 +324,14 @@ void gpPerspectivePoly(gpPoly *poly, float near, float far)
 void gpPerspectivePolyList(gpPolyList *list, float near, float far)
 {
   gpApplyPerspective(&list->trans, near, far);
+}
+
+void gpTranslatePolyListOrigin(gpPolyList *list)
+{
+    //try to revert all the translations away from original position
+    list->trans.m[3][0] = 0.f;
+    list->trans.m[3][1] = 0.f;
+    list->trans.m[3][2] = 0.f;
 }
 
 void gpClearTMatrixPoly(gpPoly *poly)
@@ -387,25 +400,28 @@ void gpRender(gpPolyList *list)
   gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
   gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
 
-  // compute avg_z for each polygon
   for (int i = 0; i < list->num_polys; i++) {
     gpPoly *poly = list->polys[i];
 
     // apply transformations
     gpTMatrix temp;
     gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4);
-    if (GLOBAL_PERSPECTIVE)
-    {
-        assert(GLOBAL_PERSPECTIVE_SET);
-        gpApplyPerspective(&temp, GLOBAL_NEAR, GLOBAL_FAR);
-    }
     gpApplyTMatrixToCoord(poly, &temp);
 
+    // compute avg_z for each polygon
     float sum_z = 0.f;
     for (int j = 0; j < poly->num_vertices; j++) {
       sum_z += poly->t_vertices[j].z;
     }
     poly->avg_z = sum_z / poly->num_vertices;
+
+    // avg_z doesn't seem to work after a perspective transform, so do perspective after
+    if (GLOBAL_PERSPECTIVE)
+    {
+        assert(GLOBAL_PERSPECTIVE_SET);
+        gpApplyPerspective(&temp, GLOBAL_NEAR, GLOBAL_FAR);
+        gpApplyTMatrixToCoord(poly, &temp);
+    }
   }
 
   // sort polygons by decreasing z (use average for now)
