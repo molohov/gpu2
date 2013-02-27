@@ -1,1 +1,12 @@
-The digilent install files and a reference manual are in the digilent/ folder. Tutorials 1-3 are in the labs/ folder.
+Welcome to our source repository for ECE532. This repository contains IP#3, a project that can display HDMI video output from off-chip memory. This repository also contains a Graphics Processing Unit (GPU), implemented on an FPGA. IP#3 is in ip/hdmi_out and the GPU is under project.
+
+Directory structure:
+  * digilent/ contains the Digilent support packages and the Atyls reference manual
+  * ip/ contains files for our IP#3 project (1280x720 resolution and RGB888x)
+    * ip/doc contains the user guide for our IP#3 project
+    * ip/hdmi_out contains a demonstration project and our HDMI output IP
+    * ip/workspace contains the C code for the demonstration project of IP#3
+  * labs/ contains tutorials 1-5 and the lab test
+  * project/prototype contains the software prototype for our GPU project, which can also run on the HDMI output project
+
+By: Ana Klimovic, Bryce Long and Victor Zhang
