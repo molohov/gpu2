@@ -2,7 +2,7 @@ Welcome to our source repository for ECE532. This repository contains IP#3, a pr
 
 Directory structure:
   * digilent/ contains the Digilent support packages and the Atyls reference manual
-  * ip/ contains files for our IP#3 project (1280x720 resolution and RGB888x)
+  * ip/ contains files for our IP#3 project (640x480 resolution and RGB565)
     * ip/doc contains the user guide for our IP#3 project
     * ip/hdmi_out contains a demonstration project and our HDMI output IP
     * ip/workspace contains the C code for the demonstration project of IP#3
