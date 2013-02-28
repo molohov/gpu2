@@ -473,44 +473,32 @@ void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
 {
     gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
     gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
-    int y0 = v1->y;
-    int y1 = v2->y;
+    // flip y
+    int y0 = GP_YRES - 1 - v1->y;
+    int y1 = GP_YRES - 1 - v2->y;
     int x0 = v1->x;
     int x1 = v2->x;
-    // let's go right to left first
-    if (x0 > x1)
-    {
-        swap (&x0, &x1);
-        swap (&y0, &y1);
-    }
-    int y = y0;
-    int dy = y1 - y0;
-    int dx = x1 - x0;
-    int x = x0;
-    int xmax = x1;
-    //check for steep line
-    int steep = ((y1-y0)/(x1-x0) > 1);
-    if (steep)
-    {
-        x = y0;
-        xmax = y1;
-        swap(&dy, &dx);
-    }
-    int f = 2*dy - dx;
-    for (; x <= xmax; x++)
-    {
-        if (steep)
-            gpSetImagePixel(img, y, x, color->r, color->g, color->b);
-        else
-            gpSetImagePixel(img, x, y, color->r, color->g, color->b);
-        if (f < 0) 
-            f += 2*dy;
-        else
-        {
-            y++;
-            f += 2 * (dy - dx);
+
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx-dy;
+
+    while (1) {
+        gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
+        if (x0 == x1 && y0 == y1) break;
+        int e2 = 2*err;
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
         }
     }
+
     gpDisplayImage(img);
     gpReleaseImage(&img);
 }

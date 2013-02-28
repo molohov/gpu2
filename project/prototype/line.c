@@ -26,4 +26,24 @@ int main()
     v1 = (gpVertex2Fixed){0, 0};
     v2 = (gpVertex2Fixed){600, 60};
     gpLine(&v2, &v1, &color);
+
+    //Create a -y steep line
+    v1 = (gpVertex2Fixed){0, 600};
+    v2 = (gpVertex2Fixed){10, 0};
+    gpLine(&v1, &v2, &color);
+
+    //Create a -x steep line
+    v1 = (gpVertex2Fixed){0, 60};
+    v2 = (gpVertex2Fixed){600, 0};
+    gpLine(&v1, &v2, &color);
+
+    //Create a -y steep line in reverse
+    v1 = (gpVertex2Fixed){0, 600};
+    v2 = (gpVertex2Fixed){10, 0};
+    gpLine(&v2, &v1, &color);
+
+    //Create a -x steep line in reverse
+    v1 = (gpVertex2Fixed){0, 60};
+    v2 = (gpVertex2Fixed){600, 0};
+    gpLine(&v2, &v1, &color);
 }
