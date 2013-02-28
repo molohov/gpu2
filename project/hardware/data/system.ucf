@@ -1,0 +1,25 @@
+#
+# pin constraints
+#
+NET GCLK LOC = "L15"  |  IOSTANDARD = "LVCMOS33";
+NET RESET LOC = "T15"  |  IOSTANDARD = "LVCMOS33"  |  TIG;
+NET RS232_Uart_1_sin LOC = "A16"  |  IOSTANDARD = "LVCMOS33";
+NET RS232_Uart_1_sout LOC = "B16"  |  IOSTANDARD = "LVCMOS33";
+NET rzq IOSTANDARD = "LVCMOS18_JEDEC";
+NET zio IOSTANDARD = "LVCMOS18_JEDEC";
+#HDMI Out Ports
+NET "hdmi_out_0_TMDS_pin(0)"  	LOC = "D8" | IOSTANDARD = TMDS_33 ; # Blue
+NET "hdmi_out_0_TMDSB_pin(0)"  LOC = "C8" | IOSTANDARD = TMDS_33 ;
+NET "hdmi_out_0_TMDS_pin(2)"  	LOC = "B8" | IOSTANDARD = TMDS_33 ; # Red
+NET "hdmi_out_0_TMDSB_pin(2)"  LOC = "A8" | IOSTANDARD = TMDS_33 ;
+NET "hdmi_out_0_TMDS_pin(1)"  	LOC = "C7" | IOSTANDARD = TMDS_33 ; # Green
+NET "hdmi_out_0_TMDSB_pin(1)"  LOC = "A7" | IOSTANDARD = TMDS_33 ;
+NET "hdmi_out_0_TMDS_pin(3)"  	LOC = "B6" | IOSTANDARD = TMDS_33 ; # Clock
+NET "hdmi_out_0_TMDSB_pin(3)"  LOC = "A6" | IOSTANDARD = TMDS_33 ;
+#
+# additional constraints
+#
+
+NET "GCLK" TNM_NET = sys_clk_pin;
+TIMESPEC TS_sys_clk_pin = PERIOD sys_clk_pin 100000 kHz;
+

@@ -1,0 +1,20 @@
+##############################################################################
+## Filename:          C:/cygwin/home/Victor/ece532/gpu2/ip/ddr2/pcores/hdmi_out_v1_00_a/data/hdmi_out_v2_1_0.pao
+## Description:       Peripheral Analysis Order
+## Date:              Wed Jan 30 10:00:37 2013 (by Create and Import Peripheral Wizard)
+##############################################################################
+
+lib proc_common_v3_00_a  all 
+lib axi_lite_ipif_v1_01_a  all 
+lib axi_master_burst_v1_00_a  all 
+lib hdmi_out_v1_00_a user_logic verilog
+lib hdmi_out_v1_00_a hdmi_out vhdl
+lib hdmi_out_v1_00_a convert_30to15_fifo verilog
+lib hdmi_out_v1_00_a DRAM16XN verilog
+lib hdmi_out_v1_00_a dvi_encoder verilog
+lib hdmi_out_v1_00_a dvi_out_native verilog
+lib hdmi_out_v1_00_a encode verilog
+lib hdmi_out_v1_00_a serdes_n_to_1 verilog
+lib hdmi_out_v1_00_a hdmi_core verilog
+lib hdmi_out_v1_00_a fill_fifo_fsm verilog
+lib hdmi_out_v1_00_a pulse_gen verilog
