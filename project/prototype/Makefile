@@ -1,9 +1,10 @@
-EXE=prototype
+EXES=prototype line
 CFLAG=-std=c99 -Os -lm `pkg-config --cflags --libs opencv` -D SW
 PROFFLAG=$(CFLAG) -g -pg -DGP_DISPLAY_TIMEOUT_IN_MS=1
 TARGET=main.c
+LINE=line.c
 
-all: $(EXE)
+all: $(EXES)
 
 display.o: display.c display.h
 	$(CC) -c display.c $(CFLAG)
@@ -11,17 +12,18 @@ display.o: display.c display.h
 gp.o: gp.c gp.h display.h
 	$(CC) -c gp.c $(CFLAG)
 
-$(EXE): $(TARGET) gp.h gp.o display.o
-	$(CC) $(TARGET) gp.o display.o $(CFLAG) -o $(EXE)
+prototype: $(TARGET) gp.h gp.o display.o
+	$(CC) $(TARGET) gp.o display.o $(CFLAG) -o $@
 
-prof: $(TARGET) gp.h gp.o display.o
-	$(CC) -c display.c $(PROFFLAG)
-	$(CC) -c gp.c $(PROFFLAG)
-	$(CC) $(TARGET) gp.o display.o $(PROFFLAG) -o $(EXE)
-	./$(EXE)
-	gprof $(EXE) > gprof.out
+line: $(LINE) gp.h gp.o display.o
+	$(CC) $(LINE) gp.o display.o $(CFLAG) -o $@
+
+prof: $(TARGET) gp.h display.h gp.c display.c
+	$(CC) $(TARGET) gp.c display.c $(PROFFLAG) -o $@
+	./$@
+	gprof $@ > gprof.out
 
 clean:
-	rm -rf $(EXE) *.o gmon.out gprof.out
+	rm -rf $(EXES) prof *.o gmon.out gprof.out
 
-.PHONY: all prof clean
+.PHONY: all clean

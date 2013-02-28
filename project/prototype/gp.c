@@ -478,7 +478,11 @@ void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
     int x0 = v1->x;
     int x1 = v2->x;
     // let's go right to left first
-    if (x0 > x1) swap (&x0, &x1);
+    if (x0 > x1)
+    {
+        swap (&x0, &x1);
+        swap (&y0, &y1);
+    }
     int y = y0;
     int dy = y1 - y0;
     int dx = x1 - x0;
