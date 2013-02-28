@@ -1,4 +1,6 @@
+#ifndef GP_DISPLAY_TIMEOUT_IN_MS
 #define GP_DISPLAY_TIMEOUT_IN_MS -1
+#endif
 
 #ifdef SW
 #include <cv.h>
