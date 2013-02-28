@@ -46,4 +46,14 @@ int main()
     v1 = (gpVertex2Fixed){0, 60};
     v2 = (gpVertex2Fixed){600, 0};
     gpLine(&v2, &v1, &color);
+
+    // vertical line
+    v1 = (gpVertex2Fixed){GP_XRES/2, 0};
+    v2 = (gpVertex2Fixed){GP_XRES/2, GP_YRES-1};
+    gpLine(&v2, &v1, &color);
+
+    // horizontal line
+    v1 = (gpVertex2Fixed){0, GP_YRES/2};
+    v2 = (gpVertex2Fixed){GP_XRES-1, GP_YRES/2};
+    gpLine(&v2, &v1, &color);
 }
