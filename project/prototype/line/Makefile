@@ -1,6 +1,6 @@
-EXE=prototype
+EXE=line
 CFLAG=-std=c99 -O3 -lm `pkg-config --cflags --libs opencv` -D SW #enable these for gprof -g -pg
-TARGET=main.c
+TARGET=line.c
 
 all: $(EXE)
 

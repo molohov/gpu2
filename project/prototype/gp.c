@@ -15,13 +15,6 @@
 #define assert(x)
 #endif
 
-/* Struct definitions */
-
-// 2-d fixed point for rendering
-typedef struct {
-  int x, y;
-} gpVertex2Fixed;
-
 // global perspective enable
 int GLOBAL_PERSPECTIVE = 0;
 int GLOBAL_PERSPECTIVE_SET = 0;
@@ -464,3 +457,51 @@ void gpSetFrustrum(float near, float far)
     GLOBAL_FAR = far;
 }
 
+void swap (int * a, int * b)
+{
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
+{
+    gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
+    gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
+    int y0 = v1->y;
+    int y1 = v2->y;
+    int x0 = v1->x;
+    int x1 = v2->x;
+    // let's go right to left first
+    if (x0 > x1) swap (&x0, &x1);
+    int y = y0;
+    int dy = y1 - y0;
+    int dx = x1 - x0;
+    int x = x0;
+    int xmax = x1;
+    //check for steep line
+    int steep = ((y1-y0)/(x1-x0) > 1);
+    if (steep)
+    {
+        x = y0;
+        xmax = y1;
+        swap(&dy, &dx);
+    }
+    int f = 2*dy - dx;
+    for (; x <= xmax; x++)
+    {
+        if (steep)
+            gpSetImagePixel(img, y, x, color->r, color->g, color->b);
+        else
+            gpSetImagePixel(img, x, y, color->r, color->g, color->b);
+        if (f < 0) 
+            f += 2*dy;
+        else
+        {
+            y++;
+            f += 2 * (dy - dx);
+        }
+    }
+    gpDisplayImage(img);
+    gpReleaseImage(&img);
+}
