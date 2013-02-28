@@ -7,6 +7,8 @@ Directory structure:
     * ip/hdmi_out contains a demonstration project and our HDMI output IP
     * ip/workspace contains the C code for the demonstration project of IP#3
   * labs/ contains tutorials 1-5 and the lab test
-  * project/prototype contains the software prototype for our GPU project, which can also run on the HDMI output project
+  * project/ contains files for our final GPU project
+    * project/hardware contains the hardware project
+    * project/software contains the software for our GPU project, and the same software can run on the hardware on a Microblaze or on a Linux computer with openCV installed
 
 By: Ana Klimovic, Bryce Long and Victor Zhang
