@@ -21,7 +21,7 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
   cvSet(img->img, CV_RGB(r, g, b), NULL);
 }
 
-void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
+inline void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
 {
   assert(x >= 0 && x < img->xres);
   assert(y >= 0 && y < img->yres);
@@ -92,7 +92,7 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
   }
 }
 
-void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
+inline void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
 {
   volatile unsigned char *ptr = img->imageData;
   ptr += (y * img->xres + x) * BYTES_PER_PIXEL;

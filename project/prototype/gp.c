@@ -131,12 +131,12 @@ void gpDeletePoly(gpPoly *poly)
   free(poly);
 }
 
-int cross_product(int x, int y, int ax, int ay, int bx, int by)
+inline int cross_product(int x, int y, int ax, int ay, int bx, int by)
 {
   return (x - bx) * (ay - by) - (ax - bx) * (y - by);
 }
 
-bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
+inline bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
 {
   int ax = vertices[0].x;
   int ay = vertices[0].y;
