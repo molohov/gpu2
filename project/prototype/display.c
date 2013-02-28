@@ -113,9 +113,11 @@ void gpDisplayImage(gpImg *img)
     hdmi_addr[2] = 1; // go
     initialized = true;
   } else {
-    // wait for user input
-    while (!*(volatile int *)(XPAR_RS232_UART_1_BASEADDR))
-      ;
+    if (GP_DISPLAY_TIMEOUT_IN_MS == -1) {
+      // wait for user input
+      while (!*(volatile int *)(XPAR_RS232_UART_1_BASEADDR))
+        ;
+    }
 
     hdmi_addr[1] = (int)img->imageData; // set frame base address
   }
