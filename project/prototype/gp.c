@@ -372,6 +372,11 @@ void gpRenderPoly(gpPoly *poly)
   gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
 
   // apply transformations
+  if (GLOBAL_PERSPECTIVE)
+  {
+    assert(GLOBAL_PERSPECTIVE_SET);
+    gpApplyPerspective(&poly->trans, GLOBAL_NEAR, GLOBAL_FAR);
+  }
   gpApplyTMatrixToCoord(poly, &poly->trans);
 
   // fill polygon algorithm
