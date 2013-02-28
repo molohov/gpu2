@@ -7,6 +7,11 @@
 
 /* Struct definitions */
 
+// 2-d fixed point for rendering
+typedef struct {
+  int x, y;
+} gpVertex2Fixed;
+
 //  3-d coordinate
 typedef struct {
   float x, y, z;
@@ -71,3 +76,4 @@ void gpRender(gpPolyList *list);
 void gpEnable(int gpFunction);
 void gpDisable(int gpFunction);
 void gpSetFrustrum(float near, float far);
+void gpLine(gpVertex2Fixed *v1, gpVertex2Fixed *v2, gpColor *color);

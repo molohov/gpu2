@@ -15,13 +15,6 @@
 #define assert(x)
 #endif
 
-/* Struct definitions */
-
-// 2-d fixed point for rendering
-typedef struct {
-  int x, y;
-} gpVertex2Fixed;
-
 // global perspective enable
 int GLOBAL_PERSPECTIVE = 0;
 int GLOBAL_PERSPECTIVE_SET = 0;
@@ -372,6 +365,11 @@ void gpRenderPoly(gpPoly *poly)
   gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
 
   // apply transformations
+  if (GLOBAL_PERSPECTIVE)
+  {
+    assert(GLOBAL_PERSPECTIVE_SET);
+    gpApplyPerspective(&poly->trans, GLOBAL_NEAR, GLOBAL_FAR);
+  }
   gpApplyTMatrixToCoord(poly, &poly->trans);
 
   // fill polygon algorithm
@@ -464,3 +462,43 @@ void gpSetFrustrum(float near, float far)
     GLOBAL_FAR = far;
 }
 
+void swap (int * a, int * b)
+{
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
+{
+    gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
+    gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
+    // flip y
+    int y0 = GP_YRES - 1 - v1->y;
+    int y1 = GP_YRES - 1 - v2->y;
+    int x0 = v1->x;
+    int x1 = v2->x;
+
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx-dy;
+
+    while (1) {
+        gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
+        if (x0 == x1 && y0 == y1) break;
+        int e2 = 2*err;
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+
+    gpDisplayImage(img);
+    gpReleaseImage(&img);
+}

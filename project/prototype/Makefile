@@ -1,7 +1,10 @@
-EXE=prototype
-CFLAG=-std=c99 -O3 -lm `pkg-config --cflags --libs opencv` -D SW
+EXES=prototype line
+CFLAG=-std=c99 -Os -lm `pkg-config --cflags --libs opencv` -D SW
+PROFFLAG=$(CFLAG) -g -pg -DGP_DISPLAY_TIMEOUT_IN_MS=1
+TARGET=main.c
+LINE=line.c
 
-all: $(EXE)
+all: $(EXES)
 
 display.o: display.c display.h
 	$(CC) -c display.c $(CFLAG)
@@ -9,10 +12,18 @@ display.o: display.c display.h
 gp.o: gp.c gp.h display.h
 	$(CC) -c gp.c $(CFLAG)
 
-$(EXE): main.c gp.h gp.o display.o
-	$(CC) main.c gp.o display.o $(CFLAG) -o $(EXE)
+prototype: $(TARGET) gp.h gp.o display.o
+	$(CC) $(TARGET) gp.o display.o $(CFLAG) -o $@
+
+line: $(LINE) gp.h gp.o display.o
+	$(CC) $(LINE) gp.o display.o $(CFLAG) -o $@
+
+prof: $(TARGET) gp.h display.h gp.c display.c
+	$(CC) $(TARGET) gp.c display.c $(PROFFLAG) -o $@
+	./$@
+	gprof $@ > gprof.out
 
 clean:
-	rm -rf $(EXE) *.o
+	rm -rf $(EXES) prof *.o gmon.out gprof.out
 
 .PHONY: all clean
