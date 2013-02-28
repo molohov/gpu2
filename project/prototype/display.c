@@ -2,6 +2,8 @@
 
 #ifdef SW
 
+#include <assert.h>
+
 #include <cv.h>
 #include <highgui.h>
 
@@ -21,6 +23,9 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
 
 void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
 {
+  assert(x >= 0 && x < img->xres);
+  assert(y >= 0 && y < img->yres);
+
   unsigned char *ptr = img->img->imageData;
   ptr += (y * img->xres + x)*3;
 
