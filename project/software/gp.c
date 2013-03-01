@@ -499,41 +499,97 @@ void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, int y_bottom, gpEdgeL
 
 void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
 {
-    int y_top = 0;
-    int y_bottom = GP_YRES;
+    int y_min = GP_YRES;
+    int start_index = -1;
 
     for (int i = 0; i < num_vertices; i++) {
-        y_top = MAX(y_top, vertices[i].y);
-        y_bottom = MIN(y_bottom, vertices[i].y);
+        if (vertices[i].y < y_min) {
+            y_min = vertices[i].y;
+            start_index = i;
+        }
     }
 
-    int y_traverse = y_top - y_bottom;
+    int left_index = start_index, right_index = start_index;
 
-    gpEdgeListElement *edge_list = malloc((y_traverse+1) * sizeof(gpEdgeListElement));
-
-    for (int i = 0; i <= y_traverse; i++) {
-        edge_list[i].x[0] = -1;
-        edge_list[i].x[1] = -1;
-    }
-
-    // for each edge, fill the active edge list
-    fillEdgeList(&vertices[num_vertices - 1], &vertices[0], y_bottom, edge_list);
-    for (int i = 1; i < num_vertices; i++) {
-        fillEdgeList(&vertices[i-1], &vertices[i], y_bottom, edge_list);
-    }
-
-    // draw the edge list!
-    int y = GP_YRES - 1 - y_bottom;
     unsigned char r = color->r;
     unsigned char g = color->g;
     unsigned char b = color->b;
     
-    for (int i=0; i <= y_traverse; i++, y--)
-    {
-        gpSetImageHLine(img, y, edge_list[i].x[0], edge_list[i].x[1], r, g, b); 
-    }
+    int y = vertices[start_index].y;
 
-    free(edge_list);
+    int y_left_0 = y, y_left_1 = y;
+    int y_right_0 = y, y_right_1 = y;
+    int x_left_0 = vertices[start_index].x;
+    int x_left_1 = x_left_0;
+    int x_right_0 = x_left_0;
+    int x_right_1 = x_left_0;
+
+    int left_dx = 0, right_dx = 0;
+    int left_dy = 0, right_dy = 0;
+    int left_sx = 0, right_sx = 0;
+    int left_err = 0, right_err = 0;
+
+    do {
+        if (vertices[left_index].y <= y) {
+            left_index = left_index - 1;
+            if (left_index < 0) left_index = num_vertices - 1;
+
+            y_left_0 = y_left_1;
+            x_left_0 = x_left_1;
+            y_left_1 = vertices[left_index].y;
+            x_left_1 = vertices[left_index].x;
+            left_dx = abs(x_left_1 - x_left_0);
+            left_dy = y_left_1 - y_left_0;
+            left_sx = (x_left_0 < x_left_1) ? 1 : -1;
+            left_err = left_dx - left_dy;
+        }
+        if (vertices[right_index].y <= y) {
+            if (left_index == right_index) break;
+
+            right_index = right_index + 1;
+            if (right_index == num_vertices) right_index = 0;
+
+            y_right_0 = y_right_1;
+            x_right_0 = x_right_1;
+            y_right_1 = vertices[right_index].y;
+            x_right_1 = vertices[right_index].x;
+            right_dx = abs(x_right_1 - x_right_0);
+            right_dy = y_right_1 - y_right_0;
+            right_sx = (x_right_0 < x_right_1) ? 1 : -1;
+            right_err = right_dx - right_dy;
+        }
+
+        do {
+            // left
+            while (1) {
+                int e2 = 2*left_err;
+                if (y == y_left_1 && x_left_0 == x_left_1) break;
+                if (e2 > -left_dy) {
+                    left_err -= left_dy;
+                    x_left_0 += left_sx;
+                }
+                if (e2 < left_dx) {
+                    left_err += left_dx;
+                    break;
+                }
+            }
+            // right
+            while (1) {
+                int e2 = 2*right_err;
+                if (y == y_right_1 && x_right_0 == x_right_1) break;
+                if (e2 > -right_dy) {
+                    right_err -= right_dy;
+                    x_right_0 += right_sx;
+                }
+                if (e2 < right_dx) {
+                    right_err += right_dx;
+                    break;
+                }
+            }
+            gpSetImageHLine(img, GP_YRES - 1 - y, x_left_0, x_right_0, r, g, b);
+            y++;
+        } while (y <= vertices[left_index].y && y <= vertices[right_index].y && y < GP_YRES);
+    } while (left_index != right_index && y < GP_YRES);
 }
 
 void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
