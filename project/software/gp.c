@@ -139,27 +139,6 @@ void gpDeletePoly(gpPoly *poly)
   free(poly);
 }
 
-inline int cross_product(int x, int y, int ax, int ay, int bx, int by)
-{
-  return (x - bx) * (ay - by) - (ax - bx) * (y - by);
-}
-
-inline bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
-{
-  int ax = vertices[0].x;
-  int ay = vertices[0].y;
-  int bx = vertices[1].x;
-  int by = vertices[1].y;
-  int cx = vertices[2].x;
-  int cy = vertices[2].y;
-
-  int cp1 = cross_product(x, y, ax, ay, bx, by);
-  int cp2 = cross_product(x, y, bx, by, cx, cy);
-  int cp3 = cross_product(x, y, cx, cy, ax, ay);
-
-  return (cp1 <= 0 && cp2 <= 0 && cp3 <= 0) || (cp1 >= 0 && cp2 >= 0 && cp3 >= 0);
-}
-
 void gpMatrixMult(float *x, float *y, float *result, int a, int b)
 {
   // Note: since y is always a square matrix, this computes result = x yT, so the input for y is a transposed matrix!
