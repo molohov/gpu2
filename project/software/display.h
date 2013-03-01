@@ -22,6 +22,8 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b);
 
 void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b);
 
+void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b);
+
 void gpDisplayImage(gpImg *img);
 
 void gpReleaseImage(gpImg **img);

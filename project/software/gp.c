@@ -502,3 +502,78 @@ void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
     gpDisplayImage(img);
     gpReleaseImage(&img);
 }
+
+void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpEdgeListElement *edge_list)
+{
+    // do Bresenham's, except on the edge list now
+    int y0 = v1->y;
+    int y1 = v2->y;
+    int x0 = v1->x;
+    int x1 = v2->x;
+
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx-dy;
+
+    while (1) {
+        if (edge_list[y0].x[0] == 0)
+            edge_list[y0].x[0] = x0;
+        else
+            edge_list[y0].x[1] = x0;
+        if (x0 == x1 && y0 == y1) break;
+        int e2 = 2*err;
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
+void gpTriangle(gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpVertex2Fixed *v3, gpColor *color)
+{
+    int y_top = MAX(v1->y, MAX(v2->y, v3->y));
+    int y_bottom = MIN(v1->y, MIN(v2->y, v3->y));
+    int x_right = MAX(v1->x, MAX(v2->x, v3->x));
+    int x_left = MIN(v1->x, MIN(v2->x, v3->x));
+
+    int y_traverse = y_top - y_bottom;
+
+    //create temporary vertices that are shifted down to y = 0
+    gpVertex2Fixed v1_shifted = {v1->x, v1->y - y_bottom};
+    gpVertex2Fixed v2_shifted = {v2->x, v2->y - y_bottom};
+    gpVertex2Fixed v3_shifted = {v3->x, v3->y - y_bottom};
+
+    gpEdgeListElement *edge_list = calloc(y_traverse+1, sizeof(gpEdgeListElement));
+
+    // for each edge, fill the active edge list
+    fillEdgeList(&v2_shifted, &v3_shifted, edge_list);
+    fillEdgeList(&v1_shifted, &v3_shifted, edge_list);
+    fillEdgeList(&v1_shifted, &v2_shifted, edge_list);
+
+    // draw the edge list!
+    gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
+    gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
+    int y = GP_YRES - 1 - y_bottom;
+    unsigned char r = color->r;
+    unsigned char g = color->g;
+    unsigned char b = color->b;
+    
+    for (int i=0; i < y_traverse; i++, y--)
+    {
+        if (y < 720 && y > 700)
+            printf("edge_list[i].x[0] = %d, edge_list[i].x[1] = %d\n", edge_list[i].x[0], edge_list[i].x[1]);
+        gpSetImageHLine(img, y, edge_list[i].x[0], edge_list[i].x[1], r, g, b); 
+    }
+
+    free(edge_list);
+
+    //draw the image!
+    gpDisplayImage(img);
+    gpReleaseImage(&img);
+}

@@ -5,7 +5,7 @@
 /* User program */
 int main()
 {
-    gpColor color = {255, 255, 0};
+    gpColor color = {0, 255, 0};
 
     //Create a y steep line
     gpVertex2Fixed v1 = {0, 0};

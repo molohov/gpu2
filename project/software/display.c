@@ -35,6 +35,28 @@ inline void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned 
   ptr[2] = r;
 }
 
+inline void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b)
+{
+  assert(x1 >= 0 && x1 < img->xres);
+  assert(x2 >= 0 && x2 < img->xres);
+  assert(y >= 0 && y < img->yres);
+
+  if (x1 > x2)
+  {
+      int tmp = x1;
+      x1 = x2;
+      x2 = tmp;
+  }
+
+  unsigned char *ptr = img->img->imageData;
+  ptr += (y * img->xres + x1)*3;
+
+  for (int i = x1; i <= x2; i++)
+  {
+      gpSetImagePixel(img, i, y, r, g, b);
+  }
+}
+
 void gpDisplayImage(gpImg *img)
 {
   cvNamedWindow("GP display", CV_WINDOW_AUTOSIZE);
