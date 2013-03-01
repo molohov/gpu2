@@ -503,11 +503,11 @@ void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
     gpReleaseImage(&img);
 }
 
-void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpEdgeListElement *edge_list)
+void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, int y_bottom, gpEdgeListElement *edge_list)
 {
-    // do Bresenham's, except on the edge list now
-    int y0 = v1->y;
-    int y1 = v2->y;
+    // do Bresenham's, except on the edge list now (and subtract y_bottom)
+    int y0 = v1->y - y_bottom;
+    int y1 = v2->y - y_bottom;
     int x0 = v1->x;
     int x1 = v2->x;
 
@@ -516,12 +516,16 @@ void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpEdgeListElement *ed
     int sx = (x0 < x1) ? 1 : -1;
     int sy = (y0 < y1) ? 1 : -1;
     int err = dx-dy;
+    bool new_y = true;
 
     while (1) {
-        if (edge_list[y0].x[0] == 0)
-            edge_list[y0].x[0] = x0;
-        else
-            edge_list[y0].x[1] = x0;
+        if (new_y){
+            if (edge_list[y0].x[0] == -1)
+                edge_list[y0].x[0] = x0;
+            else if (edge_list[y0].x[1] == -1)
+                edge_list[y0].x[1] = x0;
+        }
+        new_y = false;
         if (x0 == x1 && y0 == y1) break;
         int e2 = 2*err;
         if (e2 > -dy) {
@@ -531,30 +535,35 @@ void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpEdgeListElement *ed
         if (e2 < dx) {
             err += dx;
             y0 += sy;
+            new_y = true;
         }
     }
 }
 
-void gpTriangle(gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpVertex2Fixed *v3, gpColor *color)
+void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
 {
-    int y_top = MAX(v1->y, MAX(v2->y, v3->y));
-    int y_bottom = MIN(v1->y, MIN(v2->y, v3->y));
-    int x_right = MAX(v1->x, MAX(v2->x, v3->x));
-    int x_left = MIN(v1->x, MIN(v2->x, v3->x));
+    int y_top = 0;
+    int y_bottom = GP_YRES;
+
+    for (int i = 0; i < num_vertices; i++) {
+        y_top = MAX(y_top, vertices[i].y);
+        y_bottom = MIN(y_bottom, vertices[i].y);
+    }
 
     int y_traverse = y_top - y_bottom;
 
-    //create temporary vertices that are shifted down to y = 0
-    gpVertex2Fixed v1_shifted = {v1->x, v1->y - y_bottom};
-    gpVertex2Fixed v2_shifted = {v2->x, v2->y - y_bottom};
-    gpVertex2Fixed v3_shifted = {v3->x, v3->y - y_bottom};
+    gpEdgeListElement *edge_list = malloc((y_traverse+1) * sizeof(gpEdgeListElement));
 
-    gpEdgeListElement *edge_list = calloc(y_traverse+1, sizeof(gpEdgeListElement));
+    for (int i = 0; i <= y_traverse; i++) {
+        edge_list[i].x[0] = -1;
+        edge_list[i].x[1] = -1;
+    }
 
     // for each edge, fill the active edge list
-    fillEdgeList(&v2_shifted, &v3_shifted, edge_list);
-    fillEdgeList(&v1_shifted, &v3_shifted, edge_list);
-    fillEdgeList(&v1_shifted, &v2_shifted, edge_list);
+    fillEdgeList(&vertices[num_vertices - 1], &vertices[0], y_bottom, edge_list);
+    for (int i = 1; i < num_vertices; i++) {
+        fillEdgeList(&vertices[i-1], &vertices[i], y_bottom, edge_list);
+    }
 
     // draw the edge list!
     gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
@@ -564,7 +573,7 @@ void gpTriangle(gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpVertex2Fixed *v3, gpC
     unsigned char g = color->g;
     unsigned char b = color->b;
     
-    for (int i=0; i < y_traverse; i++, y--)
+    for (int i=0; i <= y_traverse; i++, y--)
     {
         gpSetImageHLine(img, y, edge_list[i].x[0], edge_list[i].x[1], r, g, b); 
     }

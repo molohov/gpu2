@@ -83,5 +83,5 @@ void gpDisable(int gpFunction);
 void gpSetFrustrum(float near, float far);
 void gpLine(gpVertex2Fixed *v1, gpVertex2Fixed *v2, gpColor *color);
 
-void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpEdgeListElement *edge_list);
-void gpTriangle(gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpVertex2Fixed *v3, gpColor *color);
+void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, int y_bottom, gpEdgeListElement *edge_list);
+void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
