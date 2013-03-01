@@ -1,6 +1,6 @@
 EXES=prototype line tri
-CFLAG=-std=c99 -Os -lm `pkg-config --cflags --libs opencv` -D SW
-PROFFLAG=$(CFLAG) -g -pg -DGP_DISPLAY_TIMEOUT_IN_MS=1
+CFLAG=-g -std=c99 -Os -lm `pkg-config --cflags --libs opencv` -D SW
+PROFFLAG=$(CFLAG) -pg -DGP_DISPLAY_TIMEOUT_IN_MS=1
 TARGET=main.c
 LINE=line.c
 TRI=triangle.c
