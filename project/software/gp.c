@@ -487,7 +487,7 @@ void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, int y_bottom, gpEdgeL
     bool new_y = true;
 
     while (1) {
-        if (new_y){
+        if (new_y || (x0 == x1 && y0 == y1)) {
             if (edge_list[y0].x[0] == edge_list[y0].x[1])
                 edge_list[y0].x[0] = x0;
             else if (edge_list[y0].x[1] == -1)
@@ -503,7 +503,7 @@ void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, int y_bottom, gpEdgeL
         if (e2 < dx) {
             err += dx;
             y0 += sy;
-            new_y = true;
+            new_y = (y0 != y1);
         }
     }
 }
