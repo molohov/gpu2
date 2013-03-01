@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "gp.h"
 #define PERSPECTIVE_TEST
 

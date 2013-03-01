@@ -4,6 +4,7 @@ PROFFLAG=$(CFLAG) -g -pg -DGP_DISPLAY_TIMEOUT_IN_MS=1
 TARGET=main.c
 LINE=line.c
 TRI=triangle.c
+PROF=prof.c
 
 all: $(EXES)
 
@@ -22,8 +23,8 @@ line: $(LINE) gp.h gp.o display.o
 tri: $(TRI) gp.h gp.o display.o
 	$(CC) $(TRI) gp.o display.o $(CFLAG) -o $@
 
-prof: $(TARGET) gp.h display.h gp.c display.c
-	$(CC) $(TARGET) gp.c display.c $(PROFFLAG) -o $@
+prof: $(PROF) gp.h display.h gp.c display.c
+	$(CC) $(PROF) gp.c display.c $(PROFFLAG) -o $@
 	./$@
 	gprof $@ > gprof.out
 
