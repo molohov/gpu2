@@ -51,11 +51,6 @@ typedef struct {
   gpTMatrix trans;
 } gpPolyList;
 
-// edge list struct
-typedef struct {
-    int x[2];    
-} gpEdgeListElement;
-
 /* Library functions */
 enum { GP_PERSPECTIVE, GP_OTHER };
 
@@ -88,7 +83,6 @@ void gpDisable(int gpFunction);
 void gpSetFrustrum(float near, float far);
 void gpLine(gpVertex2Fixed *v1, gpVertex2Fixed *v2, gpColor *color);
 
-void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, int y_bottom, gpEdgeListElement *edge_list);
 void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
 void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
 

@@ -450,53 +450,6 @@ void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
     gpReleaseImage(&img);
 }
 
-void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, int y_bottom, gpEdgeListElement *edge_list)
-{
-    // do Bresenham's, except on the edge list now (and subtract y_bottom)
-    int y0 = v1->y - y_bottom;
-    int y1 = v2->y - y_bottom;
-    int x0 = v1->x;
-    int x1 = v2->x;
-
-    // sort to make sure line(v1, v2) and line(v2, v1) have the same result
-    if (y0 > y1) {
-        int tmp = y0;
-        y0 = y1;
-        y1 = tmp;
-        tmp = x0;
-        x0 = x1;
-        x1 = tmp;
-    }
-
-    int dx = abs(x1 - x0);
-    int dy = y1 - y0;
-    int sx = (x0 < x1) ? 1 : -1;
-    int sy = 1;
-    int err = dx-dy;
-    bool new_y = true;
-
-    while (1) {
-        if (new_y || (x0 == x1 && y0 == y1)) {
-            if (edge_list[y0].x[0] == edge_list[y0].x[1])
-                edge_list[y0].x[0] = x0;
-            else if (edge_list[y0].x[1] == -1)
-                edge_list[y0].x[1] = x0;
-        }
-        new_y = false;
-        if (x0 == x1 && y0 == y1) break;
-        int e2 = 2*err;
-        if (e2 > -dy) {
-            err -= dy;
-            x0 += sx;
-        }
-        if (e2 < dx) {
-            err += dx;
-            y0 += sy;
-            new_y = (y0 != y1);
-        }
-    }
-}
-
 void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
 {
     int y_min = GP_YRES;
