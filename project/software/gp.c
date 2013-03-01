@@ -520,7 +520,7 @@ void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, int y_bottom, gpEdgeL
 
     while (1) {
         if (new_y){
-            if (edge_list[y0].x[0] == -1)
+            if (edge_list[y0].x[0] == edge_list[y0].x[1])
                 edge_list[y0].x[0] = x0;
             else if (edge_list[y0].x[1] == -1)
                 edge_list[y0].x[1] = x0;

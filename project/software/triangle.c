@@ -16,5 +16,8 @@ int main()
     gpVertex2Fixed v3[4] = {{300, 400}, {10, 400}, {10, 10}, {300, 30}};
     gpRenderConvexPoly(v3, 4, &color);
 
+    gpVertex2Fixed v4[3] = {{1000, 60}, {0, 0}, {10, 600}};
+    gpRenderConvexPoly(v4, 3, &color);
+
     return 0;
 }
