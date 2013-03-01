@@ -566,8 +566,6 @@ void gpTriangle(gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpVertex2Fixed *v3, gpC
     
     for (int i=0; i < y_traverse; i++, y--)
     {
-        if (y < 720 && y > 700)
-            printf("edge_list[i].x[0] = %d, edge_list[i].x[1] = %d\n", edge_list[i].x[0], edge_list[i].x[1]);
         gpSetImageHLine(img, y, edge_list[i].x[0], edge_list[i].x[1], r, g, b); 
     }
 
