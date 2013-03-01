@@ -169,10 +169,13 @@ void gpFillTriangle(gpPoly *poly, gpImg *img)
   gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
 
   for (int i = 0; i < poly->num_vertices; i++) {
-    vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2);
-    vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2);
+    vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
+    vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
   }
 
+  gpFillConvexPoly(img, vertices, poly->num_vertices, &poly->color);
+
+/*
   int x_start = MAX(0, GP_XRES/2+MIN(vertices[0].x, MIN(vertices[1].x, vertices[2].x)));
   int x_end   = MIN(GP_XRES, GP_XRES/2+1+MAX(vertices[0].x, MAX(vertices[1].x, vertices[2].x)));
 
@@ -189,7 +192,7 @@ void gpFillTriangle(gpPoly *poly, gpImg *img)
       }
     }
   }
-
+*/
   free(vertices);
 }
 
@@ -540,7 +543,7 @@ void fillEdgeList(gpVertex2Fixed * v1, gpVertex2Fixed *v2, int y_bottom, gpEdgeL
     }
 }
 
-void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
+void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
 {
     int y_top = 0;
     int y_bottom = GP_YRES;
@@ -566,8 +569,6 @@ void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *co
     }
 
     // draw the edge list!
-    gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
-    gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
     int y = GP_YRES - 1 - y_bottom;
     unsigned char r = color->r;
     unsigned char g = color->g;
@@ -579,6 +580,14 @@ void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *co
     }
 
     free(edge_list);
+}
+
+void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
+{
+    gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
+    gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
+
+    gpFillConvexPoly(img, vertices, num_vertices, color);
 
     //draw the image!
     gpDisplayImage(img);

@@ -1,3 +1,6 @@
+#ifndef _DISPLAY_H
+#define _DISPLAY_H
+
 #ifndef GP_DISPLAY_TIMEOUT_IN_MS
 #define GP_DISPLAY_TIMEOUT_IN_MS -1
 #endif
@@ -27,3 +30,5 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
 void gpDisplayImage(gpImg *img);
 
 void gpReleaseImage(gpImg **img);
+
+#endif
