@@ -15,6 +15,14 @@
 #define assert(x)
 #endif
 
+#ifndef MAX
+#define MAX(a,b) (a > b ? a : b)
+#endif
+
+#ifndef MIN
+#define MIN(a,b) (a < b ? a : b)
+#endif
+
 // global perspective enable
 int GLOBAL_PERSPECTIVE = 0;
 int GLOBAL_PERSPECTIVE_SET = 0;
@@ -150,50 +158,6 @@ inline bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
   int cp3 = cross_product(x, y, cx, cy, ax, ay);
 
   return (cp1 <= 0 && cp2 <= 0 && cp3 <= 0) || (cp1 >= 0 && cp2 >= 0 && cp3 >= 0);
-}
-
-#ifndef MAX
-#define MAX(a,b) (a > b ? a : b)
-#endif
-
-#ifndef MIN
-#define MIN(a,b) (a < b ? a : b)
-#endif
-
-void gpFillTriangle(gpPoly *poly, gpImg *img)
-{
-  assert(poly);
-  assert(poly->num_vertices == 3);
-
-  // convert floating point to fixed point
-  gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
-
-  for (int i = 0; i < poly->num_vertices; i++) {
-    vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
-    vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
-  }
-
-  gpFillConvexPoly(img, vertices, poly->num_vertices, &poly->color);
-
-/*
-  int x_start = MAX(0, GP_XRES/2+MIN(vertices[0].x, MIN(vertices[1].x, vertices[2].x)));
-  int x_end   = MIN(GP_XRES, GP_XRES/2+1+MAX(vertices[0].x, MAX(vertices[1].x, vertices[2].x)));
-
-  int y_start = MAX(0, GP_YRES/2-MAX(vertices[0].y, MAX(vertices[1].y, vertices[2].y)));
-  int y_end   = MIN(GP_YRES, GP_YRES/2+1-MIN(vertices[0].y, MIN(vertices[1].y, vertices[2].y)));
-
-  // scanline algorithm
-  for (int x = x_start; x < x_end; x++) {
-    int x_coord = x - GP_XRES/2;
-    for (int y = y_start; y < y_end; y++) {
-      int y_coord = GP_YRES/2 - y; // flip y
-      if (inTriangle(x_coord, y_coord, vertices)) {
-        gpSetImagePixel(img, x, y, poly->color.r, poly->color.g, poly->color.b);
-      }
-    }
-  }
-*/
-  free(vertices);
 }
 
 void gpMatrixMult(float *x, float *y, float *result, int a, int b)
@@ -344,19 +308,20 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
 {
   assert(poly);
 
-  if (poly->num_vertices < 3) return;
-  else if (poly->num_vertices == 3) gpFillTriangle(poly, img);
-  else {
-    // Assume convex polygon with vertices in the right order!
-    for (int i = 2; i < poly->num_vertices; i++) {
-      gpPoly *tri = gpCreatePoly(3);
-      tri->t_vertices[0] = (gpVertex3){poly->t_vertices[0].x, poly->t_vertices[0].y, poly->t_vertices[0].z};
-      tri->t_vertices[1] = (gpVertex3){poly->t_vertices[i-1].x, poly->t_vertices[i-1].y, poly->t_vertices[i-1].z};
-      tri->t_vertices[2] = (gpVertex3){poly->t_vertices[i].x, poly->t_vertices[i].y, poly->t_vertices[i].z};
-      gpSetPolyColor(tri, poly->color.r, poly->color.g, poly->color.b);
-      gpFillTriangle(tri, img);
-      gpDeletePoly(tri);
+  if (poly->num_vertices < 3) {
+    return;
+  } else {
+    // convert floating point to fixed point
+    gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
+
+    for (int i = 0; i < poly->num_vertices; i++) {
+      vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
+      vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
     }
+
+    gpFillConvexPoly(img, vertices, poly->num_vertices, &poly->color);
+
+    free(vertices);
   }
 }
 
