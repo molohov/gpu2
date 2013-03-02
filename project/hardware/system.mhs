@@ -128,7 +128,6 @@ BEGIN mdm
  BUS_INTERFACE MBDEBUG_0 = microblaze_0_debug
  PORT Debug_SYS_Rst = proc_sys_reset_0_MB_Debug_Sys_Rst
  PORT S_AXI_ACLK = clk_100_0000MHzPLL0
- PORT Interrupt = debug_module_Interrupt
 END
 
 BEGIN clock_generator
@@ -273,6 +272,7 @@ BEGIN axi_timer
  PARAMETER HW_VER = 1.03.a
  PARAMETER C_BASEADDR = 0x41c00000
  PARAMETER C_HIGHADDR = 0x41c0ffff
+ PARAMETER C_ONE_TIMER_ONLY = 1
  BUS_INTERFACE S_AXI = axi4lite_0
  PORT S_AXI_ACLK = clk_100_0000MHzPLL0
  PORT Interrupt = axi_timer_0_Interrupt
@@ -286,6 +286,6 @@ BEGIN axi_intc
  BUS_INTERFACE S_AXI = axi4lite_0
  BUS_INTERFACE INTERRUPT = axi_intc_0_INTERRUPT
  PORT S_AXI_ACLK = clk_100_0000MHzPLL0
- PORT Intr = debug_module_Interrupt & axi_timer_0_Interrupt
+ PORT Intr = axi_timer_0_Interrupt
 END
 
