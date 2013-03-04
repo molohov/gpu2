@@ -1,6 +1,30 @@
 #include "display.h"
 
+void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b)
+{
+  if (x1 < 0) x1 = 0;
+  if (x1 >= img->xres) x1 = img->xres - 1;
+  if (x2 < 0) x2 = 0;
+  if (x2 >= img->xres) x2 = img->xres - 1;
+  if (y < 0) y = 0;
+  if (y >= img->yres) y = img->yres - 1;
+
+  if (x1 > x2)
+  {
+      int tmp = x1;
+      x1 = x2;
+      x2 = tmp;
+  }
+
+  for (int i = x1; i <= x2; i++)
+  {
+      gpSetImagePixel(img, i, y, r, g, b);
+  }
+}
+
 #ifdef SW
+
+#include <assert.h>
 
 #include <cv.h>
 #include <highgui.h>
@@ -19,8 +43,11 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
   cvSet(img->img, CV_RGB(r, g, b), NULL);
 }
 
-void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
+inline void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
 {
+  assert(x >= 0 && x < img->xres);
+  assert(y >= 0 && y < img->yres);
+
   unsigned char *ptr = img->img->imageData;
   ptr += (y * img->xres + x)*3;
 
@@ -87,7 +114,7 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
   }
 }
 
-void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
+inline void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
 {
   volatile unsigned char *ptr = img->imageData;
   ptr += (y * img->xres + x) * BYTES_PER_PIXEL;
@@ -108,9 +135,11 @@ void gpDisplayImage(gpImg *img)
     hdmi_addr[2] = 1; // go
     initialized = true;
   } else {
-    // wait for user input
-    while (!*(volatile int *)(XPAR_RS232_UART_1_BASEADDR))
-      ;
+    if (GP_DISPLAY_TIMEOUT_IN_MS == -1) {
+      // wait for user input
+      while (!*(volatile int *)(XPAR_RS232_UART_1_BASEADDR))
+        ;
+    }
 
     hdmi_addr[1] = (int)img->imageData; // set frame base address
   }

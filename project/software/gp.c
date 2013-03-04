@@ -15,12 +15,13 @@
 #define assert(x)
 #endif
 
-/* Struct definitions */
+#ifndef MAX
+#define MAX(a,b) (a > b ? a : b)
+#endif
 
-// 2-d fixed point for rendering
-typedef struct {
-  int x, y;
-} gpVertex2Fixed;
+#ifndef MIN
+#define MIN(a,b) (a < b ? a : b)
+#endif
 
 // global perspective enable
 int GLOBAL_PERSPECTIVE = 0;
@@ -136,68 +137,6 @@ void gpDeletePoly(gpPoly *poly)
   free(poly->t_vertices);
   poly->num_vertices = 0;
   free(poly);
-}
-
-int cross_product(int x, int y, int ax, int ay, int bx, int by)
-{
-  return (x - bx) * (ay - by) - (ax - bx) * (y - by);
-}
-
-bool inTriangle(int x, int y, gpVertex2Fixed *vertices)
-{
-  int ax = vertices[0].x;
-  int ay = vertices[0].y;
-  int bx = vertices[1].x;
-  int by = vertices[1].y;
-  int cx = vertices[2].x;
-  int cy = vertices[2].y;
-
-  int cp1 = cross_product(x, y, ax, ay, bx, by);
-  int cp2 = cross_product(x, y, bx, by, cx, cy);
-  int cp3 = cross_product(x, y, cx, cy, ax, ay);
-
-  return (cp1 <= 0 && cp2 <= 0 && cp3 <= 0) || (cp1 >= 0 && cp2 >= 0 && cp3 >= 0);
-}
-
-#ifndef MAX
-#define MAX(a,b) (a > b ? a : b)
-#endif
-
-#ifndef MIN
-#define MIN(a,b) (a < b ? a : b)
-#endif
-
-void gpFillTriangle(gpPoly *poly, gpImg *img)
-{
-  assert(poly);
-  assert(poly->num_vertices == 3);
-
-  // convert floating point to fixed point
-  gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
-
-  for (int i = 0; i < poly->num_vertices; i++) {
-    vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2);
-    vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2);
-  }
-
-  int x_start = MAX(0, GP_XRES/2+MIN(vertices[0].x, MIN(vertices[1].x, vertices[2].x)));
-  int x_end   = MIN(GP_XRES, GP_XRES/2+1+MAX(vertices[0].x, MAX(vertices[1].x, vertices[2].x)));
-
-  int y_start = MAX(0, GP_YRES/2-MAX(vertices[0].y, MAX(vertices[1].y, vertices[2].y)));
-  int y_end   = MIN(GP_YRES, GP_YRES/2+1-MIN(vertices[0].y, MIN(vertices[1].y, vertices[2].y)));
-
-  // scanline algorithm
-  for (int x = x_start; x < x_end; x++) {
-    int x_coord = x - GP_XRES/2;
-    for (int y = y_start; y < y_end; y++) {
-      int y_coord = GP_YRES/2 - y; // flip y
-      if (inTriangle(x_coord, y_coord, vertices)) {
-        gpSetImagePixel(img, x, y, poly->color.r, poly->color.g, poly->color.b);
-      }
-    }
-  }
-
-  free(vertices);
 }
 
 void gpMatrixMult(float *x, float *y, float *result, int a, int b)
@@ -348,19 +287,20 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
 {
   assert(poly);
 
-  if (poly->num_vertices < 3) return;
-  else if (poly->num_vertices == 3) gpFillTriangle(poly, img);
-  else {
-    // Assume convex polygon with vertices in the right order!
-    for (int i = 2; i < poly->num_vertices; i++) {
-      gpPoly *tri = gpCreatePoly(3);
-      tri->t_vertices[0] = (gpVertex3){poly->t_vertices[0].x, poly->t_vertices[0].y, poly->t_vertices[0].z};
-      tri->t_vertices[1] = (gpVertex3){poly->t_vertices[i-1].x, poly->t_vertices[i-1].y, poly->t_vertices[i-1].z};
-      tri->t_vertices[2] = (gpVertex3){poly->t_vertices[i].x, poly->t_vertices[i].y, poly->t_vertices[i].z};
-      gpSetPolyColor(tri, poly->color.r, poly->color.g, poly->color.b);
-      gpFillTriangle(tri, img);
-      gpDeletePoly(tri);
+  if (poly->num_vertices < 3) {
+    return;
+  } else {
+    // convert floating point to fixed point
+    gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
+
+    for (int i = 0; i < poly->num_vertices; i++) {
+      vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
+      vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
     }
+
+    gpFillConvexPoly(img, vertices, poly->num_vertices, &poly->color);
+
+    free(vertices);
   }
 }
 
@@ -372,6 +312,11 @@ void gpRenderPoly(gpPoly *poly)
   gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
 
   // apply transformations
+  if (GLOBAL_PERSPECTIVE)
+  {
+    assert(GLOBAL_PERSPECTIVE_SET);
+    gpApplyPerspective(&poly->trans, GLOBAL_NEAR, GLOBAL_FAR);
+  }
   gpApplyTMatrixToCoord(poly, &poly->trans);
 
   // fill polygon algorithm
@@ -464,3 +409,152 @@ void gpSetFrustrum(float near, float far)
     GLOBAL_FAR = far;
 }
 
+void swap (int * a, int * b)
+{
+    int tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
+{
+    gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
+    gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
+    // flip y
+    int y0 = GP_YRES - 1 - v1->y;
+    int y1 = GP_YRES - 1 - v2->y;
+    int x0 = v1->x;
+    int x1 = v2->x;
+
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx-dy;
+
+    while (1) {
+        gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
+        if (x0 == x1 && y0 == y1) break;
+        int e2 = 2*err;
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+
+    gpDisplayImage(img);
+    gpReleaseImage(&img);
+}
+
+void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
+{
+    int y_min = GP_YRES;
+    int start_index = -1;
+
+    for (int i = 0; i < num_vertices; i++) {
+        if (vertices[i].y < y_min) {
+            y_min = vertices[i].y;
+            start_index = i;
+        }
+    }
+
+    int left_index = start_index, right_index = start_index;
+
+    unsigned char r = color->r;
+    unsigned char g = color->g;
+    unsigned char b = color->b;
+    
+    int y = vertices[start_index].y;
+
+    int y_left_0 = y, y_left_1 = y;
+    int y_right_0 = y, y_right_1 = y;
+    int x_left_0 = vertices[start_index].x;
+    int x_left_1 = x_left_0;
+    int x_right_0 = x_left_0;
+    int x_right_1 = x_left_0;
+
+    int left_dx = 0, right_dx = 0;
+    int left_dy = 0, right_dy = 0;
+    int left_sx = 0, right_sx = 0;
+    int left_err = 0, right_err = 0;
+
+    do {
+        if (vertices[left_index].y <= y) {
+            left_index = left_index - 1;
+            if (left_index < 0) left_index = num_vertices - 1;
+
+            y_left_0 = y_left_1;
+            x_left_0 = x_left_1;
+            y_left_1 = vertices[left_index].y;
+            x_left_1 = vertices[left_index].x;
+            left_dx = abs(x_left_1 - x_left_0);
+            left_dy = y_left_1 - y_left_0;
+            left_sx = (x_left_0 < x_left_1) ? 1 : -1;
+            left_err = left_dx - left_dy;
+            assert(y_left_1 >= y_left_0);
+        }
+        if (vertices[right_index].y <= y) {
+            if (left_index == right_index) break;
+
+            right_index = right_index + 1;
+            if (right_index == num_vertices) right_index = 0;
+
+            y_right_0 = y_right_1;
+            x_right_0 = x_right_1;
+            y_right_1 = vertices[right_index].y;
+            x_right_1 = vertices[right_index].x;
+            right_dx = abs(x_right_1 - x_right_0);
+            right_dy = y_right_1 - y_right_0;
+            right_sx = (x_right_0 < x_right_1) ? 1 : -1;
+            right_err = right_dx - right_dy;
+            assert(y_right_1 >= y_right_0);
+        }
+
+        do {
+            // left
+            while (1) {
+                int e2 = 2*left_err;
+                if (y == y_left_1 && x_left_0 == x_left_1) break;
+                if (e2 > -left_dy) {
+                    left_err -= left_dy;
+                    x_left_0 += left_sx;
+                }
+                if (e2 < left_dx) {
+                    left_err += left_dx;
+                    break;
+                }
+            }
+            // right
+            while (1) {
+                int e2 = 2*right_err;
+                if (y == y_right_1 && x_right_0 == x_right_1) break;
+                if (e2 > -right_dy) {
+                    right_err -= right_dy;
+                    x_right_0 += right_sx;
+                }
+                if (e2 < right_dx) {
+                    right_err += right_dx;
+                    break;
+                }
+            }
+            gpSetImageHLine(img, GP_YRES - 1 - y, x_left_0, x_right_0, r, g, b);
+            y++;
+        } while (y < vertices[left_index].y && y < vertices[right_index].y && y < GP_YRES);
+    } while (left_index != right_index && y < GP_YRES);
+}
+
+void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
+{
+    gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
+    gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
+
+    gpFillConvexPoly(img, vertices, num_vertices, color);
+
+    //draw the image!
+    gpDisplayImage(img);
+    gpReleaseImage(&img);
+}

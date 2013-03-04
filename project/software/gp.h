@@ -1,4 +1,9 @@
+#ifndef _GP_H
+#define _GP_H
+
 #include <math.h>
+
+#include "display.h"
 
 #define GP_BG_COLOR (unsigned char [3]){0x60, 0x00, 0xe0}
 #define GP_XRES 1280
@@ -6,6 +11,11 @@
 #define GP_INFER_COORD NAN
 
 /* Struct definitions */
+
+// 2-d fixed point for rendering
+typedef struct {
+  int x, y;
+} gpVertex2Fixed;
 
 //  3-d coordinate
 typedef struct {
@@ -71,3 +81,9 @@ void gpRender(gpPolyList *list);
 void gpEnable(int gpFunction);
 void gpDisable(int gpFunction);
 void gpSetFrustrum(float near, float far);
+void gpLine(gpVertex2Fixed *v1, gpVertex2Fixed *v2, gpColor *color);
+
+void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
+void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
+
+#endif
