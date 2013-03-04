@@ -541,7 +541,9 @@ void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, g
                     break;
                 }
             }
-            gpSetImageHLine(img, GP_YRES - 1 - y, x_left_0, x_right_0, r, g, b);
+            if (y >= 0) {
+            	gpSetImageHLine(img, GP_YRES - 1 - y, x_left_0, x_right_0, r, g, b);
+            }
             y++;
         } while (y < vertices[left_index].y && y < vertices[right_index].y && y < GP_YRES);
     } while (left_index != right_index && y < GP_YRES);
