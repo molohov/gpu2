@@ -1,27 +1,5 @@
 #include "display.h"
 
-void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b)
-{
-  if (x1 < 0) x1 = 0;
-  if (x1 >= img->xres) x1 = img->xres - 1;
-  if (x2 < 0) x2 = 0;
-  if (x2 >= img->xres) x2 = img->xres - 1;
-  if (y < 0) y = 0;
-  if (y >= img->yres) y = img->yres - 1;
-
-  if (x1 > x2)
-  {
-      int tmp = x1;
-      x1 = x2;
-      x2 = tmp;
-  }
-
-  for (int i = x1; i <= x2; i++)
-  {
-      gpSetImagePixel(img, i, y, r, g, b);
-  }
-}
-
 #ifdef SW
 
 #include <assert.h>
@@ -152,3 +130,27 @@ void gpReleaseImage(gpImg **img)
 }
 
 #endif
+
+void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b)
+{
+  if (x1 < 0) x1 = 0;
+  if (x1 >= img->xres) x1 = img->xres - 1;
+  if (x2 < 0) x2 = 0;
+  if (x2 >= img->xres) x2 = img->xres - 1;
+
+#ifdef SW
+  assert(y >= 0 && y < img->yres);
+#endif
+
+  if (x1 > x2)
+  {
+      int tmp = x1;
+      x1 = x2;
+      x2 = tmp;
+  }
+
+  for (int i = x1; i <= x2; i++)
+  {
+      gpSetImagePixel(img, i, y, r, g, b);
+  }
+}
