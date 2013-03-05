@@ -52,7 +52,7 @@ typedef struct {
 } gpPolyList;
 
 /* Library functions */
-enum { GP_PERSPECTIVE, GP_OTHER };
+enum { GP_PERSPECTIVE, GP_ZBUFFER };
 
 gpPolyList * gpCreatePolyList();
 void gpAddPolyToList(gpPolyList *list, gpPoly *poly);
@@ -85,5 +85,5 @@ void gpLine(gpVertex2Fixed *v1, gpVertex2Fixed *v2, gpColor *color);
 
 void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
 void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
-
+void gpInitZbuffer();
 #endif
