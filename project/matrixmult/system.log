@@ -114,3 +114,8 @@ PMSPEC -- Overriding Xilinx file
 <D:/Xilinx/14.2/ISE_DS/ISE/spartan6/data/spartan6.acd>
 Trying to terminate Process...
 Done!
+Writing filter settings....
+Done writing filter settings to:
+	C:\cygwin\home\Blair\gpu2\project\matrixmult\etc\system.filters
+Done writing Tab View settings to:
+	C:\cygwin\home\Blair\gpu2\project\matrixmult\etc\system.gui
