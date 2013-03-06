@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <stdio.h>
 
 #include "gp.h"
 #include "display.h"
@@ -308,7 +309,12 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
             vertices[i].z = (unsigned short)(((GLOBAL_FAR + GLOBAL_NEAR)/(2*(GLOBAL_FAR - GLOBAL_NEAR)) + (1/poly->t_vertices[i].z)*(-GLOBAL_FAR*GLOBAL_NEAR)/(GLOBAL_FAR - GLOBAL_NEAR) + 1/2) * GLOBAL_ZBUFFER_MAX);
           else
             vertices[i].z = (unsigned short)(poly->t_vertices[i].z * GLOBAL_ZBUFFER_MAX);
+          /* DEBUG
+          printf("floating point: x: %f, y: %f, z: %f\n", poly->t_vertices[i].x, poly->t_vertices[i].y, poly->t_vertices[i].z);
+          printf("fixed point: x: %d, y: %d, z: %d\n", vertices[i].x, vertices[i].y, vertices[i].z);
+          */
         }
+        // DEBUG printf("end poly\n");
 
         gpFillConvexPolyZBuff(img, vertices, poly->num_vertices, &poly->color);
 
@@ -649,6 +655,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
     zbuff left_dz = 0, right_dz = 0;
     zbuff left_sz = 0, right_sz = 0;
     int left_zerr = 0, right_zerr = 0;
+    int left_slope = 0, right_slope = 0;
 
 
     do {
@@ -670,7 +677,8 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             z_left_0 = z_left_1;
             z_left_1 = vertices[left_index].z;
             left_dz = abs(z_left_1 - z_left_0);
-            left_sz = (z_left_0 < z_left_1) ? 1 : -1;
+            if (left_dy) left_slope = left_dz/left_dy;
+            if (z_left_0 > z_left_1) left_slope = -left_slope;
             left_zerr = left_dy / 2;
         }
         if (vertices[right_index].y <= y) {
@@ -693,7 +701,8 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             z_right_0 = z_right_1;
             z_right_1 = vertices[right_index].z;
             right_dz = abs(z_right_1 - z_right_0);
-            right_sz = (z_right_0 < z_right_1) ? 1 : -1;
+            if (right_dy) right_slope = right_dz/right_dy;
+            if (z_right_0 > z_right_1) right_slope = -right_slope;
             right_zerr = right_dy / 2;
         }
 
@@ -710,13 +719,6 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
                     left_err += left_dx;
                     break;
                 }
-                
-                // z calculations
-                left_zerr -= left_dz;
-                if (left_zerr < 0) {
-                    z_left_0 += left_sz;
-                    left_zerr += left_dy;
-                }
             }
             // right
             while (1) {
@@ -730,18 +732,13 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
                     right_err += right_dx;
                     break;
                 }
-
-                // z calculations
-                right_zerr -= right_dz;
-                if (right_zerr < 0) {
-                    z_right_0 += right_sz;
-                    right_zerr += right_dy;
-                }
             }
             if (y >= 0) {
             	gpSetImageHLineZBuff(img, GP_YRES - 1 - y, x_left_0, x_right_0, z_left_0, z_right_0, r, g, b);
             }
             y++;
+            z_left_0 += left_slope;
+            z_right_0 += right_slope;
         } while (y < vertices[left_index].y && y < vertices[right_index].y && y < GP_YRES);
     } while (left_index != right_index && y < GP_YRES);
 }

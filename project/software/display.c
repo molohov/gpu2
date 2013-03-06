@@ -237,11 +237,12 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned short z1, 
   }                
   
   // interpolate depth values for this row
-  int dx = x1 - x2; //theoretically should be positive
-  unsigned short sz = (z1 < z2) ? 1 : -1;
+  int dx = x2 - x1; //theoretically should be positive
+  unsigned short dz = z2 - z1;
+  unsigned short sz = 0;
+  if (dx) sz = dz/dx;
   int err = dx / 2;
   unsigned short z = z1;
-
   for (int i = x1; i <= x2; i++)
   {
       if (img->zbuffer[y*img->xres + i] > z)  {
