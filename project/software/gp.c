@@ -308,10 +308,7 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
             vertices[i].z = (unsigned short)(((GLOBAL_FAR + GLOBAL_NEAR)/(2*(GLOBAL_FAR - GLOBAL_NEAR)) + (1/poly->t_vertices[i].z)*(-GLOBAL_FAR*GLOBAL_NEAR)/(GLOBAL_FAR - GLOBAL_NEAR) + 1/2) * GLOBAL_ZBUFFER_MAX);
           else
             vertices[i].z = (unsigned short)(poly->t_vertices[i].z * GLOBAL_ZBUFFER_MAX);
-        printf("float point: x: %f, y: %f, z: %f\n", poly->t_vertices[i].x, poly->t_vertices[i].y, poly->t_vertices[i].z);
-        printf("fixed point: x: %d, y: %d, z: %d\n", vertices[i].x, vertices[i].y, vertices[i].z);
         }
-        printf("end poly\n");
 
         gpFillConvexPolyZBuff(img, vertices, poly->num_vertices, &poly->color);
 
