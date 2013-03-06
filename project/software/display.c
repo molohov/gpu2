@@ -246,7 +246,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned short z1, 
   {
       if (img->zbuffer[y*img->xres + i] > z)  {
           img->zbuffer[y*img->xres + i] = z;
-          gpSetImagePixel(img, y, i, r, g, b);
+          gpSetImagePixel(img, i, y, r, g, b);
       }
       err -= dx;
       if (err < 0) {
