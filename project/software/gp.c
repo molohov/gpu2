@@ -31,7 +31,6 @@ float GLOBAL_FAR;
 
 // global z-buffer
 int GLOBAL_ZBUFFER = 0;
-int GLOBAL_ZBUFFER_SET = 0;
 
 // global background color
 unsigned char GP_BG_COLOR[3] = {0xff, 0xff, 0xff};

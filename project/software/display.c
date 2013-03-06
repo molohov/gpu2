@@ -1,5 +1,7 @@
 #include "display.h"
 
+extern int GLOBAL_ZBUFFER;
+
 #ifdef SW
 
 #include <assert.h>
@@ -13,9 +15,15 @@ gpImg *gpCreateImage(int xres, int yres)
   img->img = cvCreateImage(cvSize(xres, yres), IPL_DEPTH_8U, 3);
   img->xres = xres;
   img->yres = yres;
-  img->zbuffer = (zbuffer_t)malloc(xres * yres * sizeof(img->zbuffer));
-  // initialize to maximum
-  memset(img->zbuffer, 0xff, xres * yres * sizeof(img->zbuffer));
+
+  if (GLOBAL_ZBUFFER) {
+    img->zbuffer = (zbuffer_t)malloc(xres * yres * sizeof(img->zbuffer));
+    // initialize to maximum
+    memset(img->zbuffer, 0xff, xres * yres * sizeof(img->zbuffer));
+  } else {
+    img->zbuffer = NULL;
+  }
+
   return img;
 }
 
@@ -80,9 +88,13 @@ gpImg *gpCreateImage(int xres, int yres)
   img->xres = xres;
   img->yres = yres;
   img->imageData = render_addr;
+
   img->zbuffer = (zbuffer_t)(XPAR_S6DDR_0_S0_AXI_BASEADDR + xres * yres * BYTES_PER_PIXEL * 2);
-  // initialize to maximum
-  memset(img->zbuffer, 0xff, xres * yres * sizeof(img->zbuffer));
+  if (GLOBAL_ZBUFFER) {
+    // initialize to maximum
+    memset(img->zbuffer, 0xff, xres * yres * sizeof(img->zbuffer));
+  }
+
   return img;
 }
 
