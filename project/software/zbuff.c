@@ -29,10 +29,10 @@ int main()
   gpSetPolyColor(tri2, 0x0, 0xff, 0x0); //green
 
   gpPoly *quad2 = gpCreatePoly(4);
-  gpSetPolyVertex(quad2, 0, -0.5f, 0.f, 0.5f);
-  gpSetPolyVertex(quad2, 1, -0.5f, 1.f, 0.5f);
-  gpSetPolyVertex(quad2, 2, 0.5f, 1.f, 0.5f);
-  gpSetPolyVertex(quad2, 3, 0.5f, 0.f, GP_INFER_COORD);
+  gpSetPolyVertex(quad2, 0, -5.5f, -5.f, 5.5f);
+  gpSetPolyVertex(quad2, 1, -5.5f, 5.f, 5.5f);
+  gpSetPolyVertex(quad2, 2, 5.5f, 5.f, 5.5f);
+  gpSetPolyVertex(quad2, 3, 5.5f, -5.f, GP_INFER_COORD);
   gpSetPolyColor(quad2, 0x0, 0x0, 0xff); //blue
 
   gpPolyList *list = gpCreatePolyList();
