@@ -4,6 +4,8 @@
 /* User program */
 int main()
 {
+  gpSetBackgroundColor(0x60, 0x00, 0xe0);
+
   #ifndef PERSPECTIVE_TEST
   // Create a triangle
   gpPoly *tri = gpCreatePoly(3);

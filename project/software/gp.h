@@ -5,7 +5,6 @@
 
 #include "display.h"
 
-#define GP_BG_COLOR (unsigned char [3]){0x60, 0x00, 0xe0}
 #define GP_XRES 1280
 #define GP_YRES 720
 #define GP_INFER_COORD NAN
@@ -78,8 +77,11 @@ void gpClearTMatrixPolyList(gpPolyList *list);
 
 void gpRenderPoly(gpPoly *poly);
 void gpRender(gpPolyList *list);
+
 void gpEnable(int gpFunction);
 void gpDisable(int gpFunction);
+void gpSetBackgroundColor(unsigned char r, unsigned char g, unsigned char b);
+
 void gpSetFrustrum(float near, float far);
 void gpLine(gpVertex2Fixed *v1, gpVertex2Fixed *v2, gpColor *color);
 

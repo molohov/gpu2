@@ -33,6 +33,9 @@ float GLOBAL_FAR;
 int GLOBAL_ZBUFFER = 0;
 int GLOBAL_ZBUFFER_SET = 0;
 
+// global background color
+unsigned char GP_BG_COLOR[3] = {0xff, 0xff, 0xff};
+
 /* Library functions */
 
 gpPolyList * gpCreatePolyList()
@@ -409,6 +412,13 @@ void gpDisable (int gpFunction)
             GLOBAL_ZBUFFER = 0;
             break;
     }
+}
+
+void gpSetBackgroundColor(unsigned char r, unsigned char g, unsigned char b)
+{
+    GP_BG_COLOR[0] = r;
+    GP_BG_COLOR[1] = g;
+    GP_BG_COLOR[2] = b;
 }
 
 void gpSetFrustrum(float near, float far)
