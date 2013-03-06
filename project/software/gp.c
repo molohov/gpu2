@@ -76,7 +76,7 @@ gpPoly * gpCreatePoly(int num_vertices)
 
   gpPoly *poly = malloc(sizeof(gpPoly));
   poly->vertices = malloc(num_vertices * sizeof(gpVertex3));
-  poly->t_vertices = malloc(num_vertices * sizeof(gpVertex3));
+  poly->t_vertices = malloc(num_vertices * sizeof(gpVertex4));
   poly->num_vertices = num_vertices;
 
   // initialize all vertices to 0
@@ -176,15 +176,12 @@ void gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
 {
   for (int i = 0; i < poly->num_vertices; i++) {
     float temp[1][4] = {{poly->vertices[i].x, poly->vertices[i].y, poly->vertices[i].z, 1.f}};
-    float result[1][4];
 
-    gpMatrixMult((float *)temp, (float *)trans->m, (float *)result, 1, 4);
+    gpMatrixMult((float *)temp, (float *)trans->m, (float *)&poly->t_vertices[i], 1, 4);
 
-    float h = result[0][3];
-
-    poly->t_vertices[i].x = result[0][0] / h;
-    poly->t_vertices[i].y = result[0][1] / h;
-    poly->t_vertices[i].z = result[0][2] / h;
+    poly->t_vertices[i].x /= poly->t_vertices[i].w;
+    poly->t_vertices[i].y /= poly->t_vertices[i].w;
+    poly->t_vertices[i].z /= poly->t_vertices[i].w;
   }
 }
 

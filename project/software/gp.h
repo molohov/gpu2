@@ -16,10 +16,15 @@ typedef struct {
   int x, y;
 } gpVertex2Fixed;
 
-//  3-d coordinate
+// 3-d coordinate
 typedef struct {
   float x, y, z;
 } gpVertex3;
+
+// homogeneous 3-d coordinate
+typedef struct {
+  float x, y, z, w;
+} gpVertex4;
 
 // RGB colour
 typedef struct {
@@ -34,7 +39,7 @@ typedef struct {
 // 3-d shape
 typedef struct {
   gpVertex3 *vertices;
-  gpVertex3 *t_vertices;
+  gpVertex4 *t_vertices;
   int num_vertices;
   gpColor color;
   gpVertex3 normal;
