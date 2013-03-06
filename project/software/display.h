@@ -27,8 +27,6 @@ typedef struct {
 
 gpImg *gpCreateImage(int xres, int yres);
 
-void gpPollImageWriteReady();
-
 void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b);
 
 void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b);

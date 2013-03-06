@@ -482,8 +482,6 @@ void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
     int sy = (y0 < y1) ? 1 : -1;
     int err = dx-dy;
 
-    gpPollImageWriteReady();
-
     while (1) {
         gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
         if (x0 == x1 && y0 == y1) break;

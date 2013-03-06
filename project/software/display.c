@@ -21,11 +21,6 @@ gpImg *gpCreateImage(int xres, int yres)
   return img;
 }
 
-void gpPollImageWriteReady()
-{
-  // no need to wait
-}
-
 void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
 {
   cvSet(img->img, CV_RGB(r, g, b), NULL);
@@ -116,24 +111,28 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
   volatile int * burst_write_addr = (volatile int *)XPAR_BURST_WRITE_0_BASEADDR;
 
   if (!initialized) {
-    burst_write_addr[64] = (1 << 1) | (1 << 3); // burst write
+    burst_write_addr[64] = (1 << 1) | (1 << 3) | (1 << 8); // burst write and set done bit
     burst_write_addr[66] = 0xffff; // byte enable
     initialized = true;
-  } else {
+  }
+
+  burst_write_addr[0] = (r << 24) | (g << 16) | (b << 8);
+
+  for (int i = 0; i < img->yres; i++) {
+    burst_write_addr[65] = (int)img->imageData + i * BYTES_PER_PIXEL * img->xres;
+    burst_write_addr[67] = 0x0a000000 | (BYTES_PER_PIXEL * img->xres); // go and transfer length
     gpPollImageWriteReady();
   }
 
-  burst_write_addr[0] = r << 24 | g << 16 | b << 8;
-  burst_write_addr[65] = (int)img->imageData;
-  burst_write_addr[67] = 0x0a000000 | BYTES_PER_PIXEL * img->xres * img->yres; // go and transfer length
-
   if (GLOBAL_ZBUFFER) {
-    gpPollImageWriteReady();
-
     // initialize to maximum
     burst_write_addr[0] = 0xffffffff;
-    burst_write_addr[65] = (int)img->zbuffer;
-    burst_write_addr[67] = 0x0a000000 | sizeof(*img->zbuffer) * img->xres * img->yres; // go and transfer length
+
+    for (int i = 0; i < img->yres; i++) {
+      burst_write_addr[65] = (int)img->imageData + i * sizeof(*img->zbuffer) * img->xres;
+      burst_write_addr[67] = 0x0a000000 | (sizeof(*img->zbuffer) * img->xres); // go and transfer length
+      gpPollImageWriteReady();
+    }
   }
 }
 
@@ -193,8 +192,6 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
       x1 = x2;
       x2 = tmp;
   }
-
-  gpPollImageWriteReady();
 
   for (int i = x1; i <= x2; i++)
   {
