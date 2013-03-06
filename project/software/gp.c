@@ -253,7 +253,9 @@ void gpApplyPerspective(gpTMatrix *trans, float near, float far)
 {
   // perspective is a transpose!
   //gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, (far+near)/(near*(far - near)), 1/near}, {0.f, 0.f, 2*far/(far - near), 0.f}}};
-  gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 1/near}, {0.f, 0.f, 0.f, 0.f}}};
+  float a = 1/(GLOBAL_NEAR*(1 - GLOBAL_NEAR/GLOBAL_FAR));
+  float b = -1/(1 - GLOBAL_NEAR/GLOBAL_FAR);
+  gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, a, 1/near}, {0.f, 0.f, b, 0.f}}};
   gpApplyTMatrix(trans, &perspective);
 }
 
@@ -302,8 +304,14 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
         for (int i = 0; i < poly->num_vertices; i++) {
           vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
           vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
-          vertices[i].z = (unsigned short)(((GLOBAL_FAR + GLOBAL_NEAR)/(2*(GLOBAL_FAR - GLOBAL_NEAR)) + (1/poly->t_vertices[i].z)*(-GLOBAL_FAR*GLOBAL_NEAR)/(GLOBAL_FAR - GLOBAL_NEAR) + 1/2) * GLOBAL_ZBUFFER_MAX);
+          if (!GLOBAL_PERSPECTIVE)
+            vertices[i].z = (unsigned short)(((GLOBAL_FAR + GLOBAL_NEAR)/(2*(GLOBAL_FAR - GLOBAL_NEAR)) + (1/poly->t_vertices[i].z)*(-GLOBAL_FAR*GLOBAL_NEAR)/(GLOBAL_FAR - GLOBAL_NEAR) + 1/2) * GLOBAL_ZBUFFER_MAX);
+          else
+            vertices[i].z = (unsigned short)(poly->t_vertices[i].z * GLOBAL_ZBUFFER_MAX);
+        printf("float point: x: %f, y: %f, z: %f\n", poly->t_vertices[i].x, poly->t_vertices[i].y, poly->t_vertices[i].z);
+        printf("fixed point: x: %d, y: %d, z: %d\n", vertices[i].x, vertices[i].y, vertices[i].z);
         }
+        printf("end poly\n");
 
         gpFillConvexPolyZBuff(img, vertices, poly->num_vertices, &poly->color);
 

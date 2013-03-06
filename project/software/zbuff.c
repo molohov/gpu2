@@ -28,14 +28,22 @@ int main()
   gpSetPolyVertex(tri2, 2, 1.f, 1.f, 1.f);
   gpSetPolyColor(tri2, 0x0, 0xff, 0x0); //green
 
+  gpPoly *quad1 = gpCreatePoly(4);
+  gpSetPolyVertex(quad1, 0, -0.25f, -0.5f, 0.f);
+  gpSetPolyVertex(quad1, 1, -0.25f, 0.25f, 0.f);
+  gpSetPolyVertex(quad1, 2, 0.25f, 0.25f, 0.f);
+  gpSetPolyVertex(quad1, 3, 0.25f, -0.5f, GP_INFER_COORD);
+  gpSetPolyColor(quad1, 0xff, 0x0, 0x0); //blue
+
   gpPoly *quad2 = gpCreatePoly(4);
-  gpSetPolyVertex(quad2, 0, -5.5f, -5.f, 5.5f);
-  gpSetPolyVertex(quad2, 1, -5.5f, 5.f, 5.5f);
-  gpSetPolyVertex(quad2, 2, 5.5f, 5.f, 5.5f);
-  gpSetPolyVertex(quad2, 3, 5.5f, -5.f, GP_INFER_COORD);
+  gpSetPolyVertex(quad2, 0, -0.5f, 0.f, 0.5f);
+  gpSetPolyVertex(quad2, 1, -0.5f, 1.f, 0.5f);
+  gpSetPolyVertex(quad2, 2, 0.5f, 1.f, 0.5f);
+  gpSetPolyVertex(quad2, 3, 0.5f, 0.f, GP_INFER_COORD);
   gpSetPolyColor(quad2, 0x0, 0x0, 0xff); //blue
 
   gpPolyList *list = gpCreatePolyList();
+  gpAddPolyToList(list, quad1);
   gpAddPolyToList(list, quad2);
   gpAddPolyToList(list, tri1);
   gpAddPolyToList(list, tri2);
@@ -44,7 +52,7 @@ int main()
 
   gpEnable(GP_ZBUFFER);
   gpEnable(GP_PERSPECTIVE);
-  gpSetFrustrum(1.0, 10.0);
+  gpSetFrustrum(1.0, 3.0);
 
   gpRender(list);
 
