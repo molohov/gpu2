@@ -16,7 +16,16 @@ typedef struct {
   int x, y;
 } gpVertex2Fixed;
 
-// 3-d coordinate
+// typedef for z-buff unsigned shorts
+typedef unsigned short zbuff;
+
+// 3-d fixed point for rendering with zbuffer
+typedef struct {
+  int x, y;
+  zbuff z;
+} gpVertex3Fixed;
+
+//  3-d coordinate
 typedef struct {
   float x, y, z;
 } gpVertex3;
@@ -92,5 +101,5 @@ void gpLine(gpVertex2Fixed *v1, gpVertex2Fixed *v2, gpColor *color);
 
 void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
 void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
-void gpInitZbuffer();
+void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertices, gpColor *color);
 #endif

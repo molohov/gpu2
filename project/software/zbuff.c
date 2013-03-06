@@ -41,10 +41,15 @@ int main()
   gpTranslatePolyList(list, 0.0, -0.5, 2.0);
 
 #ifdef PERSPECTIVE
+  gpEnable(GP_ZBUFFER);
   gpEnable(GP_PERSPECTIVE);
   gpSetFrustrum(1.0, 10.0);
 #endif
 
   gpRender(list);
+
+  gpDisable(GP_PERSPECTIVE);
+  gpRender(list);
+
 }
 

@@ -31,6 +31,7 @@ float GLOBAL_FAR;
 
 // global z-buffer
 int GLOBAL_ZBUFFER = 0;
+unsigned short GLOBAL_ZBUFFER_MAX = -1;
 
 // global background color
 unsigned char GP_BG_COLOR[3] = {0xff, 0xff, 0xff};
@@ -293,16 +294,35 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
     return;
   } else {
     // convert floating point to fixed point
-    gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
+    if (GLOBAL_ZBUFFER)
+    {
+        // ensure the viewing frustrum has been set such that near and far planes are defined
+        assert(GLOBAL_PERSPECTIVE_SET);
+        gpVertex3Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex3Fixed));
 
-    for (int i = 0; i < poly->num_vertices; i++) {
-      vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
-      vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
+        for (int i = 0; i < poly->num_vertices; i++) {
+          vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
+          vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
+          vertices[i].z = (unsigned short)(((GLOBAL_FAR + GLOBAL_NEAR)/(2*(GLOBAL_FAR - GLOBAL_NEAR)) + (1/poly->t_vertices[i].z)*(-GLOBAL_FAR*GLOBAL_NEAR)/(GLOBAL_FAR - GLOBAL_NEAR) + 1/2) * GLOBAL_ZBUFFER_MAX);
+        }
+
+        gpFillConvexPolyZBuff(img, vertices, poly->num_vertices, &poly->color);
+
+        free(vertices);
     }
+    else
+    {
+        gpVertex2Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex2Fixed));
 
-    gpFillConvexPoly(img, vertices, poly->num_vertices, &poly->color);
+        for (int i = 0; i < poly->num_vertices; i++) {
+          vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
+          vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
+        }
 
-    free(vertices);
+        gpFillConvexPoly(img, vertices, poly->num_vertices, &poly->color);
+
+        free(vertices);
+    }
   }
 }
 
@@ -586,4 +606,140 @@ void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *co
     // draw the image!
     gpDisplayImage(img);
     gpReleaseImage(&img);
+}
+
+void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertices, gpColor *color)
+{
+    int y_min = GP_YRES;
+    int start_index = -1;
+
+    for (int i = 0; i < num_vertices; i++) {
+        if (vertices[i].y < y_min) {
+            y_min = vertices[i].y;
+            start_index = i;
+        }
+    }
+
+    int left_index = start_index, right_index = start_index;
+
+    unsigned char r = color->r;
+    unsigned char g = color->g;
+    unsigned char b = color->b;
+    
+    int y = vertices[start_index].y;
+
+    int y_left_0 = y, y_left_1 = y;
+    int y_right_0 = y, y_right_1 = y;
+    int x_left_0 = vertices[start_index].x;
+    int x_left_1 = x_left_0;
+    int x_right_0 = x_left_0;
+    int x_right_1 = x_left_0;
+
+    int left_dx = 0, right_dx = 0;
+    int left_dy = 0, right_dy = 0;
+    int left_sx = 0, right_sx = 0;
+    int left_err = 0, right_err = 0;
+
+    // zbuffer bresenham's variables
+    zbuff z = vertices[start_index].z;
+    zbuff z_left_0 = z, z_right_0 = z;
+    zbuff z_left_1 = z, z_right_1 = z;
+    zbuff left_dz = 0, right_dz = 0;
+    zbuff left_sz = 0, right_sz = 0;
+    int left_zerr = 0, right_zerr = 0;
+
+
+    do {
+        if (vertices[left_index].y <= y) {
+            left_index = left_index - 1;
+            if (left_index < 0) left_index = num_vertices - 1;
+
+            y_left_0 = y_left_1;
+            x_left_0 = x_left_1;
+            y_left_1 = vertices[left_index].y;
+            x_left_1 = vertices[left_index].x;
+            left_dx = abs(x_left_1 - x_left_0);
+            left_dy = y_left_1 - y_left_0;
+            left_sx = (x_left_0 < x_left_1) ? 1 : -1;
+            left_err = left_dx - left_dy;
+            assert(y_left_1 >= y_left_0);
+
+            // zbuffer additions
+            z_left_0 = z_left_1;
+            z_left_1 = vertices[left_index].z;
+            left_dz = abs(z_left_1 - z_left_0);
+            left_sz = (z_left_0 < z_left_1) ? 1 : -1;
+            left_zerr = left_dy / 2;
+        }
+        if (vertices[right_index].y <= y) {
+            if (left_index == right_index) break;
+
+            right_index = right_index + 1;
+            if (right_index == num_vertices) right_index = 0;
+
+            y_right_0 = y_right_1;
+            x_right_0 = x_right_1;
+            y_right_1 = vertices[right_index].y;
+            x_right_1 = vertices[right_index].x;
+            right_dx = abs(x_right_1 - x_right_0);
+            right_dy = y_right_1 - y_right_0;
+            right_sx = (x_right_0 < x_right_1) ? 1 : -1;
+            right_err = right_dx - right_dy;
+            assert(y_right_1 >= y_right_0);
+
+            // zbuffer additions
+            z_right_0 = z_right_1;
+            z_right_1 = vertices[right_index].z;
+            right_dz = abs(z_right_1 - z_right_0);
+            right_sz = (z_right_0 < z_right_1) ? 1 : -1;
+            right_zerr = right_dy / 2;
+        }
+
+        do {
+            // left
+            while (1) {
+                int e2 = 2*left_err;
+                if (y == y_left_1 && x_left_0 == x_left_1) break;
+                if (e2 > -left_dy) {
+                    left_err -= left_dy;
+                    x_left_0 += left_sx;
+                }
+                if (e2 < left_dx) {
+                    left_err += left_dx;
+                    break;
+                }
+                
+                // z calculations
+                left_zerr -= left_dz;
+                if (left_zerr < 0) {
+                    z_left_0 += left_sz;
+                    left_zerr += left_dy;
+                }
+            }
+            // right
+            while (1) {
+                int e2 = 2*right_err;
+                if (y == y_right_1 && x_right_0 == x_right_1) break;
+                if (e2 > -right_dy) {
+                    right_err -= right_dy;
+                    x_right_0 += right_sx;
+                }
+                if (e2 < right_dx) {
+                    right_err += right_dx;
+                    break;
+                }
+
+                // z calculations
+                right_zerr -= right_dz;
+                if (right_zerr < 0) {
+                    z_right_0 += right_sz;
+                    right_zerr += right_dy;
+                }
+            }
+            if (y >= 0) {
+            	gpSetImageHLineZBuff(img, GP_YRES - 1 - y, x_left_0, x_right_0, z_left_0, z_right_0, r, g, b);
+            }
+            y++;
+        } while (y < vertices[left_index].y && y < vertices[right_index].y && y < GP_YRES);
+    } while (left_index != right_index && y < GP_YRES);
 }

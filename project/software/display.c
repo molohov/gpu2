@@ -1,4 +1,5 @@
 #include "display.h"
+#include <stdio.h>
 
 extern int GLOBAL_ZBUFFER;
 
@@ -199,5 +200,44 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
   for (int i = x1; i <= x2; i++)
   {
       gpSetImagePixel(img, i, y, r, g, b);
+  }
+}
+ 
+void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned short z1, unsigned short z2, unsigned char r, unsigned char g, unsigned char b)
+{
+  if (x1 < 0) x1 = 0;
+  if (x1 >= img->xres) x1 = img->xres - 1;
+  if (x2 < 0) x2 = 0;
+  if (x2 >= img->xres) x2 = img->xres - 1;
+
+#ifdef SW
+  assert(y >= 0 && y < img->yres);
+#endif
+
+  if (x1 > x2)
+  {
+      int tmp = x1;
+      x1 = x2;
+      x2 = tmp;
+  }                
+  
+  // interpolate depth values for this row
+  int dx = x1 - x2; //theoretically should be positive
+  unsigned short dz = abs(z1 - z2);
+  unsigned short sz = (z1 < z2) ? 1 : -1;
+  int err = dx / 2;
+  unsigned short z = z1;
+
+  for (int i = x1; i <= x2; i++)
+  {
+      if (img->zbuffer[y*img->xres + i] > z)  {
+          img->zbuffer[y*img->xres + i] = z;
+          gpSetImagePixel(img, i, y, r, g, b);
+      }
+      err -= dx;
+      if (err < 0) {
+          z += sz;
+          err += dx;
+      }
   }
 }
