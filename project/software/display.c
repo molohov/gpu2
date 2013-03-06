@@ -15,21 +15,25 @@ gpImg *gpCreateImage(int xres, int yres)
   img->img = cvCreateImage(cvSize(xres, yres), IPL_DEPTH_8U, 3);
   img->xres = xres;
   img->yres = yres;
-
-  if (GLOBAL_ZBUFFER) {
-    img->zbuffer = (zbuffer_t)malloc(xres * yres * sizeof(img->zbuffer));
-    // initialize to maximum
-    memset(img->zbuffer, 0xff, xres * yres * sizeof(img->zbuffer));
-  } else {
-    img->zbuffer = NULL;
-  }
+  img->zbuffer = NULL;
 
   return img;
+}
+
+void gpPollImageWriteReady()
+{
+  // no need to wait
 }
 
 void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
 {
   cvSet(img->img, CV_RGB(r, g, b), NULL);
+
+  if (GLOBAL_ZBUFFER) {
+    img->zbuffer = (zbuffer_t)malloc(xres * yres * sizeof(img->zbuffer));
+    // initialize to maximum
+    memset(img->zbuffer, 0xff, xres * yres * sizeof(img->zbuffer));
+  }
 }
 
 inline void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
@@ -64,10 +68,8 @@ void gpReleaseImage(gpImg **img)
 
 #else
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <string.h>
 
 #include "xparameters.h"
 
@@ -90,24 +92,47 @@ gpImg *gpCreateImage(int xres, int yres)
   img->imageData = render_addr;
 
   img->zbuffer = (zbuffer_t)(XPAR_S6DDR_0_S0_AXI_BASEADDR + xres * yres * BYTES_PER_PIXEL * 2);
-  if (GLOBAL_ZBUFFER) {
-    // initialize to maximum
-    memset(img->zbuffer, 0xff, xres * yres * sizeof(img->zbuffer));
-  }
 
   return img;
 }
 
+void gpPollImageWriteReady()
+{
+  volatile int * burst_write_addr = (volatile int *)XPAR_BURST_WRITE_0_BASEADDR;
+
+  // poll done bit
+  while (!(burst_write_addr[64] & 0x100)) {
+  }
+
+  // clear done bit
+  burst_write_addr[64] &= ~0x100;
+}
+
 void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
 {
-  volatile unsigned char *ptr = img->imageData;
-  for (int i = 0; i < img->yres; i++) {
-    for (int j = 0; j < img->xres; j++) {
-      ptr[3] = r;
-      ptr[2] = g;
-      ptr[1] = b;
-      ptr += BYTES_PER_PIXEL;
-    }
+  static bool initialized = false;
+
+  volatile int * burst_write_addr = (volatile int *)XPAR_BURST_WRITE_0_BASEADDR;
+
+  if (!initialized) {
+    burst_write_addr[64] = (1 << 1) | (1 << 3); // burst write
+    burst_write_addr[66] = 0xffff; // byte enable
+    initialized = true;
+  } else {
+    gpPollImageWriteReady();
+  }
+
+  burst_write_addr[0] = r << 24 | g << 16 | b << 8;
+  burst_write_addr[65] = (int)img->imageData;
+  burst_write_addr[67] = 0x0a000000 | BYTES_PER_PIXEL * img->xres * img->yres; // go and transfer length
+
+  if (GLOBAL_ZBUFFER) {
+    gpPollImageWriteReady();
+
+    // initialize to maximum
+    burst_write_addr[0] = 0xffffffff;
+    burst_write_addr[65] = (int)img->zbuffer;
+    burst_write_addr[67] = 0x0a000000 | sizeof(*img->zbuffer) * img->xres * img->yres; // go and transfer length
   }
 }
 
@@ -167,6 +192,8 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
       x1 = x2;
       x2 = tmp;
   }
+
+  gpPollImageWriteReady();
 
   for (int i = x1; i <= x2; i++)
   {

@@ -448,6 +448,7 @@ void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
 {
     gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
     gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
+
     // flip y
     int y0 = GP_YRES - 1 - v1->y;
     int y1 = GP_YRES - 1 - v2->y;
@@ -459,6 +460,8 @@ void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
     int sx = (x0 < x1) ? 1 : -1;
     int sy = (y0 < y1) ? 1 : -1;
     int err = dx-dy;
+
+    gpPollImageWriteReady();
 
     while (1) {
         gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
