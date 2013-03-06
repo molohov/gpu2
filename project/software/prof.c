@@ -3,6 +3,8 @@
 /* User program */
 int main()
 {
+  gpSetBackgroundColor(0x60, 0x00, 0xe0);
+
   // Cube
   gpPoly *z = gpCreatePoly(4);
   gpSetPolyVertex(z, 0, -.5f, -.5f, -.5f);
