@@ -22,19 +22,23 @@ int main()
   gpSetPolyVertex(tri1, 2, -1.f, 1.f, 1.f);
   gpSetPolyColor(tri1, 0x0, 0xff, 0x0); //green
 
+  gpPoly *tri2 = gpCreatePoly(3);
+  gpSetPolyVertex(tri2, 0, 0.f, 0.f, 0.f);
+  gpSetPolyVertex(tri2, 1, 1.f, 0.f, 1.f);
+  gpSetPolyVertex(tri2, 2, 1.f, 1.f, 1.f);
+  gpSetPolyColor(tri2, 0x0, 0xff, 0x0); //green
+
   gpPoly *quad2 = gpCreatePoly(4);
   gpSetPolyVertex(quad2, 0, -0.5f, 0.f, 0.5f);
   gpSetPolyVertex(quad2, 1, -0.5f, 1.f, 0.5f);
-  gpSetPolyVertex(quad2, 2, 1.f, 1.f, 0.5f);
-  gpSetPolyVertex(quad2, 3, 1.f, 0.f, GP_INFER_COORD);
+  gpSetPolyVertex(quad2, 2, 0.5f, 1.f, 0.5f);
+  gpSetPolyVertex(quad2, 3, 0.5f, 0.f, GP_INFER_COORD);
   gpSetPolyColor(quad2, 0x0, 0x0, 0xff); //blue
 
-  // move it a little to the right to avoid cutting into the triangle
-  gpTranslatePoly(quad2, 0.1, 0.0, 0.0);
-
   gpPolyList *list = gpCreatePolyList();
-  gpAddPolyToList(list, tri1);
   gpAddPolyToList(list, quad2);
+  gpAddPolyToList(list, tri1);
+  gpAddPolyToList(list, tri2);
 
   gpTranslatePolyList(list, 0.0, -0.5, 2.0);
 

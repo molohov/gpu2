@@ -1,5 +1,4 @@
 #include "display.h"
-#include <stdio.h>
 
 extern int GLOBAL_ZBUFFER;
 
