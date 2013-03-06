@@ -116,23 +116,23 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
     initialized = true;
   }
 
+  if (GLOBAL_ZBUFFER) {
+    // initialize to maximum
+    burst_write_addr[0] = 0xffffffff;
+
+    for (int i = 0; i < img->yres; i++) {
+      burst_write_addr[65] = (int)img->zbuffer + i * sizeof(*img->zbuffer) * img->xres;
+      burst_write_addr[67] = 0x0a000000 | (sizeof(*img->zbuffer) * img->xres); // go and transfer length
+      gpPollImageWriteReady();
+    }
+  }
+
   burst_write_addr[0] = (r << 24) | (g << 16) | (b << 8);
 
   for (int i = 0; i < img->yres; i++) {
     burst_write_addr[65] = (int)img->imageData + i * BYTES_PER_PIXEL * img->xres;
     burst_write_addr[67] = 0x0a000000 | (BYTES_PER_PIXEL * img->xres); // go and transfer length
     gpPollImageWriteReady();
-  }
-
-  if (GLOBAL_ZBUFFER) {
-    // initialize to maximum
-    burst_write_addr[0] = 0xffffffff;
-
-    for (int i = 0; i < img->yres; i++) {
-      burst_write_addr[65] = (int)img->imageData + i * sizeof(*img->zbuffer) * img->xres;
-      burst_write_addr[67] = 0x0a000000 | (sizeof(*img->zbuffer) * img->xres); // go and transfer length
-      gpPollImageWriteReady();
-    }
   }
 }
 
