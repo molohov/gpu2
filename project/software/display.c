@@ -62,6 +62,28 @@ void gpReleaseImage(gpImg **img)
   *img = NULL;
 }
 
+void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b)
+{
+  if (x1 < 0) x1 = 0;
+  if (x1 >= img->xres) x1 = img->xres - 1;
+  if (x2 < 0) x2 = 0;
+  if (x2 >= img->xres) x2 = img->xres - 1;
+
+  assert(y >= 0 && y < img->yres);
+
+  if (x1 > x2)
+  {
+      int tmp = x1;
+      x1 = x2;
+      x2 = tmp;
+  }
+
+  for (int i = x1; i <= x2; i++)
+  {
+    gpSetImagePixel(img, i, y, r, g, b);
+  }
+}
+
 #else
 
 #include <stdlib.h>
@@ -171,18 +193,12 @@ void gpReleaseImage(gpImg **img)
   *img = NULL;
 }
 
-#endif
-
 void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b)
 {
   if (x1 < 0) x1 = 0;
   if (x1 >= img->xres) x1 = img->xres - 1;
   if (x2 < 0) x2 = 0;
   if (x2 >= img->xres) x2 = img->xres - 1;
-
-#ifdef SW
-  assert(y >= 0 && y < img->yres);
-#endif
 
   if (x1 > x2)
   {
@@ -199,6 +215,8 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
     *ptr++ = (r << 24) | (g << 16) | (b << 8);
   }
 }
+
+#endif
  
 void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned short z1, unsigned short z2, unsigned char r, unsigned char g, unsigned char b)
 {
@@ -228,7 +246,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned short z1, 
   {
       if (img->zbuffer[y*img->xres + i] > z)  {
           img->zbuffer[y*img->xres + i] = z;
-          gpSetImagePixel(img, i, y, r, g, b);
+          gpSetImagePixel(img, y, i, r, g, b);
       }
       err -= dx;
       if (err < 0) {
