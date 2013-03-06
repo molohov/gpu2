@@ -9,6 +9,7 @@ int main()
   gpSetBackgroundColor(0x60, 0x00, 0xe0);
 
   // Create this scene to test depth. It would fail the painter's algorithm:
+  // NOTE: diagonal square is actually a triangle, but the square is shown to illustrate the angle relative to the camera-planar square
   /*
   |\
   | \------
@@ -29,6 +30,9 @@ int main()
   gpSetPolyVertex(quad2, 2, 1.f, 1.f, 0.5f);
   gpSetPolyVertex(quad2, 3, 1.f, 0.f, GP_INFER_COORD);
   gpSetPolyColor(quad2, 0x0, 0x0, 0xff); //blue
+
+  // move it a little to the right to avoid cutting into the triangle
+  gpTranslatePoly(quad2, 0.1, 0.0, 0.0);
 
   gpPolyList *list = gpCreatePolyList();
   gpAddPolyToList(list, tri1);
