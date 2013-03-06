@@ -138,11 +138,9 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
 
 inline void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
 {
-  volatile unsigned char *ptr = img->imageData;
-  ptr += (y * img->xres + x) * BYTES_PER_PIXEL;
-  ptr[3] = r;
-  ptr[2] = g;
-  ptr[1] = b;
+  volatile unsigned *ptr = (volatile unsigned *)img->imageData;
+  ptr += (y * img->xres + x);
+  *ptr = (r << 24) | (g << 16) | (b << 8);
 }
 
 void gpDisplayImage(gpImg *img)
@@ -193,9 +191,12 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
       x2 = tmp;
   }
 
+  volatile unsigned *ptr = (volatile unsigned *)img->imageData;
+  ptr += (y * img->xres + x1);
+
   for (int i = x1; i <= x2; i++)
   {
-      gpSetImagePixel(img, i, y, r, g, b);
+    *ptr++ = (r << 24) | (g << 16) | (b << 8);
   }
 }
  
@@ -219,7 +220,6 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned short z1, 
   
   // interpolate depth values for this row
   int dx = x1 - x2; //theoretically should be positive
-  unsigned short dz = abs(z1 - z2);
   unsigned short sz = (z1 < z2) ? 1 : -1;
   int err = dx / 2;
   unsigned short z = z1;
