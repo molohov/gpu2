@@ -8,14 +8,20 @@
 #ifdef SW
 #include <cv.h>
 
+typedef unsigned short * zbuffer_t;
+
 typedef struct {
   int xres, yres;
   IplImage *img;
+  zbuffer_t zbuffer;
 } gpImg;
 #else
+typedef volatile unsigned short * zbuffer_t;
+
 typedef struct {
   int xres, yres;
   volatile unsigned char *imageData;
+  zbuffer_t zbuffer;
 } gpImg;
 #endif
 

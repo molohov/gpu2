@@ -13,6 +13,9 @@ gpImg *gpCreateImage(int xres, int yres)
   img->img = cvCreateImage(cvSize(xres, yres), IPL_DEPTH_8U, 3);
   img->xres = xres;
   img->yres = yres;
+  img->zbuffer = (zbuffer_t)malloc(xres * yres * sizeof(img->zbuffer));
+  // initialize to maximum
+  memset(img->zbuffer, 0xff, xres * yres * sizeof(img->zbuffer));
   return img;
 }
 
@@ -46,6 +49,7 @@ void gpDisplayImage(gpImg *img)
 void gpReleaseImage(gpImg **img)
 {
   cvReleaseImage(&(*img)->img);
+  free((*img)->zbuffer);
   free(*img);
   *img = NULL;
 }
@@ -63,8 +67,8 @@ void gpReleaseImage(gpImg **img)
 
 gpImg *gpCreateImage(int xres, int yres)
 {
-  volatile unsigned char *ddr_addr1 = (volatile unsigned char *) XPAR_S6DDR_0_S0_AXI_BASEADDR;
-  volatile unsigned char *ddr_addr2 = (volatile unsigned char *) (XPAR_S6DDR_0_S0_AXI_BASEADDR + xres * yres * BYTES_PER_PIXEL);
+  volatile unsigned char *ddr_addr1 = (volatile unsigned char *)XPAR_S6DDR_0_S0_AXI_BASEADDR;
+  volatile unsigned char *ddr_addr2 = (volatile unsigned char *)(XPAR_S6DDR_0_S0_AXI_BASEADDR + xres * yres * BYTES_PER_PIXEL);
 
   static bool render_addr1 = false;
 
@@ -76,6 +80,9 @@ gpImg *gpCreateImage(int xres, int yres)
   img->xres = xres;
   img->yres = yres;
   img->imageData = render_addr;
+  img->zbuffer = (zbuffer_t)(XPAR_S6DDR_0_S0_AXI_BASEADDR + xres * yres * BYTES_PER_PIXEL * 2);
+  // initialize to maximum
+  memset(img->zbuffer, 0xff, xres * yres * sizeof(img->zbuffer));
   return img;
 }
 

@@ -30,13 +30,8 @@ float GLOBAL_NEAR;
 float GLOBAL_FAR;
 
 // global z-buffer
-short * zbuffer;
 int GLOBAL_ZBUFFER = 0;
 int GLOBAL_ZBUFFER_SET = 0;
-
-// global framebuffer
-gpImg *fb; 
-int GLOBAL_FB_SET = 0;
 
 /* Library functions */
 
@@ -565,28 +560,11 @@ void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, g
 
 void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
 {
-    gpFillConvexPoly(fb, vertices, num_vertices, color);
-}
+    gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
+    gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
+    gpFillConvexPoly(img, vertices, num_vertices, color);
 
-void gpInitZbuffer()
-{
-    zbuffer = (short *)malloc(GP_XRES*GP_YRES*sizeof(short));
-    for (int i = 0; i < GP_YRES * GP_XRES; i++)
-        zbuffer = 0;
-    GLOBAL_ZBUFFER_SET = 1;
+    // draw the image!
+    gpDisplayImage(img);
+    gpReleaseImage(&img);
 }
-
-void gpInitFrameBuffer()
-{
-    fb = gpCreateImage(GP_XRES, GP_YRES);
-    gpSetImage(fb, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
-    GLOBAL_FB_SET = 1;
-}
-
-void gpDrawFrameBuffer()
-{
-    gpDisplayImage(fb);
-    // erase it again
-    gpSetImage(fb, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
-}
-    
