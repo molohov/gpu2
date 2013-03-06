@@ -5,6 +5,7 @@ extern int GLOBAL_ZBUFFER;
 #ifdef SW
 
 #include <assert.h>
+#include <string.h>
 
 #include <cv.h>
 #include <highgui.h>
@@ -30,9 +31,9 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
   cvSet(img->img, CV_RGB(r, g, b), NULL);
 
   if (GLOBAL_ZBUFFER) {
-    img->zbuffer = (zbuffer_t)malloc(xres * yres * sizeof(img->zbuffer));
+    img->zbuffer = (zbuffer_t)malloc(img->xres * img->yres * sizeof(img->zbuffer));
     // initialize to maximum
-    memset(img->zbuffer, 0xff, xres * yres * sizeof(img->zbuffer));
+    memset(img->zbuffer, 0xff, img->xres * img->yres * sizeof(img->zbuffer));
   }
 }
 
