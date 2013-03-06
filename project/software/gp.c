@@ -332,8 +332,8 @@ void gpRenderPoly(gpPoly *poly)
   gpReleaseImage(&img);
 }
 
-// compare z-coordinate of polygon a and b in descending order
-int poly_z_cmp(const void *a, const void *b)
+// compare z-coordinate of polygons a and b in descending order
+int poly_painters(const void *a, const void *b)
 {
   const gpPoly *pa = *(const gpPoly **)a;
   const gpPoly *pb = *(const gpPoly **)b;
@@ -341,6 +341,12 @@ int poly_z_cmp(const void *a, const void *b)
   if (pa->avg_z == pb->avg_z) return 0;
 
   return (pa->avg_z > pb->avg_z) ? -1 : 1;
+}
+
+// compare z-coordinate of polygons a and b in ascending order
+int poly_reverse_painters(const void *a, const void *b)
+{
+  return poly_painters(b, a);
 }
 
 void gpRender(gpPolyList *list)
@@ -375,7 +381,11 @@ void gpRender(gpPolyList *list)
   }
 
   // sort polygons by decreasing z (use average for now)
-  qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_z_cmp);
+  if (GLOBAL_ZBUFFER) {
+    qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_reverse_painters);
+  } else {
+    qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_painters);
+  }
 
   // fill polygon algorithm for each polygon
   for (int i = 0; i < list->num_polys; i++) {
