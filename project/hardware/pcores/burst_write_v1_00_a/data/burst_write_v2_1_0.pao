@@ -1,0 +1,11 @@
+##############################################################################
+## Filename:          C:/cygwin/home/Victor/ece532/gpu2/project/hardware/pcores/burst_write_v1_00_a/data/burst_write_v2_1_0.pao
+## Description:       Peripheral Analysis Order
+## Date:              Tue Mar 05 20:19:37 2013 (by Create and Import Peripheral Wizard)
+##############################################################################
+
+lib proc_common_v3_00_a  all 
+lib axi_lite_ipif_v1_01_a  all 
+lib axi_master_burst_v1_00_a  all 
+lib burst_write_v1_00_a user_logic verilog
+lib burst_write_v1_00_a burst_write vhdl
