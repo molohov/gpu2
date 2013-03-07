@@ -261,7 +261,8 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
     slope = dz / dx;
     rem = abs(dz - slope * dx);
   } else {
-    z1 = (z1 + z2) / 2;
+    // take the minimum
+    z1 = (z1 < z2) ? z1 : z2;
   }
 
   int error = (dx + 1) / 2;

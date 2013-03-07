@@ -659,6 +659,9 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             if (left_dy) {
                 left_slope = left_dz / left_dy;
                 left_rem = abs(left_dz - left_slope * left_dy);
+            } else {
+                // take the minumum
+                z_left_0 = (z_left_0 < z_left_1) ? z_left_0 : z_left_1;
             }
             left_sz = (left_dz > 0) ? 1 : -1;
             left_zerr = (left_dy + 1) / 2;
@@ -686,6 +689,9 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             if (right_dy) {
                 right_slope = right_dz / right_dy;
                 right_rem = abs(right_dz - right_slope * right_dy);
+            } else {
+                // take the minumum
+                z_right_0 = (z_right_0 < z_right_1) ? z_right_0 : z_right_1;
             }
             right_sz = (right_dz > 0) ? 1 : -1;
             right_zerr = (right_dy + 1) / 2;
