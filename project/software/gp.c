@@ -26,8 +26,8 @@
 // global perspective enable
 int GLOBAL_PERSPECTIVE = 0;
 int GLOBAL_PERSPECTIVE_SET = 0;
-float GLOBAL_NEAR;
-float GLOBAL_FAR;
+float GLOBAL_NEAR = 0.f;
+float GLOBAL_FAR = 10.f;
 
 // global z-buffer
 int GLOBAL_ZBUFFER = 0;
