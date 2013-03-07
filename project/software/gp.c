@@ -380,6 +380,11 @@ void gpRender(gpPolyList *list)
     // apply transformations
     gpTMatrix temp;
     gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4);
+    if (GLOBAL_PERSPECTIVE)
+    {
+        assert(GLOBAL_PERSPECTIVE_SET);
+        gpApplyPerspective(&temp, GLOBAL_NEAR, GLOBAL_FAR);
+    }
     gpApplyTMatrixToCoord(poly, &temp);
 
     // compute avg_z for each polygon
@@ -388,14 +393,6 @@ void gpRender(gpPolyList *list)
       sum_z += poly->t_vertices[j].z;
     }
     poly->avg_z = sum_z / poly->num_vertices;
-
-    // avg_z doesn't seem to work after a perspective transform, so do perspective after
-    if (GLOBAL_PERSPECTIVE)
-    {
-        assert(GLOBAL_PERSPECTIVE_SET);
-        gpApplyPerspective(&temp, GLOBAL_NEAR, GLOBAL_FAR);
-        gpApplyTMatrixToCoord(poly, &temp);
-    }
   }
 
   // sort polygons by decreasing z (use average for now)
