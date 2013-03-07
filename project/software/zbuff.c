@@ -26,11 +26,11 @@ int main()
   gpAddPolyToList(list, quad2);
   gpAddPolyToList(list, quad1);
 
-  gpTranslatePolyList(list, 0.0, -0.5, 2.0);
+  gpTranslatePolyList(list, 0.0, -0.5, 3.0);
 
   gpEnable(GP_ZBUFFER);
   gpEnable(GP_PERSPECTIVE);
-  gpSetFrustrum(1.0, 3.0);
+  gpSetFrustrum(1.0, 5.0);
 
   gpRender(list);
 
