@@ -458,13 +458,6 @@ void gpSetFrustrum(float near, float far)
     GLOBAL_FAR = far;
 }
 
-void swap (int * a, int * b)
-{
-    int tmp = *a;
-    *a = *b;
-    *b = tmp;
-}
-
 void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
 {
     gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
