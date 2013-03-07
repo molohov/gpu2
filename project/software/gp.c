@@ -290,11 +290,8 @@ void gpClearTMatrixPolyList(gpPolyList *list)
 
 void gpFillPoly(gpPoly *poly, gpImg *img)
 {
-  assert(poly);
+    assert(poly);
 
-  if (poly->num_vertices < 3) {
-    return;
-  } else {
     // convert floating point to fixed point
     if (GLOBAL_ZBUFFER)
     {
@@ -333,7 +330,6 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
 
         free(vertices);
     }
-  }
 }
 
 void gpRenderPoly(gpPoly *poly)
@@ -464,41 +460,6 @@ void gpSetFrustrum(float near, float far)
     GLOBAL_FAR = far;
 }
 
-void gpLine (gpVertex2Fixed * v1, gpVertex2Fixed *v2, gpColor * color)
-{
-    gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
-    gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
-
-    // flip y
-    int y0 = GP_YRES - 1 - v1->y;
-    int y1 = GP_YRES - 1 - v2->y;
-    int x0 = v1->x;
-    int x1 = v2->x;
-
-    int dx = abs(x1 - x0);
-    int dy = abs(y1 - y0);
-    int sx = (x0 < x1) ? 1 : -1;
-    int sy = (y0 < y1) ? 1 : -1;
-    int err = dx-dy;
-
-    while (1) {
-        gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
-        if (x0 == x1 && y0 == y1) break;
-        int e2 = 2*err;
-        if (e2 > -dy) {
-            err -= dy;
-            x0 += sx;
-        }
-        if (e2 < dx) {
-            err += dx;
-            y0 += sy;
-        }
-    }
-
-    gpDisplayImage(img);
-    gpReleaseImage(&img);
-}
-
 void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
 {
     int y_min = GP_YRES;
@@ -547,7 +508,7 @@ void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, g
             assert(y_left_1 >= y_left_0);
         }
         if (vertices[right_index].y <= y) {
-            if (left_index == right_index) break;
+            if (left_index == right_index && num_vertices != 1) break;
 
             right_index = right_index + 1;
             if (right_index == num_vertices) right_index = 0;
