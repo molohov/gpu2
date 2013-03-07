@@ -53,7 +53,13 @@ void gpDisplayImage(gpImg *img)
   cvNamedWindow("GP display", CV_WINDOW_AUTOSIZE);
 
 #ifdef DISPLAY_Z_BUFFER
-  memcpy(img->img->imageData, img->zbuffer, 1280 * 720 * BYTES_PER_PIXEL);
+  for (int i = 0; i < img->yres; i++) {
+    for (int j = 0; j < img->xres; j++) {
+      img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL] = img->zbuffer[(i * img->xres + j)] >> 24;
+      img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL + 1] = img->zbuffer[(i * img->xres + j)] >> 24;
+      img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL + 2] = img->zbuffer[(i * img->xres + j)] >> 24;
+    }
+  }
 #endif
 
   cvShowImage("GP display", img->img);
