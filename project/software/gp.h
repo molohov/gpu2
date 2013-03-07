@@ -16,13 +16,10 @@ typedef struct {
   int x, y;
 } gpVertex2Fixed;
 
-// typedef for z-buff
-typedef unsigned int zbuff;
-
 // 3-d fixed point for rendering with zbuffer
 typedef struct {
   int x, y;
-  zbuff z;
+  unsigned z;
 } gpVertex3Fixed;
 
 //  3-d coordinate
