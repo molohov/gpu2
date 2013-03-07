@@ -242,8 +242,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   assert(y >= 0 && y < img->yres);
 #endif
 
-  if (x1 > x2)
-  {
+  if (x1 > x2) {
       int tmp = x1;
       x1 = x2;
       x2 = tmp;
