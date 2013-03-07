@@ -20,7 +20,7 @@ int interpolate(int x1, int x2, int z1, int z2)
     rem = abs(dz - slope * dx);
   }
 
-  int error = (dx + 1)/ 2;
+  int error = (dx + 1) / 2;
   int sz = (dz > 0) ? 1 : -1;
 
   printf("Interpolating %d-%d, %d-%d:\n\n", x1, x2, z1, z2);
