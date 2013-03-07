@@ -31,7 +31,7 @@ float GLOBAL_FAR;
 
 // global z-buffer
 int GLOBAL_ZBUFFER = 0;
-unsigned GLOBAL_ZBUFFER_MAX = -1;
+unsigned GLOBAL_ZBUFFER_MAX = 0x7fffffff; // maximum of signed int
 
 // global background color
 unsigned char GP_BG_COLOR[3] = {0xff, 0xff, 0xff};
@@ -311,7 +311,7 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
             vertices[i].z = (unsigned)(poly->t_vertices[i].z * GLOBAL_ZBUFFER_MAX);
           /* DEBUG
           printf("floating point: x: %f, y: %f, z: %f\n", poly->t_vertices[i].x, poly->t_vertices[i].y, poly->t_vertices[i].z);
-          printf("fixed point: x: %d, y: %d, z: %d\n", vertices[i].x, vertices[i].y, vertices[i].z);
+          printf("fixed point: x: %d, y: %d, z: %x\n", vertices[i].x, vertices[i].y, vertices[i].z);
           */
         }
         // DEBUG printf("end poly\n");
