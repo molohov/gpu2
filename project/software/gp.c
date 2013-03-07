@@ -724,17 +724,19 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
                     break;
                 }
             }
+            z_left_0 += (left_slope + 1) / 2;
+            z_right_0 += (right_slope + 1) / 2;
             if (y >= 0) {
             	gpSetImageHLineZBuff(img, GP_YRES - 1 - y, x_left_0, x_right_0, z_left_0, z_right_0, r, g, b);
             }
             y++;
-            z_left_0 += left_slope;
+            z_left_0 += left_slope / 2;
             left_zerr += left_rem;
             if (left_zerr > left_dy) {
                 z_left_0 += left_sz;
                 left_zerr -= left_dy;
             }
-            z_right_0 += right_slope;
+            z_right_0 += right_slope / 2;
             right_zerr += right_rem;
             if (right_zerr > right_dy) {
                 z_right_0 += right_sz;
