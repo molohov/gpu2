@@ -91,8 +91,8 @@ void gpRender(gpPolyList *list);
 
 void gpEnable(int gpFunction);
 void gpDisable(int gpFunction);
-void gpSetBackgroundColor(unsigned char r, unsigned char g, unsigned char b);
 
+void gpSetBackgroundColor(unsigned char r, unsigned char g, unsigned char b);
 void gpSetFrustrum(float near, float far);
 
 void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
