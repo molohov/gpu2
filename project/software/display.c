@@ -10,10 +10,12 @@ extern int GLOBAL_ZBUFFER;
 #include <cv.h>
 #include <highgui.h>
 
+#define BYTES_PER_PIXEL 4
+
 gpImg *gpCreateImage(int xres, int yres)
 {
   gpImg *img = malloc(sizeof(gpImg));
-  img->img = cvCreateImage(cvSize(xres, yres), IPL_DEPTH_8U, 3);
+  img->img = cvCreateImage(cvSize(xres, yres), IPL_DEPTH_8U, BYTES_PER_PIXEL);
   img->xres = xres;
   img->yres = yres;
   img->zbuffer = NULL;
@@ -38,7 +40,7 @@ inline void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned 
   assert(y >= 0 && y < img->yres);
 
   unsigned char *ptr = img->img->imageData;
-  ptr += (y * img->xres + x)*3;
+  ptr += (y * img->xres + x) * BYTES_PER_PIXEL;
 
   // bgr
   ptr[0] = b;
@@ -49,6 +51,10 @@ inline void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned 
 void gpDisplayImage(gpImg *img)
 {
   cvNamedWindow("GP display", CV_WINDOW_AUTOSIZE);
+
+#ifdef DISPLAY_Z_BUFFER
+  memcpy(img->img->imageData, img->zbuffer, 1280 * 720 * BYTES_PER_PIXEL);
+#endif
 
   cvShowImage("GP display", img->img);
   cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);

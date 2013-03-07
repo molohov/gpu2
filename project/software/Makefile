@@ -1,4 +1,4 @@
-EXES=prototype line tri zbuff
+EXES=prototype line tri zbuff zbuff_dbg
 CFLAG=-g -std=c99 -Os -lm `pkg-config --cflags --libs opencv` -D SW
 PROFFLAG=$(CFLAG) -pg -DGP_DISPLAY_TIMEOUT_IN_MS=5
 TARGET=main.c
@@ -26,6 +26,9 @@ tri: $(TRI) gp.h gp.o display.o
 
 zbuff: $(ZBUFF) gp.h gp.o display.o
 	$(CC) $(ZBUFF) gp.o display.o $(CFLAG) -o $@
+
+zbuff_dbg: $(ZBUFF) gp.h display.h gp.c display.c
+	$(CC) $(ZBUFF) gp.c display.c $(CFLAG) -DDISPLAY_Z_BUFFER -o $@
 
 prof: $(PROF) gp.h display.h gp.c display.c
 	$(CC) $(PROF) gp.c display.c $(PROFFLAG) -o $@
