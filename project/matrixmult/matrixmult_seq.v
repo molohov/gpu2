@@ -33,6 +33,79 @@
 //
 //
 
+//product becomes available one cycle after provide inputs and assert inputs_ready
+module multiply (
+		input clk,
+		input reset,
+		input [31:0] in1,
+		input [31:0] in2,
+		input inputs_ready,
+		output reg [31:0] product,
+		output reg product_ready
+		);
+
+	always @(posedge clk)
+	begin
+		if (reset) 
+			begin
+			product <= 32'b0;
+			product_ready <= 1'b0;
+			end
+		else if (inputs_ready) 
+			begin
+			product <= in1[15:0] * in2[15:0]; //compute product using 16 lower bits of inputs, result is 32 bit
+			product_ready <= 1'b1; 
+			end
+	end
+endmodule
+
+
+//this module computes the running sum of inputs (which are products)
+//therefore computes one element of final matrix
+//when count reaches N, you know you have completed the number of additions required 
+//need to reset to start new element/row computation
+module sum_matrixmult_1element(
+		input clk,
+		input reset,
+		input [31:0] in1, 		//this will be a product from multiply module
+		input in_ready,			//assert this when providing module with fresh input
+		output reg [31:0] running_sum,	//this will be the running sum
+		output done			//this is asserted when counter reaches N (ie: added all the products for this element of matrix)
+	};
+
+	parameter N = 4; 	//number of rows in matrix (number of additions required to generate one element of matrix result)
+	parameter log2N = 2;
+
+	reg [log2N:0] count;
+
+	assign done = (count == N) ? 1'b1 : 1'b0;
+
+	always @ posedge clk
+	begin
+		if (reset)
+			begin
+				running_sum <= 32'b0;
+				count <= 'b0;
+			end
+		else if (in_ready && !done) //don't keep adding if done
+			begin
+				running_sum <= running_sum + in1;
+				count <= count + 1'b1;
+			end
+	end
+endmodule
+
+
+module full_matrixmult(
+		input clk,
+		input reset,
+		input [31:0] 
+
+	);
+
+	
+endmodule
+
 	
 module matrixmult_tb();
 
