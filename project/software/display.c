@@ -34,18 +34,16 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
   }
 }
 
-inline void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
+void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
 {
   assert(x >= 0 && x < img->xres);
   assert(y >= 0 && y < img->yres);
 
-  unsigned char *ptr = img->img->imageData;
-  ptr += (y * img->xres + x) * BYTES_PER_PIXEL;
+  unsigned *ptr = (unsigned *)img->img->imageData;
+  ptr += (y * img->xres + x);
 
   // bgr
-  ptr[0] = b;
-  ptr[1] = g;
-  ptr[2] = r;
+  *ptr = b | (g << 8) | (r << 16);
 }
 
 void gpDisplayImage(gpImg *img)
@@ -90,9 +88,12 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
       x2 = tmp;
   }
 
+  unsigned *ptr = (unsigned *)img->img->imageData;
+  ptr += (y * img->xres + x1);
+
   for (int i = x1; i <= x2; i++)
   {
-    gpSetImagePixel(img, i, y, r, g, b);
+    *ptr++ = b | (g << 8) | (r << 16);
   }
 }
 
@@ -170,7 +171,7 @@ void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
   }
 }
 
-inline void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
+void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g, unsigned char b)
 {
   volatile unsigned *ptr = (volatile unsigned *)img->imageData;
   ptr += (y * img->xres + x);
