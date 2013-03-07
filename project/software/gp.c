@@ -408,13 +408,11 @@ void gpRender(gpPolyList *list)
   }
 
   // sort polygons by decreasing z (use average for now)
-  /*
   if (GLOBAL_ZBUFFER) {
     qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_reverse_painters);
   } else {
     qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_painters);
   }
-  */
 
   // fill polygon algorithm for each polygon
   for (int i = 0; i < list->num_polys; i++) {
