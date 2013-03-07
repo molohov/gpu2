@@ -58,19 +58,31 @@ int main()
     gpSetPolyVertex(l8, 1, 0.f, -2.f, 0.f);
     gpSetPolyColor(l8, 0xff, 0x0, 0x0);
 
+    gpPoly *l9 = gpCreatePoly(2);
+    gpSetPolyVertex(l9, 0, 2.f, .5f, 0.f);
+    gpSetPolyVertex(l9, 1, -2.f, -.5f, 0.f);
+    gpSetPolyColor(l9, 0xff, 0x0, 0x0);
+
+    gpPoly *l10 = gpCreatePoly(2);
+    gpSetPolyVertex(l10, 0, 2.f, -.5f, 0.f);
+    gpSetPolyVertex(l10, 1, -2.f, .5f, 0.f);
+    gpSetPolyColor(l10, 0xff, 0x0, 0x0);
+
     gpAddPolyToList(list, l5);
     gpAddPolyToList(list, l6);
     gpAddPolyToList(list, l7);
     gpAddPolyToList(list, l8);
+    gpAddPolyToList(list, l9);
+    gpAddPolyToList(list, l10);
 
     gpRender(list);
 
     // test a single point
 
-    gpPoly *l9 = gpCreatePoly(1);
-    gpSetPolyVertex(l9, 0, .3f, .3f, 0.f);
-    gpSetPolyColor(l9, 0xff, 0xff, 0xff);
+    gpPoly *l11 = gpCreatePoly(1);
+    gpSetPolyVertex(l11, 0, .3f, .3f, 0.f);
+    gpSetPolyColor(l11, 0xff, 0xff, 0xff);
 
-    gpAddPolyToList(list, l9);
+    gpAddPolyToList(list, l11);
     gpRender(list);
 }
