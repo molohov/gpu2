@@ -460,8 +460,48 @@ void gpSetFrustrum(float near, float far)
     GLOBAL_FAR = far;
 }
 
+void gpFillLine(gpImg *img, gpVertex2Fixed *v1, gpVertex2Fixed *v2, gpColor *color)
+{
+    // flip y
+    int y0 = GP_YRES - 1 - v1->y;
+    int y1 = GP_YRES - 1 - v2->y;
+    int x0 = v1->x;
+    int x1 = v2->x;
+
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+    int sx = (x0 < x1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx-dy;
+
+    while (1) {
+        if (x0 >= 0 && x0 < GP_XRES && y0 >= 0 && y0 < GP_YRES) {
+            gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
+        }
+        if (x0 == x1 && y0 == y1 || sy == 1 && y0 >= GP_YRES || sy == -1 && y0 < 0) break;
+        int e2 = 2*err;
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
 void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
 {
+    if (num_vertices == 1) {
+        gpFillLine(img, vertices, vertices, color);
+        return;
+    }
+    if (num_vertices == 2) {
+        gpFillLine(img, vertices, vertices + 1, color);
+        return;
+    }
+
     int y_min = GP_YRES;
     int start_index = -1;
 
@@ -508,7 +548,7 @@ void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, g
             assert(y_left_1 >= y_left_0);
         }
         if (vertices[right_index].y <= y) {
-            if (left_index == right_index && num_vertices != 1) break;
+            if (left_index == right_index) break;
 
             right_index = right_index + 1;
             if (right_index == num_vertices) right_index = 0;
