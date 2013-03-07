@@ -251,7 +251,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
       z1 = z2;
       z2 = tmp;
   }                
-  
+
   // interpolate depth values for this row
   int dx = x2 - x1;
   int dz = z2 - z1;
@@ -261,13 +261,14 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   if (dx) {
     slope = dz / dx;
     rem = abs(dz - slope * dx);
+  } else {
+    z1 = (z1 + z2) / 2;
   }
 
   int error = (dx + 1) / 2;
   int sz = (dz > 0) ? 1 : -1;
 
-  for (;; x1++)
-  {
+  for (;; x1++) {
       if (img->zbuffer[y*img->xres + x1] > z1)  {
           img->zbuffer[y*img->xres + x1] = z1;
           gpSetImagePixel(img, x1, y, r, g, b);
