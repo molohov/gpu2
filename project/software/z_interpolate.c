@@ -25,7 +25,7 @@ int interpolate(int x1, int x2, int z1, int z2)
 
   printf("Interpolating %d-%d, %d-%d:\n\n", x1, x2, z1, z2);
 
-  for (; x1 < x2; x1++) {
+  for (;; x1++) {
     printf("(%d, %d)\n", x1, z1);
     if (x1 == x2) break;
     z1 += slope;
