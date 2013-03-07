@@ -337,7 +337,7 @@ void gpRenderPoly(gpPoly *poly)
   assert(poly);
 
   gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
-  gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
+  gpSetImageBackground(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
 
   // apply transformations
   if (GLOBAL_PERSPECTIVE)
@@ -377,7 +377,7 @@ void gpRender(gpPolyList *list)
   assert(list);
 
   gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
-  gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
+  gpSetImageBackground(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
 
   for (int i = 0; i < list->num_polys; i++) {
     gpPoly *poly = list->polys[i];
