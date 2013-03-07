@@ -246,6 +246,9 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
       int tmp = x1;
       x1 = x2;
       x2 = tmp;
+      tmp = z1;
+      z1 = z2;
+      z2 = tmp;
   }                
   
   // interpolate depth values for this row
