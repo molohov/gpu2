@@ -598,17 +598,6 @@ void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, g
     } while (left_index != right_index && y < GP_YRES);
 }
 
-void gpRenderConvexPoly(gpVertex2Fixed * vertices, int num_vertices, gpColor *color)
-{
-    gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
-    gpSetImage(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
-    gpFillConvexPoly(img, vertices, num_vertices, color);
-
-    // draw the image!
-    gpDisplayImage(img);
-    gpReleaseImage(&img);
-}
-
 void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertices, gpColor *color)
 {
     int y_min = GP_YRES;
