@@ -30,7 +30,7 @@ int main()
 
   gpEnable(GP_ZBUFFER);
   gpEnable(GP_PERSPECTIVE);
-  gpSetFrustrum(1.0, 4.0);
+  gpSetFrustrum(1.0, 3.0);
 
   gpRender(list);
 

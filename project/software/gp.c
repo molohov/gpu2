@@ -31,7 +31,7 @@ float GLOBAL_FAR;
 
 // global z-buffer
 int GLOBAL_ZBUFFER = 0;
-unsigned short GLOBAL_ZBUFFER_MAX = -1;
+zbuff GLOBAL_ZBUFFER_MAX = -1;
 
 // global background color
 unsigned char GP_BG_COLOR[3] = {0xff, 0xff, 0xff};
@@ -306,9 +306,9 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
           vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
           vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
           if (!GLOBAL_PERSPECTIVE)
-            vertices[i].z = (unsigned short)(((GLOBAL_FAR + GLOBAL_NEAR)/(2*(GLOBAL_FAR - GLOBAL_NEAR)) + (1/poly->t_vertices[i].z)*(-GLOBAL_FAR*GLOBAL_NEAR)/(GLOBAL_FAR - GLOBAL_NEAR) + 1/2) * GLOBAL_ZBUFFER_MAX);
+            vertices[i].z = (zbuff)(((GLOBAL_FAR + GLOBAL_NEAR)/(2*(GLOBAL_FAR - GLOBAL_NEAR)) + (1/poly->t_vertices[i].z)*(-GLOBAL_FAR*GLOBAL_NEAR)/(GLOBAL_FAR - GLOBAL_NEAR) + 1/2) * GLOBAL_ZBUFFER_MAX);
           else
-            vertices[i].z = (unsigned short)(poly->t_vertices[i].z * GLOBAL_ZBUFFER_MAX);
+            vertices[i].z = (zbuff)(poly->t_vertices[i].z * GLOBAL_ZBUFFER_MAX);
           /* DEBUG
           printf("floating point: x: %f, y: %f, z: %f\n", poly->t_vertices[i].x, poly->t_vertices[i].y, poly->t_vertices[i].z);
           printf("fixed point: x: %d, y: %d, z: %d\n", vertices[i].x, vertices[i].y, vertices[i].z);
@@ -408,11 +408,13 @@ void gpRender(gpPolyList *list)
   }
 
   // sort polygons by decreasing z (use average for now)
+  /*
   if (GLOBAL_ZBUFFER) {
     qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_reverse_painters);
   } else {
     qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_painters);
   }
+  */
 
   // fill polygon algorithm for each polygon
   for (int i = 0; i < list->num_polys; i++) {
