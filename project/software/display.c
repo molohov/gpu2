@@ -268,7 +268,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
           if (img->zbuffer[y*img->xres + x1] > z1) {
               img->zbuffer[y*img->xres + x1] = z1;
               gpSetImagePixel(img, x1, y, r, g, b);
-           }
+          }
       }
       if (x1 == x2 || x1 >= img->xres) break;
       z1 += slope;
