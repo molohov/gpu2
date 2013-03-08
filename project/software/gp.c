@@ -38,6 +38,41 @@ unsigned char GP_BG_COLOR[3] = {0xff, 0xff, 0xff};
 
 /* Library functions */
 
+gpPolyHierarchy * gpCreatePolyHierarchy()
+{
+  gpPolyHierarchy *h = malloc(sizeof(gpPolyHierarchy));
+  h->list = NULL;
+  h->child = NULL;
+  h->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
+
+  return h;
+}
+
+void gpSetPolyHierarchyList(gpPolyHierarchy *hierarchy, gpPolyList *list)
+{
+  assert(hierarchy->list == NULL);
+  hierarchy->list = list;
+}
+
+void gpSetPolyHierarchyChild(gpPolyHierarchy *hierarchy, gpPolyHierarchy *child)
+{
+  assert(hierarchy->child == NULL);
+  hierarchy->child = child;
+}
+
+void gpDeletePolyHierarchy(gpPolyHierarchy *hierarchy)
+{
+  if (hierarchy->child) {
+    gpDeletePolyHierarchy(hierarchy->child);
+  }
+
+  if (hierarchy->list) {
+    gpDeletePolyList(hierarchy->list);
+  }
+
+  free(hierarchy);
+}
+
 gpPolyList * gpCreatePolyList()
 {
   gpPolyList *list = malloc(sizeof(gpPolyList));
@@ -165,12 +200,22 @@ void gpMatrixMult(float *x, float *y, float *result, int a, int b)
   }
 }
 
+// dst = dst * src
 void gpApplyTMatrix(gpTMatrix *dst, gpTMatrix *src)
 {
   float temp[4][4];
   memcpy(temp, dst->m, sizeof(dst->m));
 
   gpMatrixMult((float *)temp, (float *)src->m, (float *)dst->m, 4, 4);
+}
+
+// dst = src * dst
+void gpAppliedTMatrix(gpTMatrix *dst, gpTMatrix *src)
+{
+  float temp[4][4];
+  memcpy(temp, dst->m, sizeof(dst->m));
+
+  gpMatrixMult((float *)src->m, (float *)temp, (float *)dst->m, 4, 4);
 }
 
 void gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
@@ -203,6 +248,11 @@ void gpTranslatePolyList(gpPolyList *list, float x, float y, float z)
   gpApplyTranslate(&list->trans, x, y, z);
 }
 
+void gpTranslatePolyHierarchy(gpPolyHierarchy *hierarchy, float x, float y, float z)
+{
+  gpApplyTranslate(&hierarchy->trans, x, y, z);
+}
+
 void gpApplyScale(gpTMatrix *trans, float x, float y, float z)
 {
   // scale is a transpose!
@@ -218,6 +268,11 @@ void gpScalePoly(gpPoly *poly, float x, float y, float z)
 void gpScalePolyList(gpPolyList *list, float x, float y, float z)
 {
   gpApplyScale(&list->trans, x, y, z);
+}
+
+void gpScalePolyHierarchy(gpPolyHierarchy *hierarchy, float x, float y, float z)
+{
+  gpApplyScale(&hierarchy->trans, x, y, z);
 }
 
 void gpApplyRotate(gpTMatrix *trans, float x, float y, float z)
@@ -242,40 +297,21 @@ void gpRotatePoly(gpPoly *poly, float x, float y, float z)
 
 void gpRotatePolyList(gpPolyList *list, float x, float y, float z)
 {
-  float x_position = list->trans.m[3][0];
-  float y_position = list->trans.m[3][1];
-  float z_position = list->trans.m[3][2];
-  gpTranslatePolyListOrigin(list);
   gpApplyRotate(&list->trans, x, y, z);
-  gpTranslatePolyList(list, x_position, y_position, z_position);
+}
+
+void gpRotatePolyHierarchy(gpPolyHierarchy *hierarchy, float x, float y, float z)
+{
+  gpApplyRotate(&hierarchy->trans, x, y, z);
 }
 
 void gpApplyPerspective(gpTMatrix *trans, float near, float far)
 {
   // perspective is a transpose!
-  //gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, (far+near)/(near*(far - near)), 1/near}, {0.f, 0.f, 2*far/(far - near), 0.f}}};
   float a = 1/(GLOBAL_NEAR*(1 - GLOBAL_NEAR/GLOBAL_FAR));
   float b = -1/(1 - GLOBAL_NEAR/GLOBAL_FAR);
   gpTMatrix perspective = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, a, 1/near}, {0.f, 0.f, b, 0.f}}};
   gpApplyTMatrix(trans, &perspective);
-}
-
-void gpPerspectivePoly(gpPoly *poly, float near, float far)
-{
-  gpApplyPerspective(&poly->trans, near, far);
-}
-
-void gpPerspectivePolyList(gpPolyList *list, float near, float far)
-{
-  gpApplyPerspective(&list->trans, near, far);
-}
-
-void gpTranslatePolyListOrigin(gpPolyList *list)
-{
-    //try to revert all the translations away from original position
-    list->trans.m[3][0] = 0.f;
-    list->trans.m[3][1] = 0.f;
-    list->trans.m[3][2] = 0.f;
 }
 
 void gpClearTMatrixPoly(gpPoly *poly)
@@ -826,6 +862,65 @@ void gpRender(gpPolyList *list)
   gpDisplayImage(img);
 
   gpReleaseImage(&img);
+}
+
+void gpRenderAll(gpPolyHierarchy *hierarchy)
+{
+  gpPolyList *list = gpCreatePolyList();
+
+  gpTMatrix trans = {{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
+
+  if (GLOBAL_PERSPECTIVE) {
+      assert(GLOBAL_PERSPECTIVE_SET);
+      gpApplyPerspective(&trans, GLOBAL_NEAR, GLOBAL_FAR);
+  }
+
+  while (hierarchy) {
+    gpAppliedTMatrix(&trans, &hierarchy->trans);
+
+    if (hierarchy->list) {
+      gpTMatrix list_trans;
+      gpMatrixMult((float *)hierarchy->list->trans.m, (float *)trans.m, (float *)list_trans.m, 4, 4);
+      for (int i = 0; i < hierarchy->list->num_polys; i++) {
+        gpPoly *poly = hierarchy->list->polys[i];
+        gpAddPolyToList(list, poly);
+        gpTMatrix temp;
+        gpMatrixMult((float *)poly->trans.m, (float *)list_trans.m, (float *)temp.m, 4, 4);
+        gpApplyTMatrixToCoord(poly, &temp);
+
+        // compute avg_z for each polygon
+        float sum_z = 0.f;
+        for (int j = 0; j < poly->num_vertices; j++) {
+          sum_z += poly->t_vertices[j].z;
+        }
+        poly->avg_z = sum_z / poly->num_vertices;
+      }
+    }
+
+    hierarchy = hierarchy->child;
+  }
+
+  gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
+  gpSetImageBackground(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
+
+  // sort polygons by decreasing z (use average for now)
+  if (GLOBAL_ZBUFFER) {
+    qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_reverse_painters);
+  } else {
+    qsort(list->polys, list->num_polys, sizeof(gpPoly *), poly_painters);
+  }
+
+  // fill polygon algorithm for each polygon
+  for (int i = 0; i < list->num_polys; i++) {
+    gpFillPoly(list->polys[i], img);
+  }
+
+  gpDisplayImage(img);
+
+  gpReleaseImage(&img);
+
+  free(list->polys);
+  free(list);
 }
 
 void gpEnable(int gpFunction)

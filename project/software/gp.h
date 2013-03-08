@@ -64,8 +64,21 @@ typedef struct {
   gpTMatrix trans;
 } gpPolyList;
 
+// hierarchy of 3-d shapes
+struct gpPolyHierarchy {
+  gpPolyList *list;
+  struct gpPolyHierarchy *child;
+  gpTMatrix trans;
+};
+typedef struct gpPolyHierarchy gpPolyHierarchy;
+
 /* Library functions */
 enum { GP_PERSPECTIVE, GP_ZBUFFER };
+
+gpPolyHierarchy * gpCreatePolyHierarchy();
+void gpSetPolyHierarchyList(gpPolyHierarchy *hierarchy, gpPolyList *list);
+void gpSetPolyHierarchyChild(gpPolyHierarchy *hierarchy, gpPolyHierarchy *child);
+void gpDeletePolyHierarchy(gpPolyHierarchy *hierarchy);
 
 gpPolyList * gpCreatePolyList();
 void gpAddPolyToList(gpPolyList *list, gpPoly *poly);
@@ -78,19 +91,21 @@ void gpDeletePoly(gpPoly *poly);
 
 void gpTranslatePoly(gpPoly *poly, float x, float y, float z);
 void gpTranslatePolyList(gpPolyList *list, float x, float y, float z);
+void gpTranslatePolyHierarchy(gpPolyHierarchy *hierarchy, float x, float y, float z);
 void gpScalePoly(gpPoly *poly, float x, float y, float z);
 void gpScalePolyList(gpPolyList *list, float x, float y, float z);
+void gpScalePolyHierarchy(gpPolyHierarchy *hierarchy, float x, float y, float z);
 void gpRotatePoly(gpPoly *poly, float x, float y, float z);
 void gpRotatePolyList(gpPolyList *list, float x, float y, float z);
-void gpPerspectivePoly(gpPoly *poly, float near, float far);
-void gpPerspectivePolyList(gpPolyList *list, float near, float far);
-void gpTranslatePolyListOrigin(gpPolyList *list);
+void gpRotatePolyHierarchy(gpPolyHierarchy *hierarchy, float x, float y, float z);
 
 void gpClearTMatrixPoly(gpPoly *poly);
 void gpClearTMatrixPolyList(gpPolyList *list);
+void gpClearTMatrixPolyHierarchy(gpPolyHierarchy *hierarchy);
 
 void gpRenderPoly(gpPoly *poly);
 void gpRender(gpPolyList *list);
+void gpRenderAll(gpPolyHierarchy *hierarchy);
 
 void gpEnable(int gpFunction);
 void gpDisable(int gpFunction);

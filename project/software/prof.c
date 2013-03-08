@@ -57,23 +57,25 @@ int main()
   gpAddPolyToList(cube, y2);
   gpAddPolyToList(cube, x2);
 
-
   gpEnable(GP_PERSPECTIVE);
   gpSetFrustrum(1.0, 10.0);
 
+  gpPolyHierarchy *translations = gpCreatePolyHierarchy();
+  gpSetPolyHierarchyList(translations, cube);
+  gpTranslatePolyHierarchy(translations, 0.f, 0.f, 1.5f);
+
   gpRotatePolyList(cube, -0.4f, 0.4f, 0.2f);
-  gpTranslatePolyList(cube, 0.f, 0.f, 1.5f);
 
   for (int c = 0; c < 50; c++) {
     for (int i = 0; i < 64; i++) {
-      gpTranslatePolyList(cube, 0.f, 0.f, 0.05f);
+      gpTranslatePolyHierarchy(translations, 0.f, 0.f, 0.05f);
       gpRotatePolyList(cube, 0.3f, 0.3f, 0.0f);
-      gpRender(cube);
+      gpRenderAll(translations);
     }
-    gpTranslatePolyList(cube, 0.f, 0.f, -64 * 0.05f);
+    gpTranslatePolyHierarchy(translations, 0.f, 0.f, -64 * 0.05f);
   }
 
-  gpDeletePolyList(cube);
+  gpDeletePolyHierarchy(translations);
 
   return 0;
 }
