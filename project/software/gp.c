@@ -598,7 +598,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.y - S.y != 0);
           output_vertices[idx] = (gpVertex3Fixed){S.x - (S.y - GP_YRES + 1) * (S.x - E.x) / (S.y - E.y), GP_YRES - 1,
-                                                  S.z.f - (E.y - GP_YRES + 1) * (S.z.f - E.z.f) / (S.y - E.y)};
+                                                  S.z.f - (S.y - GP_YRES + 1) * (S.z.f - E.z.f) / (S.y - E.y)};
         }
       }
       S = E;
