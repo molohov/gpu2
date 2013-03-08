@@ -1,10 +1,15 @@
 #include "gp.h"
 #define PERSPECTIVE_TEST
+//#define ZBUFFER_TEST
 
 /* User program */
 int main()
 {
   gpSetBackgroundColor(0x60, 0x00, 0xe0);
+
+#ifdef ZBUFFER_TEST
+  gpEnable(GP_ZBUFFER);
+#endif
 
   #ifndef PERSPECTIVE_TEST
   // Create a triangle

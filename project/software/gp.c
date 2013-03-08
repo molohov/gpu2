@@ -882,7 +882,9 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             left_dz = z_left_1 - z_left_0;
             left_y_steep = false;
             left_x_steep = false;
-            if (left_dx != 0) {
+            //if (left_dx != 0) { // prevents most off-by-one glitches of adjacent lines
+            //if (abs(left_dx) > left_dy) { // prevents off-by-a lot glitches for steep y
+            if (abs(left_dx) > left_dy / 8) { // somewhere in between
                 left_x_steep = true;
                 left_slope = left_dz / left_dx;
                 left_rem = abs(left_dz - left_slope * left_dx);
@@ -922,7 +924,9 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             right_dz = z_right_1 - z_right_0;
             right_y_steep = false;
             right_x_steep = false;
-            if (right_dx != 0) {
+            //if (right_dx != 0) { // prevents most off-by-one glitches of adjacent lines
+            //if (abs(right_dx) > right_dy) { // prevents off-by-a lot glitches for steep y
+            if (abs(right_dx) > right_dy / 8) { // somewhere in between
                 right_x_steep = true;
                 right_slope = right_dz / right_dx;
                 right_rem = abs(right_dz - right_slope * right_dx);
