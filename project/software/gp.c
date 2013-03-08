@@ -295,15 +295,13 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
     // convert floating point to fixed point
     if (GLOBAL_ZBUFFER)
     {
-        // ensure the viewing frustrum has been set such that near and far planes are defined
-        assert(GLOBAL_PERSPECTIVE_SET);
         gpVertex3Fixed *vertices = malloc(poly->num_vertices * sizeof(gpVertex3Fixed));
 
         for (int i = 0; i < poly->num_vertices; i++) {
           vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
           vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
           if (!GLOBAL_PERSPECTIVE)
-            vertices[i].z = (unsigned)(((GLOBAL_FAR + GLOBAL_NEAR)/(2*(GLOBAL_FAR - GLOBAL_NEAR)) + (1/poly->t_vertices[i].z)*(-GLOBAL_FAR*GLOBAL_NEAR)/(GLOBAL_FAR - GLOBAL_NEAR) + 1/2) * GLOBAL_ZBUFFER_MAX);
+            vertices[i].z = (unsigned)((poly->t_vertices[i].z - GLOBAL_NEAR) / (GLOBAL_FAR - GLOBAL_NEAR) * GLOBAL_ZBUFFER_MAX);
           else
             vertices[i].z = (unsigned)(poly->t_vertices[i].z * GLOBAL_ZBUFFER_MAX);
         }
