@@ -292,9 +292,11 @@ int gpClipXY(gpVertex2Fixed **vertices_p, int num_vertices)
 {
   assert(num_vertices > 0);
 
+  int max_vertices = 2 * num_vertices;
+
   // clip x < 0
   {
-    gpVertex2Fixed *output_vertices = malloc(num_vertices * sizeof(gpVertex2Fixed));
+    gpVertex2Fixed *output_vertices = malloc(max_vertices * sizeof(gpVertex2Fixed));
     memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex2Fixed));
     gpVertex2Fixed S = output_vertices[num_vertices - 1];
 
@@ -309,7 +311,6 @@ int gpClipXY(gpVertex2Fixed **vertices_p, int num_vertices)
           output_vertices[idx] = (gpVertex2Fixed){0, E.y - E.x * (E.y - S.y) / (E.x - S.x)};
           idx++;
           new_num_vertices++;
-          output_vertices = realloc(output_vertices, new_num_vertices * sizeof(gpVertex2Fixed));
         }
         output_vertices[idx] = E;
       } else {
@@ -332,7 +333,7 @@ int gpClipXY(gpVertex2Fixed **vertices_p, int num_vertices)
   }
   // clip x >= xres
   {
-    gpVertex2Fixed *output_vertices = malloc(num_vertices * sizeof(gpVertex2Fixed));
+    gpVertex2Fixed *output_vertices = malloc(max_vertices * sizeof(gpVertex2Fixed));
     memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex2Fixed));
     gpVertex2Fixed S = output_vertices[num_vertices - 1];
 
@@ -347,7 +348,6 @@ int gpClipXY(gpVertex2Fixed **vertices_p, int num_vertices)
           output_vertices[idx] = (gpVertex2Fixed){GP_XRES - 1, E.y - (E.x - GP_XRES + 1) * (E.y - S.y) / (E.x - S.x)};
           idx++;
           new_num_vertices++;
-          output_vertices = realloc(output_vertices, new_num_vertices * sizeof(gpVertex2Fixed));
         }
         output_vertices[idx] = E;
       } else {
@@ -370,7 +370,7 @@ int gpClipXY(gpVertex2Fixed **vertices_p, int num_vertices)
   }
   // clip y < 0
   {
-    gpVertex2Fixed *output_vertices = malloc(num_vertices * sizeof(gpVertex2Fixed));
+    gpVertex2Fixed *output_vertices = malloc(max_vertices * sizeof(gpVertex2Fixed));
     memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex2Fixed));
     gpVertex2Fixed S = output_vertices[num_vertices - 1];
 
@@ -385,7 +385,6 @@ int gpClipXY(gpVertex2Fixed **vertices_p, int num_vertices)
           output_vertices[idx] = (gpVertex2Fixed){E.x - E.y * (E.x - S.x) / (E.y - S.y), 0};
           idx++;
           new_num_vertices++;
-          output_vertices = realloc(output_vertices, new_num_vertices * sizeof(gpVertex2Fixed));
         }
         output_vertices[idx] = E;
       } else {
@@ -408,7 +407,7 @@ int gpClipXY(gpVertex2Fixed **vertices_p, int num_vertices)
   }
   // clip y >= yres
   {
-    gpVertex2Fixed *output_vertices = malloc(num_vertices * sizeof(gpVertex2Fixed));
+    gpVertex2Fixed *output_vertices = malloc(max_vertices * sizeof(gpVertex2Fixed));
     memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex2Fixed));
     gpVertex2Fixed S = output_vertices[num_vertices - 1];
 
@@ -423,7 +422,6 @@ int gpClipXY(gpVertex2Fixed **vertices_p, int num_vertices)
           output_vertices[idx] = (gpVertex2Fixed){E.x - (E.y - GP_YRES + 1) * (E.x - S.x) / (E.y - S.y), GP_YRES - 1};
           idx++;
           new_num_vertices++;
-          output_vertices = realloc(output_vertices, new_num_vertices * sizeof(gpVertex2Fixed));
         }
         output_vertices[idx] = E;
       } else {
