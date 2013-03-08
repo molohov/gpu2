@@ -944,6 +944,11 @@ void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, g
             left_index = left_index - 1;
             if (left_index < 0) left_index = num_vertices - 1;
 
+            if (left_index == right_index && vertices[right_index].y <= y) {
+                gpSetImageHLine(img, GP_YRES - 1 - y, x_left_1, x_right_1, r, g, b);
+                break;
+            }
+
             y_left_0 = y_left_1;
             x_left_0 = x_left_1;
             y_left_1 = vertices[left_index].y;
@@ -955,8 +960,6 @@ void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, g
             assert(y_left_1 >= y_left_0);
         }
         if (vertices[right_index].y <= y) {
-            if (left_index == right_index) break;
-
             right_index = right_index + 1;
             if (right_index == num_vertices) right_index = 0;
 
@@ -1120,6 +1123,11 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             left_index = left_index - 1;
             if (left_index < 0) left_index = num_vertices - 1;
 
+            if (left_index == right_index && vertices[right_index].y <= y) {
+                gpSetImageHLine(img, GP_YRES - 1 - y, x_left_1, x_right_1, r, g, b);
+                break;
+            }
+
             y_left_0 = y_left_1;
             x_left_0 = x_left_1;
             y_left_1 = vertices[left_index].y;
@@ -1157,8 +1165,6 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             left_sz = (left_dz > 0) ? 1 : -1;
         }
         if (vertices[right_index].y <= y) {
-            if (left_index == right_index) break;
-
             right_index = right_index + 1;
             if (right_index == num_vertices) right_index = 0;
 
