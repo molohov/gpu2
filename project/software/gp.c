@@ -1133,13 +1133,11 @@ void gpFillLineZBuff(gpImg *img, gpVertex3Fixed *v1, gpVertex3Fixed *v2, gpColor
     int sz = (dz > 0) ? 1 : -1;
 
     while (1) {
-        if (x0 >= 0 && x0 < GP_XRES && y0 >= 0 && y0 < GP_YRES) {
-            if (img->zbuffer[y0*img->xres + x0] > z0) {
-                img->zbuffer[y0*img->xres + x0] = z0;
-                gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
-            }
+        if (img->zbuffer[y0*img->xres + x0] > z0) {
+            img->zbuffer[y0*img->xres + x0] = z0;
+            gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
         }
-        if (x0 == x1 && y0 == y1 || sy == 1 && y0 >= GP_YRES || sy == -1 && y0 < 0) break;
+        if (x0 == x1 && y0 == y1) break;
         int e2 = 2*err;
         if (e2 > -dy) {
             err -= dy;
