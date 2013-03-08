@@ -598,8 +598,6 @@ void gpFillLineZBuff(gpImg *img, gpVertex3Fixed *v1, gpVertex3Fixed *v2, gpColor
     int x1 = v2->x;
     unsigned z0 = v1->z;
     unsigned z1 = v2->z;
-    // use average z for now...
-    unsigned z = (z0 +z1)/2;
 
     int dx = abs(x1 - x0);
     int dy = abs(y1 - y0);
@@ -607,10 +605,17 @@ void gpFillLineZBuff(gpImg *img, gpVertex3Fixed *v1, gpVertex3Fixed *v2, gpColor
     int sy = (y0 < y1) ? 1 : -1;
     int err = dx-dy;
 
+    int dz = z1 - z0;
+    int dxy = dx + dy;
+    int slope = (dxy) ? dz / dxy : 0;
+    int rem = abs(dz - slope * dxy);
+    int zerr = (dxy + 1) / 2;
+    int sz = (dz > 0) ? 1 : -1;
+
     while (1) {
         if (x0 >= 0 && x0 < GP_XRES && y0 >= 0 && y0 < GP_YRES) {
-            if (img->zbuffer[y0*img->xres + x0] > z) {
-                img->zbuffer[y0*img->xres + x0] = z;
+            if (img->zbuffer[y0*img->xres + x0] > z1) {
+                img->zbuffer[y0*img->xres + x0] = z1;
                 gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
             }
         }
@@ -619,10 +624,24 @@ void gpFillLineZBuff(gpImg *img, gpVertex3Fixed *v1, gpVertex3Fixed *v2, gpColor
         if (e2 > -dy) {
             err -= dy;
             x0 += sx;
+
+            z1 += slope;
+            zerr += rem;
+            if (zerr > dxy) {
+                z1 += sz;
+                zerr -= dxy;
+            }
         }
         if (e2 < dx) {
             err += dx;
             y0 += sy;
+
+            z1 += slope;
+            zerr += rem;
+            if (zerr > dxy) {
+                z1 += sz;
+                zerr -= dxy;
+            }
         }
     }
 }
