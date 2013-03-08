@@ -632,7 +632,8 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
     int left_slope = 0, right_slope = 0;
     int left_rem = 0, right_rem = 0;
     int left_zerr = 0, right_zerr = 0;
-
+    bool left_y_steep = false, left_x_steep = false;
+    bool right_y_steep = false, right_x_steep = false;
 
     do {
         if (vertices[left_index].y <= y) {
@@ -653,17 +654,25 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             z_left_0 = z_left_1;
             z_left_1 = vertices[left_index].z;
             left_dz = z_left_1 - z_left_0;
-            if (left_dy) {
+            left_y_steep = false;
+            left_x_steep = false;
+            if (left_dx != 0) {
+                left_x_steep = true;
+                left_slope = left_dz / left_dx;
+                left_rem = abs(left_dz - left_slope * left_dx);
+                left_zerr = (abs(left_dx) + 1) / 2;
+            } else if (left_dy != 0) {
+                left_y_steep = true;
                 left_slope = left_dz / left_dy;
                 left_rem = abs(left_dz - left_slope * left_dy);
+                left_zerr = (left_dy + 1) / 2;
             } else {
                 // take the minimum
                 z_left_0 = (z_left_0 < z_left_1) ? z_left_0 : z_left_1;
                 left_slope = 0;
+                left_zerr = 0;
             }
             left_sz = (left_dz > 0) ? 1 : -1;
-            left_zerr = (left_dy + 1) / 2;
-            z_left_0 += left_slope / 2;
         }
         if (vertices[right_index].y <= y) {
             if (left_index == right_index) break;
@@ -685,17 +694,25 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             z_right_0 = z_right_1;
             z_right_1 = vertices[right_index].z;
             right_dz = z_right_1 - z_right_0;
-            if (right_dy) {
+            right_y_steep = false;
+            right_x_steep = false;
+            if (right_dx != 0) {
+                right_x_steep = true;
+                right_slope = right_dz / right_dx;
+                right_rem = abs(right_dz - right_slope * right_dx);
+                right_zerr = (right_dx + 1) / 2;
+            } else if (right_dy != 0) {
+                right_y_steep = true;
                 right_slope = right_dz / right_dy;
                 right_rem = abs(right_dz - right_slope * right_dy);
+                right_zerr = (right_dy + 1) / 2;
             } else {
                 // take the minimum
                 z_right_0 = (z_right_0 < z_right_1) ? z_right_0 : z_right_1;
                 right_slope = 0;
+                right_zerr = 0;
             }
             right_sz = (right_dz > 0) ? 1 : -1;
-            right_zerr = (right_dy + 1) / 2;
-            z_right_0 += right_slope / 2;
         }
 
         do {
@@ -706,6 +723,14 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
                 if (e2 > -left_dy) {
                     left_err -= left_dy;
                     x_left_0 += left_sx;
+                    if (left_x_steep) {
+                        z_left_0 += left_slope;
+                        left_zerr += left_rem;
+                        if (left_zerr > abs(left_dx)) {
+                            z_left_0 += left_sz;
+                            left_zerr -= abs(left_dx);
+                        }
+                    }
                 }
                 if (e2 < left_dx) {
                     left_err += left_dx;
@@ -719,28 +744,41 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
                 if (e2 > -right_dy) {
                     right_err -= right_dy;
                     x_right_0 += right_sx;
+                    if (right_x_steep) {
+                        z_right_0 += right_slope;
+                        right_zerr += right_rem;
+                        if (right_zerr > abs(right_dx)) {
+                            z_right_0 += right_sz;
+                            right_zerr -= abs(right_dx);
+                        }
+                    }
                 }
                 if (e2 < right_dx) {
                     right_err += right_dx;
                     break;
                 }
             }
+            // x is about half a step before y, so do z interpolation first
+            if (left_y_steep) {
+                z_left_0 += left_slope;
+                left_zerr += left_rem;
+                if (left_zerr > left_dy) {
+                    z_left_0 += left_sz;
+                    left_zerr -= left_dy;
+                }
+            }
+            if (right_y_steep) {
+                z_right_0 += right_slope;
+                right_zerr += right_rem;
+                if (right_zerr > right_dy) {
+                    z_right_0 += right_sz;
+                    right_zerr -= right_dy;
+                }
+            }
             if (y >= 0) {
             	gpSetImageHLineZBuff(img, GP_YRES - 1 - y, x_left_0, x_right_0, z_left_0, z_right_0, r, g, b);
             }
             y++;
-            z_left_0 += left_slope;
-            left_zerr += left_rem;
-            if (left_zerr > left_dy) {
-                z_left_0 += left_sz;
-                left_zerr -= left_dy;
-            }
-            z_right_0 += right_slope;
-            right_zerr += right_rem;
-            if (right_zerr > right_dy) {
-                z_right_0 += right_sz;
-                right_zerr -= right_dy;
-            }
         } while (y < vertices[left_index].y && y < vertices[right_index].y && y < GP_YRES);
     } while (left_index != right_index && y < GP_YRES);
 }
