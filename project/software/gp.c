@@ -450,6 +450,7 @@ void gpSetFrustrum(float near, float far)
     GLOBAL_FAR = far;
 }
 
+// Note: this is not symmetric, ie drawing (v1, v2) will not draw the same line as (v2, v1)
 void gpFillLine(gpImg *img, gpVertex2Fixed *v1, gpVertex2Fixed *v2, gpColor *color)
 {
     // flip y
@@ -589,6 +590,7 @@ void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, g
     } while (left_index != right_index && y < GP_YRES);
 }
 
+// Note: this is not symmetric, ie drawing (v1, v2) will not draw the same line as (v2, v1)
 void gpFillLineZBuff(gpImg *img, gpVertex3Fixed *v1, gpVertex3Fixed *v2, gpColor *color)
 {
     // flip y
@@ -614,8 +616,8 @@ void gpFillLineZBuff(gpImg *img, gpVertex3Fixed *v1, gpVertex3Fixed *v2, gpColor
 
     while (1) {
         if (x0 >= 0 && x0 < GP_XRES && y0 >= 0 && y0 < GP_YRES) {
-            if (img->zbuffer[y0*img->xres + x0] > z1) {
-                img->zbuffer[y0*img->xres + x0] = z1;
+            if (img->zbuffer[y0*img->xres + x0] > z0) {
+                img->zbuffer[y0*img->xres + x0] = z0;
                 gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
             }
         }
@@ -625,10 +627,10 @@ void gpFillLineZBuff(gpImg *img, gpVertex3Fixed *v1, gpVertex3Fixed *v2, gpColor
             err -= dy;
             x0 += sx;
 
-            z1 += slope;
+            z0 += slope;
             zerr += rem;
             if (zerr > dxy) {
-                z1 += sz;
+                z0 += sz;
                 zerr -= dxy;
             }
         }
@@ -636,10 +638,10 @@ void gpFillLineZBuff(gpImg *img, gpVertex3Fixed *v1, gpVertex3Fixed *v2, gpColor
             err += dx;
             y0 += sy;
 
-            z1 += slope;
+            z0 += slope;
             zerr += rem;
             if (zerr > dxy) {
-                z1 += sz;
+                z0 += sz;
                 zerr -= dxy;
             }
         }
