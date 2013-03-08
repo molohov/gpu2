@@ -46,7 +46,7 @@ module multiply (
 
 	always @(posedge clk)
 	begin
-		if (reset) 
+		if (reset || product_ready)	//????????????product ready???????????????->only want it on for one cycle!!! 
 			begin
 			product <= 32'b0;
 			product_ready <= 1'b0;
@@ -68,10 +68,10 @@ module sum_matrixmult_1element(
 		input clk,
 		input reset,
 		input [31:0] in1, 		//this will be a product from multiply module
-		input in_ready,			//assert this when providing module with fresh input
+		input in_ready,			//assert this for one cycle when providing module with fresh input
 		output reg [31:0] running_sum,	//this will be the running sum
 		output done			//this is asserted when counter reaches N (ie: added all the products for this element of matrix)
-	};
+		);
 
 	parameter N = 4; 	//number of rows in matrix (number of additions required to generate one element of matrix result)
 	parameter log2N = 2;
@@ -80,9 +80,9 @@ module sum_matrixmult_1element(
 
 	assign done = (count == N) ? 1'b1 : 1'b0;
 
-	always @ posedge clk
+	always @ (posedge clk)
 	begin
-		if (reset)
+		if (reset || done) //done???????????????????????????????????????? --> only want done on for 1 cycle!!!
 			begin
 				running_sum <= 32'b0;
 				count <= 'b0;
@@ -95,18 +95,122 @@ module sum_matrixmult_1element(
 	end
 endmodule
 
-
-module full_matrixmult(
+//latch matrix result elements and count up to 4 (then you have all elements of result matrix ready)
+module latch_matrixmult(
 		input clk,
 		input reset,
-		input [31:0] 
+		input [31:0] element_in,
+		input new_element,	//need to pulse for one cycle only
+		output reg [31:0] element0,
+		output reg [31:0] element1,
+		output reg [31:0] element2,
+		output reg [31:0] element3,
+		output reg done_matrix
 
 	);
 
+	reg [2:0] count;
+
+	always @ (posedge clk)
+	begin
+		if (reset)
+			begin 
+			element0 <= 32'b0;
+			element1 <= 32'b0;
+			element2 <= 32'b0;
+			element3 <= 32'b0;
+			done_matrix <= 1'b0;
+			count <= 3'b0;
+			end
+		else if (new_element && count == 0)	
+			begin
+			element0 <= element_in;
+			count <= count + 1'b1;
+			done_matrix <= 1'b0;
+			end
+		else if (new_element && count == 1)	
+			begin
+			element1 <= element_in;
+			count <= count + 1'b1;
+			done_matrix <= 1'b0;
+			end
+		else if (new_element && count == 2)	
+			begin
+			element2 <= element_in;
+			count <= count + 1'b1;
+			done_matrix <= 1'b0;
+			end
+		else if (new_element && count == 3)	
+			begin
+			element3 <= element_in;
+			count <= count + 1'b1;
+			done_matrix <= 1'b1;
+			end
 	
+
+
+	end
+
+
 endmodule
 
+//provide 2 inputs at a time and assert inputs_ready to start, then keep going
+module matrixmultiplier (
+		input clk,
+		input reset,
+		input [31:0] in1,
+		input [31:0] in2,
+		input inputs_to_multiply_ready,
+		output [31:0] result0,
+		output [31:0] result1,
+		output [31:0] result2,
+		output [31:0] result3,
+		output done_matrixmult
+		);
+
+
+	wire [31:0] product;
+	wire product_ready;
+	wire [31:0] element;
+	wire element_ready;
+
+	multiply mul (.clk(clk),
+		.reset(reset),
+		.in1(in1),
+		.in2(in2),
+		.inputs_ready(inputs_to_multiply_ready),
+		.product(product),
+		.product_ready(product_ready)
+		);
 	
+	sum_matrixmult_1element add(
+		.clk(clk),
+		.reset(reset),
+		.in1(product), 		//this will be a product from multiply module
+		.in_ready(product_ready),//assert this for one cycle when providing module with fresh input
+		.running_sum(element),	//this will be the running sum
+		.done(element_ready)
+		);
+
+ 	latch_matrixmult latch(
+		.clk(clk),
+		.reset(reset),
+		.element_in(element),
+		.new_element(element_ready),	//need to pulse for one cycle only
+		.element0(result0),
+		.element1(result1),
+		.element2(result2),
+		.element3(result3),
+		.done_matrix(done_matrixmult)
+		);
+
+endmodule
+
+////////////////////////////////////////////////////////
+
+
+
+
 module matrixmult_tb();
 
    wire [15:0] row0_0;
@@ -118,12 +222,12 @@ module matrixmult_tb();
 	wire [15:0] row1_1;
 	wire [15:0] row1_2;
 	wire [15:0] row1_3;
-	
+
 	wire [15:0] row2_0;
 	wire [15:0] row2_1;
 	wire [15:0] row2_2;
 	wire [15:0] row2_3;
-	
+
 	wire [15:0] row3_0;
 	wire [15:0] row3_1;
 	wire [15:0] row3_2;
@@ -150,12 +254,12 @@ module matrixmult_tb();
 	assign row1_1 = 16'd6;
 	assign row1_2 = 16'd7;
 	assign row1_3 = 16'd3;
-	
+
 	assign row2_0 = 16'd1;
 	assign row2_1 = 16'd2;
 	assign row2_2 = 16'd3;
 	assign row2_3 = 16'd2;
-	
+
 	assign row3_0 = 16'd4;
 	assign row3_1 = 16'd5;
 	assign row3_2 = 16'd3;
@@ -203,8 +307,8 @@ module matrixmult_tb();
 		);
 
 endmodule
-	
-	
+
+
 module matrixmult 
 (
 	input [15:0] row0_0,
@@ -216,12 +320,12 @@ module matrixmult
 	input [15:0] row1_1,
 	input [15:0] row1_2,
 	input [15:0] row1_3,
-	
+
 	input [15:0] row2_0,
 	input [15:0] row2_1,
 	input [15:0] row2_2,
 	input [15:0] row2_3,
-	
+
 	input [15:0] row3_0,
 	input [15:0] row3_1,
 	input [15:0] row3_2,
@@ -237,7 +341,7 @@ module matrixmult
 	output [31:0] pixelout_2,
 	output [31:0] pixelout_3
 
-	
+
 );
 
 
@@ -248,3 +352,4 @@ assign pixelout_3 = (row3_3 * pixelinT_3) + (row3_2 * pixelinT_2) + (row3_1 * pi
 
 
 endmodule
+
