@@ -884,10 +884,8 @@ void gpFillLine(gpImg *img, gpVertex2Fixed *v1, gpVertex2Fixed *v2, gpColor *col
     int err = dx-dy;
 
     while (1) {
-        if (x0 >= 0 && x0 < GP_XRES && y0 >= 0 && y0 < GP_YRES) {
-            gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
-        }
-        if (x0 == x1 && y0 == y1 || sy == 1 && y0 >= GP_YRES || sy == -1 && y0 < 0) break;
+        gpSetImagePixel(img, x0, y0, color->r, color->g, color->b);
+        if (x0 == x1 && y0 == y1) break;
         int e2 = 2*err;
         if (e2 > -dy) {
             err -= dy;
