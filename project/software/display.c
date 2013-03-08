@@ -136,7 +136,7 @@ void gpPollImageWriteReady()
   burst_write_addr[64] &= ~0x100;
 }
 
-void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
+void gpSetImageBackground(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
 {
   static bool initialized = false;
 
