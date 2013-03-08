@@ -74,11 +74,8 @@ void gpReleaseImage(gpImg **img)
 
 void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b)
 {
-  if (x1 < 0) x1 = 0;
-  if (x1 >= img->xres) x1 = img->xres - 1;
-  if (x2 < 0) x2 = 0;
-  if (x2 >= img->xres) x2 = img->xres - 1;
-
+  assert(x1 >= 0 && x1 < img->xres);
+  assert(x2 >= 0 && x2 < img->xres);
   assert(y >= 0 && y < img->yres);
 
   if (x1 > x2)
@@ -208,10 +205,8 @@ void gpReleaseImage(gpImg **img)
 
 void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b)
 {
-  if (x1 < 0) x1 = 0;
-  if (x1 >= img->xres) x1 = img->xres - 1;
-  if (x2 < 0) x2 = 0;
-  if (x2 >= img->xres) x2 = img->xres - 1;
+  assert(x1 >= 0 && x1 < img->xres);
+  assert(x2 >= 0 && x2 < img->xres);
 
   if (x1 > x2)
   {

@@ -17,7 +17,16 @@ int main()
   // Render it
   gpRenderPoly(tri);
 
-  gpTranslatePoly(tri, 0.2f, 0.2f, 0.f);
+  gpTranslatePoly(tri, 0.f, .5f, 0.f);
+  gpRenderPoly(tri);
+
+  gpTranslatePoly(tri, 0.f, -2.0f, 0.f);
+  gpRenderPoly(tri);
+
+  gpTranslatePoly(tri, -1.f, 1.f, 0.f);
+  gpRenderPoly(tri);
+
+  gpTranslatePoly(tri, 2.f, 0.f, 0.f);
   gpRenderPoly(tri);
 
   // Create a quadrilateral

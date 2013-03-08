@@ -288,6 +288,166 @@ void gpClearTMatrixPolyList(gpPolyList *list)
   list->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
 }
 
+int gpClipXY(gpVertex2Fixed **vertices_p, int num_vertices)
+{
+  assert(num_vertices > 0);
+
+  // clip x < 0
+  {
+    gpVertex2Fixed *output_vertices = malloc(num_vertices * sizeof(gpVertex2Fixed));
+    memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex2Fixed));
+    gpVertex2Fixed S = output_vertices[num_vertices - 1];
+
+    int idx = 0;
+    int new_num_vertices = num_vertices;
+    for (int i = 0; i < num_vertices; i++) {
+      gpVertex2Fixed E = (*vertices_p)[i];
+      if (E.x >= 0) {
+        if (S.x < 0) {
+          // intersection
+          assert(E.x - S.x != 0);
+          output_vertices[idx] = (gpVertex2Fixed){0, E.y - E.x * (E.y - S.y) / (E.x - S.x)};
+          idx++;
+          new_num_vertices++;
+          output_vertices = realloc(output_vertices, new_num_vertices * sizeof(gpVertex2Fixed));
+        }
+        output_vertices[idx] = E;
+      } else {
+        if (S.x < 0) {
+          // remove
+          new_num_vertices--;
+          idx--;
+        } else {
+          // intersection
+          assert(E.x - S.x != 0);
+          output_vertices[idx] = (gpVertex2Fixed){0, S.y - S.x * (S.y - E.y) / (S.x - E.x)};
+        }
+      }
+      S = E;
+      idx++;
+    }
+    num_vertices = new_num_vertices;
+    free(*vertices_p);
+    *vertices_p = output_vertices;
+  }
+  // clip x >= xres
+  {
+    gpVertex2Fixed *output_vertices = malloc(num_vertices * sizeof(gpVertex2Fixed));
+    memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex2Fixed));
+    gpVertex2Fixed S = output_vertices[num_vertices - 1];
+
+    int idx = 0;
+    int new_num_vertices = num_vertices;
+    for (int i = 0; i < num_vertices; i++) {
+      gpVertex2Fixed E = (*vertices_p)[i];
+      if (E.x < GP_XRES) {
+        if (S.x >= GP_XRES) {
+          // intersection
+          assert(E.x - S.x != 0);
+          output_vertices[idx] = (gpVertex2Fixed){GP_XRES - 1, E.y - (E.x - GP_XRES + 1) * (E.y - S.y) / (E.x - S.x)};
+          idx++;
+          new_num_vertices++;
+          output_vertices = realloc(output_vertices, new_num_vertices * sizeof(gpVertex2Fixed));
+        }
+        output_vertices[idx] = E;
+      } else {
+        if (S.x >= GP_XRES) {
+          // remove
+          new_num_vertices--;
+          idx--;
+        } else {
+          // intersection
+          assert(E.x - S.x != 0);
+          output_vertices[idx] = (gpVertex2Fixed){GP_XRES - 1, S.y - (S.x - GP_XRES + 1) * (S.y - E.y) / (S.x - E.x)};
+        }
+      }
+      S = E;
+      idx++;
+    }
+    num_vertices = new_num_vertices;
+    free(*vertices_p);
+    *vertices_p = output_vertices;
+  }
+  // clip y < 0
+  {
+    gpVertex2Fixed *output_vertices = malloc(num_vertices * sizeof(gpVertex2Fixed));
+    memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex2Fixed));
+    gpVertex2Fixed S = output_vertices[num_vertices - 1];
+
+    int idx = 0;
+    int new_num_vertices = num_vertices;
+    for (int i = 0; i < num_vertices; i++) {
+      gpVertex2Fixed E = (*vertices_p)[i];
+      if (E.y >= 0) {
+        if (S.y < 0) {
+          // intersection
+          assert(E.y - S.y != 0);
+          output_vertices[idx] = (gpVertex2Fixed){E.x - E.y * (E.x - S.x) / (E.y - S.y), 0};
+          idx++;
+          new_num_vertices++;
+          output_vertices = realloc(output_vertices, new_num_vertices * sizeof(gpVertex2Fixed));
+        }
+        output_vertices[idx] = E;
+      } else {
+        if (S.y < 0) {
+          // remove
+          new_num_vertices--;
+          idx--;
+        } else {
+          // intersection
+          assert(E.y - S.y != 0);
+          output_vertices[idx] = (gpVertex2Fixed){S.x - S.y * (S.x - E.x) / (S.y - E.y), 0};
+        }
+      }
+      S = E;
+      idx++;
+    }
+    num_vertices = new_num_vertices;
+    free(*vertices_p);
+    *vertices_p = output_vertices;
+  }
+  // clip y >= yres
+  {
+    gpVertex2Fixed *output_vertices = malloc(num_vertices * sizeof(gpVertex2Fixed));
+    memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex2Fixed));
+    gpVertex2Fixed S = output_vertices[num_vertices - 1];
+
+    int idx = 0;
+    int new_num_vertices = num_vertices;
+    for (int i = 0; i < num_vertices; i++) {
+      gpVertex2Fixed E = (*vertices_p)[i];
+      if (E.y < GP_YRES) {
+        if (S.y >= GP_YRES) {
+          // intersection
+          assert(E.y - S.y != 0);
+          output_vertices[idx] = (gpVertex2Fixed){E.x - (E.y - GP_YRES + 1) * (E.x - S.x) / (E.y - S.y), GP_YRES - 1};
+          idx++;
+          new_num_vertices++;
+          output_vertices = realloc(output_vertices, new_num_vertices * sizeof(gpVertex2Fixed));
+        }
+        output_vertices[idx] = E;
+      } else {
+        if (S.y >= GP_YRES) {
+          // remove
+          new_num_vertices--;
+          idx--;
+        } else {
+          // intersection
+          assert(E.y - S.y != 0);
+          output_vertices[idx] = (gpVertex2Fixed){S.x - (S.y - GP_YRES + 1) * (S.x - E.x) / (S.y - E.y), GP_YRES - 1};
+        }
+      }
+      S = E;
+      idx++;
+    }
+    num_vertices = new_num_vertices;
+    free(*vertices_p);
+    *vertices_p = output_vertices;
+  }
+
+  return num_vertices;
+}
+
 void gpFillPoly(gpPoly *poly, gpImg *img)
 {
     assert(poly);
@@ -319,7 +479,11 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
           vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
         }
 
-        gpFillConvexPoly(img, vertices, poly->num_vertices, &poly->color);
+        int fill_vertices = gpClipXY(&vertices, poly->num_vertices);
+
+        if (fill_vertices) {
+          gpFillConvexPoly(img, vertices, fill_vertices, &poly->color);
+        }
 
         free(vertices);
     }
@@ -582,12 +746,10 @@ void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, g
                     break;
                 }
             }
-            if (y >= 0) {
-            	gpSetImageHLine(img, GP_YRES - 1 - y, x_left_0, x_right_0, r, g, b);
-            }
+            gpSetImageHLine(img, GP_YRES - 1 - y, x_left_0, x_right_0, r, g, b);
             y++;
-        } while (y < vertices[left_index].y && y < vertices[right_index].y && y < GP_YRES);
-    } while (left_index != right_index && y < GP_YRES);
+        } while (y < vertices[left_index].y && y < vertices[right_index].y);
+    } while (left_index != right_index);
 }
 
 // Note: this is not symmetric, ie drawing (v1, v2) will not draw the same line as (v2, v1)
