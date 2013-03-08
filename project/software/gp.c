@@ -1,3 +1,8 @@
+#ifndef SW
+// Reduce code size by removing asserts
+#define NDEBUG
+#endif
+
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,11 +14,6 @@
 #include "display.h"
 
 #define POLY_LIST_CHUNK_SIZE 16
-
-#ifndef SW
-// Hack to reduce code size by half by removing asserts (ignore warning)
-#define assert(x)
-#endif
 
 #ifndef MAX
 #define MAX(a,b) (a > b ? a : b)
@@ -503,7 +503,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.x - S.x != 0);
           output_vertices[idx] = (gpVertex3Fixed){0, E.y - E.x * (E.y - S.y) / (E.x - S.x),
-                                                     E.z.f - E.x * (E.z.f - S.z.f) / (E.x - S.x)};
+                                                    {E.z.f - E.x * (E.z.f - S.z.f) / (E.x - S.x)}};
           idx++;
           new_num_vertices++;
         }
@@ -517,7 +517,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.x - S.x != 0);
           output_vertices[idx] = (gpVertex3Fixed){0, S.y - S.x * (S.y - E.y) / (S.x - E.x),
-                                                     S.z.f - S.x * (S.z.f - E.z.f) / (S.x - E.x)};
+                                                    {S.z.f - S.x * (S.z.f - E.z.f) / (S.x - E.x)}};
         }
       }
       S = E;
@@ -542,7 +542,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.x - S.x != 0);
           output_vertices[idx] = (gpVertex3Fixed){GP_XRES - 1, E.y - (E.x - GP_XRES + 1) * (E.y - S.y) / (E.x - S.x),
-                                                               E.z.f - (E.x - GP_XRES + 1) * (E.z.f - S.z.f) / (E.x - S.x)};
+                                                              {E.z.f - (E.x - GP_XRES + 1) * (E.z.f - S.z.f) / (E.x - S.x)}};
           idx++;
           new_num_vertices++;
         }
@@ -556,7 +556,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.x - S.x != 0);
           output_vertices[idx] = (gpVertex3Fixed){GP_XRES - 1, S.y - (S.x - GP_XRES + 1) * (S.y - E.y) / (S.x - E.x),
-                                                               S.z.f - (S.x - GP_XRES + 1) * (S.z.f - E.z.f) / (S.x - E.x)};
+                                                              {S.z.f - (S.x - GP_XRES + 1) * (S.z.f - E.z.f) / (S.x - E.x)}};
         }
       }
       S = E;
@@ -581,7 +581,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.y - S.y != 0);
           output_vertices[idx] = (gpVertex3Fixed){E.x - E.y * (E.x - S.x) / (E.y - S.y), 0,
-                                                  E.z.f - E.y * (E.z.f - S.z.f) / (E.y - S.y)};
+                                                 {E.z.f - E.y * (E.z.f - S.z.f) / (E.y - S.y)}};
           idx++;
           new_num_vertices++;
         }
@@ -595,7 +595,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.y - S.y != 0);
           output_vertices[idx] = (gpVertex3Fixed){S.x - S.y * (S.x - E.x) / (S.y - E.y), 0,
-                                                  S.z.f - S.y * (S.z.f - E.z.f) / (S.y - E.y)};
+                                                 {S.z.f - S.y * (S.z.f - E.z.f) / (S.y - E.y)}};
         }
       }
       S = E;
@@ -620,7 +620,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.y - S.y != 0);
           output_vertices[idx] = (gpVertex3Fixed){E.x - (E.y - GP_YRES + 1) * (E.x - S.x) / (E.y - S.y), GP_YRES - 1,
-                                                  E.z.f - (E.y - GP_YRES + 1) * (E.z.f - S.z.f) / (E.y - S.y)};
+                                                 {E.z.f - (E.y - GP_YRES + 1) * (E.z.f - S.z.f) / (E.y - S.y)}};
           idx++;
           new_num_vertices++;
         }
@@ -634,7 +634,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.y - S.y != 0);
           output_vertices[idx] = (gpVertex3Fixed){S.x - (S.y - GP_YRES + 1) * (S.x - E.x) / (S.y - E.y), GP_YRES - 1,
-                                                  S.z.f - (S.y - GP_YRES + 1) * (S.z.f - E.z.f) / (S.y - E.y)};
+                                                 {S.z.f - (S.y - GP_YRES + 1) * (S.z.f - E.z.f) / (S.y - E.y)}};
         }
       }
       S = E;
@@ -659,7 +659,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.z.f - S.z.f != 0.f);
           output_vertices[idx] = (gpVertex3Fixed){E.x - (int)((E.z.f - near) * (E.x - S.x) / (E.z.f - S.z.f) + .5f),
-                                                  E.y - (int)((E.z.f - near) * (E.y - S.y) / (E.z.f - S.z.f) + .5f), near};
+                                                  E.y - (int)((E.z.f - near) * (E.y - S.y) / (E.z.f - S.z.f) + .5f), {near}};
           idx++;
           new_num_vertices++;
         }
@@ -673,7 +673,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.z.f - S.z.f != 0.f);
           output_vertices[idx] = (gpVertex3Fixed){S.x - (int)((S.z.f - near) * (S.x - E.x) / (S.z.f - E.z.f) + .5f),
-                                                  S.y - (int)((S.z.f - near) * (S.y - E.y) / (S.z.f - E.z.f) + .5f), near};
+                                                  S.y - (int)((S.z.f - near) * (S.y - E.y) / (S.z.f - E.z.f) + .5f), {near}};
         }
       }
       S = E;
@@ -698,7 +698,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.z.f - S.z.f != 0.f);
           output_vertices[idx] = (gpVertex3Fixed){E.x - (int)((E.z.f - far) * (E.x - S.x) / (E.z.f - S.z.f) + .5f),
-                                                  E.y - (int)((E.z.f - far) * (E.y - S.y) / (E.z.f - S.z.f) + .5f), far};
+                                                  E.y - (int)((E.z.f - far) * (E.y - S.y) / (E.z.f - S.z.f) + .5f), {far}};
           idx++;
           new_num_vertices++;
         }
@@ -712,7 +712,7 @@ int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float f
           // intersection
           assert(E.z.f - S.z.f != 0.f);
           output_vertices[idx] = (gpVertex3Fixed){S.x - (int)((S.z.f - far) * (S.x - E.x) / (S.z.f - E.z.f) + .5f),
-                                                  S.y - (int)((S.z.f - far) * (S.y - E.y) / (S.z.f - E.z.f) + .5f), far};
+                                                  S.y - (int)((S.z.f - far) * (S.y - E.y) / (S.z.f - E.z.f) + .5f), {far}};
         }
       }
       S = E;
