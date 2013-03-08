@@ -826,16 +826,22 @@ void gpRender(gpPolyList *list)
   gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
   gpSetImageBackground(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
 
+  gpTMatrix temp;
+
+  if (GLOBAL_PERSPECTIVE) {
+    assert(GLOBAL_PERSPECTIVE_SET);
+    memcpy(&temp, &list->trans.m, sizeof(list->trans.m));
+    gpApplyPerspective(&temp, GLOBAL_NEAR, GLOBAL_FAR);
+  }
+
   for (int i = 0; i < list->num_polys; i++) {
     gpPoly *poly = list->polys[i];
 
     // apply transformations
-    gpTMatrix temp;
-    gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4);
-    if (GLOBAL_PERSPECTIVE)
-    {
-        assert(GLOBAL_PERSPECTIVE_SET);
-        gpApplyPerspective(&temp, GLOBAL_NEAR, GLOBAL_FAR);
+    if (GLOBAL_PERSPECTIVE) {
+      gpAppliedTMatrix(&temp, &poly->trans);
+    } else {
+      gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4);
     }
     gpApplyTMatrixToCoord(poly, &temp);
 
