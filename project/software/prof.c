@@ -4,6 +4,7 @@
 int main()
 {
   gpSetBackgroundColor(0x60, 0x00, 0xe0);
+  gpEnable(GP_ZBUFFER);
 
   // Cube
   gpPoly *z = gpCreatePoly(4);

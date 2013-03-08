@@ -446,6 +446,250 @@ int gpClipXY(gpVertex2Fixed **vertices_p, int num_vertices)
   return num_vertices;
 }
 
+int gpClipXYZ(gpVertex3Fixed **vertices_p, int num_vertices, float near, float far)
+{
+  assert(num_vertices > 0);
+
+  int max_vertices = 2 * num_vertices;
+
+  // clip x < 0
+  {
+    gpVertex3Fixed *output_vertices = malloc(max_vertices * sizeof(gpVertex3Fixed));
+    memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex3Fixed));
+    gpVertex3Fixed S = output_vertices[num_vertices - 1];
+
+    int idx = 0;
+    int new_num_vertices = num_vertices;
+    for (int i = 0; i < num_vertices; i++) {
+      gpVertex3Fixed E = (*vertices_p)[i];
+      if (E.x >= 0) {
+        if (S.x < 0) {
+          // intersection
+          assert(E.x - S.x != 0);
+          output_vertices[idx] = (gpVertex3Fixed){0, E.y - E.x * (E.y - S.y) / (E.x - S.x),
+                                                     E.z.f - E.x * (E.z.f - S.z.f) / (E.x - S.x)};
+          idx++;
+          new_num_vertices++;
+        }
+        output_vertices[idx] = E;
+      } else {
+        if (S.x < 0) {
+          // remove
+          new_num_vertices--;
+          idx--;
+        } else {
+          // intersection
+          assert(E.x - S.x != 0);
+          output_vertices[idx] = (gpVertex3Fixed){0, S.y - S.x * (S.y - E.y) / (S.x - E.x),
+                                                     S.z.f - S.x * (S.z.f - E.z.f) / (S.x - E.x)};
+        }
+      }
+      S = E;
+      idx++;
+    }
+    num_vertices = new_num_vertices;
+    free(*vertices_p);
+    *vertices_p = output_vertices;
+  }
+  // clip x >= xres
+  {
+    gpVertex3Fixed *output_vertices = malloc(max_vertices * sizeof(gpVertex3Fixed));
+    memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex3Fixed));
+    gpVertex3Fixed S = output_vertices[num_vertices - 1];
+
+    int idx = 0;
+    int new_num_vertices = num_vertices;
+    for (int i = 0; i < num_vertices; i++) {
+      gpVertex3Fixed E = (*vertices_p)[i];
+      if (E.x < GP_XRES) {
+        if (S.x >= GP_XRES) {
+          // intersection
+          assert(E.x - S.x != 0);
+          output_vertices[idx] = (gpVertex3Fixed){GP_XRES - 1, E.y - (E.x - GP_XRES + 1) * (E.y - S.y) / (E.x - S.x),
+                                                               E.z.f - (E.x - GP_XRES + 1) * (E.z.f - S.z.f) / (E.x - S.x)};
+          idx++;
+          new_num_vertices++;
+        }
+        output_vertices[idx] = E;
+      } else {
+        if (S.x >= GP_XRES) {
+          // remove
+          new_num_vertices--;
+          idx--;
+        } else {
+          // intersection
+          assert(E.x - S.x != 0);
+          output_vertices[idx] = (gpVertex3Fixed){GP_XRES - 1, S.y - (S.x - GP_XRES + 1) * (S.y - E.y) / (S.x - E.x),
+                                                               S.z.f - (S.x - GP_XRES + 1) * (S.z.f - E.z.f) / (S.x - E.x)};
+        }
+      }
+      S = E;
+      idx++;
+    }
+    num_vertices = new_num_vertices;
+    free(*vertices_p);
+    *vertices_p = output_vertices;
+  }
+  // clip y < 0
+  {
+    gpVertex3Fixed *output_vertices = malloc(max_vertices * sizeof(gpVertex3Fixed));
+    memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex3Fixed));
+    gpVertex3Fixed S = output_vertices[num_vertices - 1];
+
+    int idx = 0;
+    int new_num_vertices = num_vertices;
+    for (int i = 0; i < num_vertices; i++) {
+      gpVertex3Fixed E = (*vertices_p)[i];
+      if (E.y >= 0) {
+        if (S.y < 0) {
+          // intersection
+          assert(E.y - S.y != 0);
+          output_vertices[idx] = (gpVertex3Fixed){E.x - E.y * (E.x - S.x) / (E.y - S.y), 0,
+                                                  E.z.f - E.y * (E.z.f - S.z.f) / (E.y - S.y)};
+          idx++;
+          new_num_vertices++;
+        }
+        output_vertices[idx] = E;
+      } else {
+        if (S.y < 0) {
+          // remove
+          new_num_vertices--;
+          idx--;
+        } else {
+          // intersection
+          assert(E.y - S.y != 0);
+          output_vertices[idx] = (gpVertex3Fixed){S.x - S.y * (S.x - E.x) / (S.y - E.y), 0,
+                                                  S.z.f - S.y * (S.z.f - E.z.f) / (S.y - E.y)};
+        }
+      }
+      S = E;
+      idx++;
+    }
+    num_vertices = new_num_vertices;
+    free(*vertices_p);
+    *vertices_p = output_vertices;
+  }
+  // clip y >= yres
+  {
+    gpVertex3Fixed *output_vertices = malloc(max_vertices * sizeof(gpVertex3Fixed));
+    memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex3Fixed));
+    gpVertex3Fixed S = output_vertices[num_vertices - 1];
+
+    int idx = 0;
+    int new_num_vertices = num_vertices;
+    for (int i = 0; i < num_vertices; i++) {
+      gpVertex3Fixed E = (*vertices_p)[i];
+      if (E.y < GP_YRES) {
+        if (S.y >= GP_YRES) {
+          // intersection
+          assert(E.y - S.y != 0);
+          output_vertices[idx] = (gpVertex3Fixed){E.x - (E.y - GP_YRES + 1) * (E.x - S.x) / (E.y - S.y), GP_YRES - 1,
+                                                  E.z.f - (E.y - GP_YRES + 1) * (E.z.f - S.z.f) / (E.y - S.y)};
+          idx++;
+          new_num_vertices++;
+        }
+        output_vertices[idx] = E;
+      } else {
+        if (S.y >= GP_YRES) {
+          // remove
+          new_num_vertices--;
+          idx--;
+        } else {
+          // intersection
+          assert(E.y - S.y != 0);
+          output_vertices[idx] = (gpVertex3Fixed){S.x - (S.y - GP_YRES + 1) * (S.x - E.x) / (S.y - E.y), GP_YRES - 1,
+                                                  S.z.f - (E.y - GP_YRES + 1) * (S.z.f - E.z.f) / (S.y - E.y)};
+        }
+      }
+      S = E;
+      idx++;
+    }
+    num_vertices = new_num_vertices;
+    free(*vertices_p);
+    *vertices_p = output_vertices;
+  }
+  // clip z < near
+  {
+    gpVertex3Fixed *output_vertices = malloc(max_vertices * sizeof(gpVertex3Fixed));
+    memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex3Fixed));
+    gpVertex3Fixed S = output_vertices[num_vertices - 1];
+
+    int idx = 0;
+    int new_num_vertices = num_vertices;
+    for (int i = 0; i < num_vertices; i++) {
+      gpVertex3Fixed E = (*vertices_p)[i];
+      if (E.z.f >= near) {
+        if (S.z.f < near) {
+          // intersection
+          assert(E.z.f - S.z.f != 0.f);
+          output_vertices[idx] = (gpVertex3Fixed){E.x - (int)((E.z.f - near) * (E.x - S.x) / (E.z.f - S.z.f) + .5f),
+                                                  E.y - (int)((E.z.f - near) * (E.y - S.y) / (E.z.f - S.z.f) + .5f), near};
+          idx++;
+          new_num_vertices++;
+        }
+        output_vertices[idx] = E;
+      } else {
+        if (S.z.f < near) {
+          // remove
+          new_num_vertices--;
+          idx--;
+        } else {
+          // intersection
+          assert(E.z.f - S.z.f != 0.f);
+          output_vertices[idx] = (gpVertex3Fixed){S.x - (int)((S.z.f - near) * (S.x - E.x) / (S.z.f - E.z.f) + .5f),
+                                                  S.y - (int)((S.z.f - near) * (S.y - E.y) / (S.z.f - E.z.f) + .5f), near};
+        }
+      }
+      S = E;
+      idx++;
+    }
+    num_vertices = new_num_vertices;
+    free(*vertices_p);
+    *vertices_p = output_vertices;
+  }
+  // clip z > far
+  {
+    gpVertex3Fixed *output_vertices = malloc(max_vertices * sizeof(gpVertex3Fixed));
+    memcpy(output_vertices, *vertices_p, num_vertices * sizeof(gpVertex3Fixed));
+    gpVertex3Fixed S = output_vertices[num_vertices - 1];
+
+    int idx = 0;
+    int new_num_vertices = num_vertices;
+    for (int i = 0; i < num_vertices; i++) {
+      gpVertex3Fixed E = (*vertices_p)[i];
+      if (E.z.f <= far) {
+        if (S.z.f > far) {
+          // intersection
+          assert(E.z.f - S.z.f != 0.f);
+          output_vertices[idx] = (gpVertex3Fixed){E.x - (int)((E.z.f - far) * (E.x - S.x) / (E.z.f - S.z.f) + .5f),
+                                                  E.y - (int)((E.z.f - far) * (E.y - S.y) / (E.z.f - S.z.f) + .5f), far};
+          idx++;
+          new_num_vertices++;
+        }
+        output_vertices[idx] = E;
+      } else {
+        if (S.z.f > far) {
+          // remove
+          new_num_vertices--;
+          idx--;
+        } else {
+          // intersection
+          assert(E.z.f - S.z.f != 0.f);
+          output_vertices[idx] = (gpVertex3Fixed){S.x - (int)((S.z.f - far) * (S.x - E.x) / (S.z.f - E.z.f) + .5f),
+                                                  S.y - (int)((S.z.f - far) * (S.y - E.y) / (S.z.f - E.z.f) + .5f), far};
+        }
+      }
+      S = E;
+      idx++;
+    }
+    num_vertices = new_num_vertices;
+    free(*vertices_p);
+    *vertices_p = output_vertices;
+  }
+
+  return num_vertices;
+}
+
 void gpFillPoly(gpPoly *poly, gpImg *img)
 {
     assert(poly);
@@ -458,13 +702,25 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
         for (int i = 0; i < poly->num_vertices; i++) {
           vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
           vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
-          if (!GLOBAL_PERSPECTIVE)
-            vertices[i].z = (unsigned)((poly->t_vertices[i].z - GLOBAL_NEAR) / (GLOBAL_FAR - GLOBAL_NEAR) * GLOBAL_ZBUFFER_MAX);
-          else
-            vertices[i].z = (unsigned)(poly->t_vertices[i].z * GLOBAL_ZBUFFER_MAX);
+          vertices[i].z.f = poly->t_vertices[i].z;
         }
 
-        gpFillConvexPolyZBuff(img, vertices, poly->num_vertices, &poly->color);
+        float near = (GLOBAL_PERSPECTIVE) ? 0.f : GLOBAL_NEAR;
+        float far = (GLOBAL_PERSPECTIVE) ? 1.f : GLOBAL_FAR;
+
+        int fill_vertices = gpClipXYZ(&vertices, poly->num_vertices, near, far);
+
+        for (int i = 0; i < fill_vertices; i++) {
+          if (GLOBAL_PERSPECTIVE) {
+            vertices[i].z.u = (unsigned)(vertices[i].z.f * GLOBAL_ZBUFFER_MAX);
+          } else {
+            vertices[i].z.u = (unsigned)((vertices[i].z.f - GLOBAL_NEAR) / (GLOBAL_FAR - GLOBAL_NEAR) * GLOBAL_ZBUFFER_MAX);
+          }
+        }
+
+        if (fill_vertices) {
+          gpFillConvexPolyZBuff(img, vertices, fill_vertices, &poly->color);
+        }
 
         free(vertices);
     }
@@ -758,8 +1014,8 @@ void gpFillLineZBuff(gpImg *img, gpVertex3Fixed *v1, gpVertex3Fixed *v2, gpColor
     int y1 = GP_YRES - 1 - v2->y;
     int x0 = v1->x;
     int x1 = v2->x;
-    unsigned z0 = v1->z;
-    unsigned z1 = v2->z;
+    unsigned z0 = v1->z.u;
+    unsigned z1 = v2->z.u;
 
     int dx = abs(x1 - x0);
     int dy = abs(y1 - y0);
@@ -850,7 +1106,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
     int left_err = 0, right_err = 0;
 
     // zbuffer bresenham's variables
-    unsigned z = vertices[start_index].z;
+    unsigned z = vertices[start_index].z.u;
     unsigned z_left_0 = z, z_right_0 = z;
     unsigned z_left_1 = z, z_right_1 = z;
     int left_dz = 0, right_dz = 0;
@@ -878,7 +1134,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
 
             // zbuffer additions
             z_left_0 = z_left_1;
-            z_left_1 = vertices[left_index].z;
+            z_left_1 = vertices[left_index].z.u;
             left_dz = z_left_1 - z_left_0;
             left_y_steep = false;
             left_x_steep = false;
@@ -920,7 +1176,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
 
             // zbuffer additions
             z_right_0 = z_right_1;
-            z_right_1 = vertices[right_index].z;
+            z_right_1 = vertices[right_index].z.u;
             right_dz = z_right_1 - z_right_0;
             right_y_steep = false;
             right_x_steep = false;

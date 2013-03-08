@@ -1,6 +1,6 @@
 #include "gp.h"
 #define PERSPECTIVE_TEST
-//#define ZBUFFER_TEST
+#define ZBUFFER_TEST
 
 /* User program */
 int main()
@@ -140,7 +140,6 @@ int main()
 #else
   gpRotatePolyList(cube, 0.8f, 0.0f, 0.0f);
   gpTranslatePolyList(cube, 0.f, 0.f, 1.5f);
-  gpRender(cube);
   gpEnable(GP_PERSPECTIVE);
   gpSetFrustrum(1.0, 10.0);
   for (int i = 0; i < 64; i++) {
@@ -152,8 +151,6 @@ int main()
   gpTranslatePolyList(cube, 0.f, 0.f, -1.6f);
   gpRender(cube);
   gpEnable(GP_PERSPECTIVE);
-  gpRender(cube);
-  gpDisable(GP_PERSPECTIVE);
   gpRender(cube);
 #endif
 

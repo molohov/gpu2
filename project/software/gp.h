@@ -19,7 +19,10 @@ typedef struct {
 // 3-d fixed point for rendering with zbuffer
 typedef struct {
   int x, y;
-  unsigned z;
+  union {
+    float f;
+    unsigned u;
+  } z;
 } gpVertex3Fixed;
 
 //  3-d coordinate
