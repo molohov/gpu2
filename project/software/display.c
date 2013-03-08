@@ -233,11 +233,6 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
  
 void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, unsigned int z2, unsigned char r, unsigned char g, unsigned char b)
 {
-  if (x1 < 0) x1 = 0;
-  if (x1 >= img->xres) x1 = img->xres - 1;
-  if (x2 < 0) x2 = 0;
-  if (x2 >= img->xres) x2 = img->xres - 1;
-
 #ifdef SW
   assert(y >= 0 && y < img->yres);
 #endif
@@ -269,11 +264,13 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   int sz = (dz > 0) ? 1 : -1;
 
   for (;; x1++) {
-      if (img->zbuffer[y*img->xres + x1] > z1)  {
-          img->zbuffer[y*img->xres + x1] = z1;
-          gpSetImagePixel(img, x1, y, r, g, b);
+      if (x1 >= 0) {
+          if (img->zbuffer[y*img->xres + x1] > z1) {
+              img->zbuffer[y*img->xres + x1] = z1;
+              gpSetImagePixel(img, x1, y, r, g, b);
+           }
       }
-      if (x1 == x2) break;
+      if (x1 == x2 || x1 >= img->xres) break;
       z1 += slope;
       error += rem;
       if (error > dx) {
