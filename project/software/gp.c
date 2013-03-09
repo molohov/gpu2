@@ -1230,7 +1230,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             if (left_index < 0) left_index = num_vertices - 1;
 
             if (left_index == right_index && vertices[right_index].y <= y) {
-                gpSetImageHLine(img, GP_YRES - 1 - y, x_left_1, x_right_1, r, g, b);
+                gpSetImageHLineZBuff(img, GP_YRES - 1 - y, x_left_1, x_right_1, z_left_1, z_right_1, r, g, b);
                 break;
             }
 

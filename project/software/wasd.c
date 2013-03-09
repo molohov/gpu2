@@ -39,6 +39,12 @@ bool keyboard(int c)
       gpRotatePolyList(cube, 0.f, -.05f, 0.f);
       theta -= .2f;
       break;
+    case 'r':
+      gpTranslatePolyHierarchy(translations, 0.f, -.2f, 0.f);
+      break;
+    case 'f':
+      gpTranslatePolyHierarchy(translations, 0.f, .2f, 0.f);
+      break;
     case 'q':
       return true;
     default:
