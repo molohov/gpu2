@@ -332,6 +332,11 @@ void gpClearTMatrixPolyList(gpPolyList *list)
   list->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
 }
 
+void gpClearTMatrixPolyHierarchy(gpPolyHierarchy *hierarchy)
+{
+  hierarchy->trans = (gpTMatrix){{{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}, {0.f, 0.f, 0.f, 1.f}}}; // Identity
+}
+
 int gpClipXY(gpVertex2Fixed **vertices_p, int num_vertices)
 {
   assert(num_vertices > 0);
