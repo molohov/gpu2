@@ -1,7 +1,7 @@
 #ifndef _GP_H
 #define _GP_H
 
-#include <math.h>
+#include <stdbool.h>
 
 #include "display.h"
 
@@ -115,4 +115,6 @@ void gpSetFrustrum(float near, float far);
 
 void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
 void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertices, gpColor *color);
+
+void gpCallbacks(bool (*keyboard)(int c), void (*idle)());
 #endif

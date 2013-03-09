@@ -1371,3 +1371,19 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
         } while (y < vertices[left_index].y && y < vertices[right_index].y && y < GP_YRES);
     } while (left_index != right_index && y < GP_YRES);
 }
+
+void gpCallbacks(bool (*keyboard)(int c), void (*idle)())
+{
+  gpDisableTimeout();
+
+  while (1) {
+    int c = gpWaitKey();
+    if (c == -1) {
+      idle();
+    } else {
+      if (keyboard(c)) {
+        break;
+      }
+    }
+  }
+}

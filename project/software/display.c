@@ -1,6 +1,10 @@
 #include "display.h"
 
+#include <stdbool.h>
+
 extern int GLOBAL_ZBUFFER;
+
+bool time_out = true;
 
 #ifdef SW
 
@@ -61,7 +65,10 @@ void gpDisplayImage(gpImg *img)
 #endif
 
   cvShowImage("GP display", img->img);
-  cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
+
+  if (time_out) {
+    cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
+  }
 }
 
 void gpReleaseImage(gpImg **img)
@@ -94,10 +101,16 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
   }
 }
 
+int gpWaitKey()
+{
+  assert(GP_DISPLAY_TIMEOUT_IN_MS != -1);
+
+  return cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
+}
+
 #else
 
 #include <stdlib.h>
-#include <stdbool.h>
 
 #include "xparameters.h"
 
@@ -187,7 +200,7 @@ void gpDisplayImage(gpImg *img)
     hdmi_addr[2] = 1; // go
     initialized = true;
   } else {
-    if (GP_DISPLAY_TIMEOUT_IN_MS == -1) {
+    if (GP_DISPLAY_TIMEOUT_IN_MS == -1 && time_out) {
       // wait for user input
       while (!*(volatile int *)(XPAR_RS232_UART_1_BASEADDR))
         ;
@@ -270,4 +283,9 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
           error -= dx;
       }
   }
+}
+
+void gpDisableTimeout()
+{
+  time_out = false;
 }

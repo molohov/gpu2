@@ -39,4 +39,8 @@ void gpDisplayImage(gpImg *img);
 
 void gpReleaseImage(gpImg **img);
 
+void gpDisableTimeout();
+
+int gpWaitKey();
+
 #endif
