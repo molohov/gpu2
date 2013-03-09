@@ -1,5 +1,7 @@
 #include "gp.h"
 
+#define INITIAL_Z 1.5f
+
 gpPolyList *cube = NULL;
 gpPolyHierarchy *translations = NULL;
 
@@ -11,20 +13,33 @@ void idle()
 
 bool keyboard(int c)
 {
+  static float z = INITIAL_Z;
+  static float theta = 0.f;
+
   bool render = true;
 
   switch (c) {
     case 'w':
-      gpTranslatePolyHierarchy(translations, 0.f, 0.f, -.2f);
+      if (z > INITIAL_Z) {
+        gpTranslatePolyHierarchy(translations, 0.f, 0.f, -.2f);
+        z += -.2f;
+      }
       break;
     case 'a':
-      gpRotatePolyHierarchy(translations, 0.f, .2f, 0.f);
+      if (theta < .6f) {
+        gpRotatePolyHierarchy(translations, 0.f, .2f, 0.f);
+        theta += .2f;
+      }
       break;
     case 's':
-      gpTranslatePolyHierarchy(translations, 0.f, 0.f, .2f);
+        gpTranslatePolyHierarchy(translations, 0.f, 0.f, .2f);
+      z += .2f;
       break;
     case 'd':
-      gpRotatePolyHierarchy(translations, 0.f, -.2f, 0.f);
+      if (theta > -.6f) {
+        gpRotatePolyHierarchy(translations, 0.f, -.2f, 0.f);
+        theta -= .2f;
+      }
       break;
     case 'q':
       return true;
@@ -100,7 +115,7 @@ int main()
 
   translations = gpCreatePolyHierarchy();
   gpSetPolyHierarchyList(translations, cube);
-  gpTranslatePolyHierarchy(translations, 0.f, 0.f, 1.5f);
+  gpTranslatePolyHierarchy(translations, 0.f, 0.f, INITIAL_Z);
 
   gpRotatePolyList(cube, -0.4f, 0.4f, 0.2f);
 
