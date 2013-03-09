@@ -26,20 +26,18 @@ bool keyboard(int c)
       }
       break;
     case 'a':
-      if (theta < .6f) {
-        gpRotatePolyHierarchy(translations, 0.f, .2f, 0.f);
-        theta += .2f;
-      }
+      gpRotatePolyHierarchy(translations, 0.f, .05f, 0.f);
+      gpRotatePolyList(cube, 0.f, .05f, 0.f);
+      theta += .2f;
       break;
     case 's':
-        gpTranslatePolyHierarchy(translations, 0.f, 0.f, .2f);
+      gpTranslatePolyHierarchy(translations, 0.f, 0.f, .2f);
       z += .2f;
       break;
     case 'd':
-      if (theta > -.6f) {
-        gpRotatePolyHierarchy(translations, 0.f, -.2f, 0.f);
-        theta -= .2f;
-      }
+      gpRotatePolyHierarchy(translations, 0.f, -.05f, 0.f);
+      gpRotatePolyList(cube, 0.f, -.05f, 0.f);
+      theta -= .2f;
       break;
     case 'q':
       return true;
@@ -60,7 +58,7 @@ int main()
   gpSetBackgroundColor(0x60, 0x00, 0xe0);
   gpEnable(GP_ZBUFFER);
   gpEnable(GP_PERSPECTIVE);
-  gpSetFrustrum(1.0, 10.0);
+  gpSetFrustrum(1.f, 20.f);
 
   // Cube
   gpPoly *z = gpCreatePoly(4);
