@@ -218,7 +218,8 @@ void gpAppliedTMatrix(gpTMatrix *dst, gpTMatrix *src)
   gpMatrixMult((float *)src->m, (float *)temp, (float *)dst->m, 4, 4);
 }
 
-void gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
+// return if going to be rendered
+bool gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
 {
   for (int i = 0; i < poly->num_vertices; i++) {
     float temp[1][4] = {{poly->vertices[i].x, poly->vertices[i].y, poly->vertices[i].z, 1.f}};
@@ -227,13 +228,15 @@ void gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
 
     // won't get rendered anyway, exit here
     if (poly->t_vertices[i].w < 0.f) {
-      return;
+      return false;
     }
 
     poly->t_vertices[i].x /= poly->t_vertices[i].w;
     poly->t_vertices[i].y /= poly->t_vertices[i].w;
     poly->t_vertices[i].z /= poly->t_vertices[i].w;
   }
+
+  return true;
 }
 
 void gpApplyTranslate(gpTMatrix *trans, float x, float y, float z)
@@ -855,7 +858,10 @@ void gpRender(gpPolyList *list)
     } else {
       gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4);
     }
-    gpApplyTMatrixToCoord(poly, &temp);
+    bool render = gpApplyTMatrixToCoord(poly, &temp);
+    if (!render) {
+      continue;
+    }
 
     // compute avg_z for each polygon
     float sum_z = 0.f;
@@ -904,7 +910,11 @@ void gpRenderAll(gpPolyHierarchy *hierarchy)
         gpAddPolyToList(list, poly);
         gpTMatrix temp;
         gpMatrixMult((float *)poly->trans.m, (float *)list_trans.m, (float *)temp.m, 4, 4);
-        gpApplyTMatrixToCoord(poly, &temp);
+        bool render = gpApplyTMatrixToCoord(poly, &temp);
+
+        if (!render) {
+          continue;
+        }
 
         // compute avg_z for each polygon
         float sum_z = 0.f;
