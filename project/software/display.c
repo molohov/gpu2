@@ -103,9 +103,8 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
 
 int gpWaitKey()
 {
-  assert(GP_DISPLAY_TIMEOUT_IN_MS != -1);
-
-  return cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
+  int c = cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
+  return (c == -1) ? 0 : c;
 }
 
 #else
@@ -234,6 +233,12 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
   }
 }
 
+int gpWaitKey()
+{
+  assert(GP_DISPLAY_TIMEOUT_IN_MS != -1);
+
+  return *((volatile int *)XPAR_RS232_UART_1_BASEADDR);
+}
 #endif
  
 void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, unsigned int z2, unsigned char r, unsigned char g, unsigned char b)
