@@ -225,6 +225,11 @@ void gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
 
     gpMatrixMult((float *)temp, (float *)trans->m, (float *)&poly->t_vertices[i], 1, 4);
 
+    // won't get rendered anyway, exit here
+    if (poly->t_vertices[i].w < 0.f) {
+      return;
+    }
+
     poly->t_vertices[i].x /= poly->t_vertices[i].w;
     poly->t_vertices[i].y /= poly->t_vertices[i].w;
     poly->t_vertices[i].z /= poly->t_vertices[i].w;
