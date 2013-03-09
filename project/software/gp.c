@@ -1064,7 +1064,7 @@ void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, g
             left_dy = y_left_1 - y_left_0;
             left_sx = (x_left_0 < x_left_1) ? 1 : -1;
             left_err = left_dx - left_dy;
-            assert(y_left_1 >= y_left_0);
+            assert(y_left_1 >= y_left_0 && "You are probably trying to render a concave polygon, which isn't supported");
         }
         if (vertices[right_index].y <= y) {
             right_index = right_index + 1;
@@ -1078,7 +1078,7 @@ void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, g
             right_dy = y_right_1 - y_right_0;
             right_sx = (x_right_0 < x_right_1) ? 1 : -1;
             right_err = right_dx - right_dy;
-            assert(y_right_1 >= y_right_0);
+            assert(y_right_1 >= y_right_0 && "You are probably trying to render a concave polygon, which isn't supported");
         }
 
         do {
@@ -1241,7 +1241,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             left_dy = y_left_1 - y_left_0;
             left_sx = (x_left_0 < x_left_1) ? 1 : -1;
             left_err = left_dx - left_dy;
-            assert(y_left_1 >= y_left_0);
+            assert(y_left_1 >= y_left_0 && "You are probably trying to render a concave polygon, which isn't supported");
 
             // zbuffer additions
             z_left_0 = z_left_1;
@@ -1281,7 +1281,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             right_dy = y_right_1 - y_right_0;
             right_sx = (x_right_0 < x_right_1) ? 1 : -1;
             right_err = right_dx - right_dy;
-            assert(y_right_1 >= y_right_0);
+            assert(y_right_1 >= y_right_0 && "You are probably trying to render a concave polygon, which isn't supported");
 
             // zbuffer additions
             z_right_0 = z_right_1;
@@ -1384,12 +1384,12 @@ void gpCallbacks(bool (*keyboard)(int c), void (*idle)())
 
   while (1) {
     int c = gpWaitKey();
-    if (c == -1) {
-      idle();
-    } else {
+    if (c) {
       if (keyboard(c)) {
         break;
       }
+    } else {
+      idle();
     }
   }
 }
