@@ -19,7 +19,7 @@ int main()
   gpSetPolyVertex(quad2, 1, -1.f, .5f, 0.f);
   gpSetPolyVertex(quad2, 2, 1.f, 1.f, 0.f);
   gpSetPolyVertex(quad2, 3, .8f, 0.f, GP_INFER_COORD);
-  gpSetPolyColor(quad2, 0xff, 0x0, 0x0); //blue
+  gpSetPolyColor(quad2, 0xff, 0x0, 0x0); //red
   gpRotatePoly(quad2, 0.0, 3.14159/8, 0.0);
 
   gpPolyList *list = gpCreatePolyList();

@@ -832,20 +832,21 @@ void gpRender(gpPolyList *list)
   gpImg *img = gpCreateImage(GP_XRES, GP_YRES);
   gpSetImageBackground(img, GP_BG_COLOR[0], GP_BG_COLOR[1], GP_BG_COLOR[2]);
 
-  gpTMatrix temp;
+  gpTMatrix last;
 
   if (GLOBAL_PERSPECTIVE) {
     assert(GLOBAL_PERSPECTIVE_SET);
-    memcpy(&temp, &list->trans.m, sizeof(list->trans.m));
-    gpApplyPerspective(&temp, GLOBAL_NEAR, GLOBAL_FAR);
+    memcpy(&last, &list->trans.m, sizeof(list->trans.m));
+    gpApplyPerspective(&last, GLOBAL_NEAR, GLOBAL_FAR);
   }
 
   for (int i = 0; i < list->num_polys; i++) {
     gpPoly *poly = list->polys[i];
 
     // apply transformations
+    gpTMatrix temp;
     if (GLOBAL_PERSPECTIVE) {
-      gpAppliedTMatrix(&temp, &poly->trans);
+      gpMatrixMult((float *)poly->trans.m, (float *)last.m, (float *)temp.m, 4, 4);
     } else {
       gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4);
     }
