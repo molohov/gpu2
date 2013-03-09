@@ -62,17 +62,18 @@ int main()
 
   gpPolyHierarchy *translations = gpCreatePolyHierarchy();
   gpSetPolyHierarchyList(translations, cube);
-  gpTranslatePolyHierarchy(translations, 0.f, 0.f, 1.5f);
+  gpTranslatePolyHierarchy(translations, 0.f, 0.f, -1.5f);
 
   gpRotatePolyList(cube, -0.4f, 0.4f, 0.2f);
 
   for (int c = 0; c < 50; c++) {
-    for (int i = 0; i < 64; i++) {
+    int i;
+    for (i = 0; i < 128; i++) {
       gpTranslatePolyHierarchy(translations, 0.f, 0.f, 0.05f);
       gpRotatePolyList(cube, 0.3f, 0.3f, 0.0f);
       gpRenderAll(translations);
     }
-    gpTranslatePolyHierarchy(translations, 0.f, 0.f, -64 * 0.05f);
+    gpTranslatePolyHierarchy(translations, 0.f, 0.f, -i * 0.05f);
   }
 
   gpDeletePolyHierarchy(translations);
