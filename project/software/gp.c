@@ -1381,7 +1381,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
 
 void gpCallbacks(bool (*keyboard)(int c), void (*idle)())
 {
-  gpDisableTimeout();
+  gpSetTimeout(false);
 
   while (1) {
     int c = gpWaitKey();
@@ -1393,4 +1393,6 @@ void gpCallbacks(bool (*keyboard)(int c), void (*idle)())
       idle();
     }
   }
+
+  gpSetTimeout(true);
 }

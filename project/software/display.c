@@ -235,8 +235,6 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
 
 int gpWaitKey()
 {
-  assert(GP_DISPLAY_TIMEOUT_IN_MS != -1);
-
   return *((volatile int *)XPAR_RS232_UART_1_BASEADDR);
 }
 #endif
@@ -290,7 +288,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   }
 }
 
-void gpDisableTimeout()
+void gpSetTimeout(bool val)
 {
-  time_out = false;
+  time_out = val;
 }
