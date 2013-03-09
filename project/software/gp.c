@@ -745,6 +745,9 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
           vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
           vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
           vertices[i].z.f = poly->t_vertices[i].z;
+          if (poly->t_vertices[i].w < 0.f) {
+            return;
+          }
         }
 
         float near = (GLOBAL_PERSPECTIVE) ? 0.f : GLOBAL_NEAR;
@@ -773,6 +776,9 @@ void gpFillPoly(gpPoly *poly, gpImg *img)
         for (int i = 0; i < poly->num_vertices; i++) {
           vertices[i].x = (int)(poly->t_vertices[i].x * MIN(GP_XRES, GP_YRES) / 2) + GP_XRES/2;
           vertices[i].y = (int)(poly->t_vertices[i].y * MIN(GP_XRES, GP_YRES) / 2) + GP_YRES/2;
+          if (poly->t_vertices[i].w < 0.f) {
+            return;
+          }
         }
 
         int fill_vertices = gpClipXY(&vertices, poly->num_vertices);

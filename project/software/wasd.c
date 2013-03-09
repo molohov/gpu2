@@ -13,31 +13,22 @@ void idle()
 
 bool keyboard(int c)
 {
-  static float z = INITIAL_Z;
-  static float theta = 0.f;
-
   bool render = true;
 
   switch (c) {
     case 'w':
-      if (z > INITIAL_Z) {
-        gpTranslatePolyHierarchy(translations, 0.f, 0.f, -.2f);
-        z += -.2f;
-      }
+      gpTranslatePolyHierarchy(translations, 0.f, 0.f, -.2f);
       break;
     case 'a':
       gpRotatePolyHierarchy(translations, 0.f, .05f, 0.f);
       gpRotatePolyList(cube, 0.f, .05f, 0.f);
-      theta += .2f;
       break;
     case 's':
       gpTranslatePolyHierarchy(translations, 0.f, 0.f, .2f);
-      z += .2f;
       break;
     case 'd':
       gpRotatePolyHierarchy(translations, 0.f, -.05f, 0.f);
       gpRotatePolyList(cube, 0.f, -.05f, 0.f);
-      theta -= .2f;
       break;
     case 'r':
       gpTranslatePolyHierarchy(translations, 0.f, -.2f, 0.f);
