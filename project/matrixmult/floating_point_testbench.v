@@ -34,7 +34,7 @@ module floating_point_testbench();
 	initial
 		clk <= 0;
 	always @ (clk)
-		clk <= #100 ~clk;
+		clk <= #50 ~clk;
 
 	initial begin
 		s_axis_a_tvalid <= 1'b0;
@@ -42,14 +42,27 @@ module floating_point_testbench();
 		m_axis_result_tready <= 1'b0;
 		s_axis_a_tdata <= 32'b01000011011011000000000000000000; //0 10000110 11011000000000000000000 = 236
 		s_axis_b_tdata <= 32'b10111110001000000000000000000000; //1 01111100 01000000000000000000000 = -0.15625
+		expected_output <= 32'hC2138000; //36.875
 
 		@ (negedge clk);
 		s_axis_a_tvalid <= 1'b1;
 		s_axis_b_tvalid <= 1'b1;
 		m_axis_result_tready <= 1'b1;
-		
-		//expected ouput
-		@ (negedge clk)
+
+		@ (negedge clk);
+		@ (negedge clk);
+		s_axis_a_tdata <= 32'b10111110001000000000000000000000; //1 01111100 01000000000000000000000 = -0.15625
+		s_axis_b_tdata <= 32'b10111110001000000000000000000000; //1 01111100 01000000000000000000000 = -0.15625
+		expected_output <= 32'h3CC80000; //0.0244140625
+
+		@ (negedge clk);
+		s_axis_a_tdata <= 32'h3F47AE14; //0.78
+		s_axis_b_tdata <= 32'h42C7C7AE; //99.89
+		expected_output <= 32'h429BD412; //77.9142
+
+		@ (negedge clk);
+		s_axis_a_tdata <= 32'b01000011011011000000000000000000; //0 10000110 11011000000000000000000 = 236
+		s_axis_b_tdata <= 32'b10111110001000000000000000000000; //1 01111100 01000000000000000000000 = -0.15625
 		expected_output <= 32'hC2138000; //36.875
 
 	end
