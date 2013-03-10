@@ -1,10 +1,15 @@
 #include "gp.h"
 #define PERSPECTIVE_TEST
+#define ZBUFFER_TEST
 
 /* User program */
 int main()
 {
   gpSetBackgroundColor(0x60, 0x00, 0xe0);
+
+#ifdef ZBUFFER_TEST
+  gpEnable(GP_ZBUFFER);
+#endif
 
   #ifndef PERSPECTIVE_TEST
   // Create a triangle
@@ -17,7 +22,16 @@ int main()
   // Render it
   gpRenderPoly(tri);
 
-  gpTranslatePoly(tri, 0.2f, 0.2f, 0.f);
+  gpTranslatePoly(tri, 0.f, .5f, 0.f);
+  gpRenderPoly(tri);
+
+  gpTranslatePoly(tri, 0.f, -2.0f, 0.f);
+  gpRenderPoly(tri);
+
+  gpTranslatePoly(tri, -1.f, 1.f, 0.f);
+  gpRenderPoly(tri);
+
+  gpTranslatePoly(tri, 2.f, 0.f, 0.f);
   gpRenderPoly(tri);
 
   // Create a quadrilateral
@@ -123,27 +137,31 @@ int main()
     gpRotatePolyList(cube, 0.2f, 0.2f, 0.0f);
     gpRender(cube);
   }
-#else
-  gpRotatePolyList(cube, 0.8f, 0.0f, 0.0f);
-  gpTranslatePolyList(cube, 0.f, 0.f, 1.5f);
-  gpRender(cube);
-  gpEnable(GP_PERSPECTIVE);
-  gpSetFrustrum(1.0, 10.0);
-  for (int i = 0; i < 64; i++) {
-    gpTranslatePolyList(cube, 0.f, 0.f, 0.05f);
-    gpRotatePolyList(cube, 0.3f, 0.3f, 0.0f);
-    gpRender(cube);
-  }
-  gpDisable(GP_PERSPECTIVE);
-  gpTranslatePolyList(cube, 0.f, 0.f, -1.6f);
-  gpRender(cube);
-  gpEnable(GP_PERSPECTIVE);
-  gpRender(cube);
-  gpDisable(GP_PERSPECTIVE);
-  gpRender(cube);
-#endif
 
   gpDeletePolyList(cube);
+#else
+  gpRotatePolyList(cube, 0.8f, 0.0f, 0.0f);
+  gpEnable(GP_PERSPECTIVE);
+  gpSetFrustrum(1.0, 10.0);
+
+  gpPolyHierarchy *translations = gpCreatePolyHierarchy();
+  gpSetPolyHierarchyList(translations, cube);
+  gpTranslatePolyHierarchy(translations, 0.f, 0.f, 1.5f);
+
+  for (int i = 0; i < 64; i++) {
+    gpTranslatePolyHierarchy(translations, 0.f, 0.f, 0.05f);
+    gpRotatePolyList(cube, 0.3f, 0.3f, 0.0f);
+    gpRenderAll(translations);
+  }
+
+  gpTranslatePolyList(cube, 0.f, 0.f, 3.5f);
+  gpDisable(GP_PERSPECTIVE);
+  gpRender(cube);
+  gpEnable(GP_PERSPECTIVE);
+  gpRender(cube);
+
+  gpDeletePolyHierarchy(translations);
+#endif
 
   return 0;
 }

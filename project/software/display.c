@@ -1,6 +1,10 @@
 #include "display.h"
 
+#include <stdbool.h>
+
 extern int GLOBAL_ZBUFFER;
+
+bool time_out = true;
 
 #ifdef SW
 
@@ -61,7 +65,10 @@ void gpDisplayImage(gpImg *img)
 #endif
 
   cvShowImage("GP display", img->img);
-  cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
+
+  if (time_out) {
+    cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
+  }
 }
 
 void gpReleaseImage(gpImg **img)
@@ -74,11 +81,8 @@ void gpReleaseImage(gpImg **img)
 
 void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b)
 {
-  if (x1 < 0) x1 = 0;
-  if (x1 >= img->xres) x1 = img->xres - 1;
-  if (x2 < 0) x2 = 0;
-  if (x2 >= img->xres) x2 = img->xres - 1;
-
+  assert(x1 >= 0 && x1 < img->xres);
+  assert(x2 >= 0 && x2 < img->xres);
   assert(y >= 0 && y < img->yres);
 
   if (x1 > x2)
@@ -97,10 +101,15 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
   }
 }
 
+int gpWaitKey()
+{
+  int c = cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
+  return (c == -1) ? 0 : c;
+}
+
 #else
 
 #include <stdlib.h>
-#include <stdbool.h>
 
 #include "xparameters.h"
 
@@ -139,7 +148,7 @@ void gpPollImageWriteReady()
   burst_write_addr[64] &= ~0x100;
 }
 
-void gpSetImage(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
+void gpSetImageBackground(gpImg *img, unsigned char r, unsigned char g, unsigned char b)
 {
   static bool initialized = false;
 
@@ -190,7 +199,7 @@ void gpDisplayImage(gpImg *img)
     hdmi_addr[2] = 1; // go
     initialized = true;
   } else {
-    if (GP_DISPLAY_TIMEOUT_IN_MS == -1) {
+    if (GP_DISPLAY_TIMEOUT_IN_MS == -1 && time_out) {
       // wait for user input
       while (!*(volatile int *)(XPAR_RS232_UART_1_BASEADDR))
         ;
@@ -208,11 +217,6 @@ void gpReleaseImage(gpImg **img)
 
 void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b)
 {
-  if (x1 < 0) x1 = 0;
-  if (x1 >= img->xres) x1 = img->xres - 1;
-  if (x2 < 0) x2 = 0;
-  if (x2 >= img->xres) x2 = img->xres - 1;
-
   if (x1 > x2)
   {
       int tmp = x1;
@@ -229,11 +233,17 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
   }
 }
 
+int gpWaitKey()
+{
+  return *((volatile int *)XPAR_RS232_UART_1_BASEADDR);
+}
 #endif
  
 void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, unsigned int z2, unsigned char r, unsigned char g, unsigned char b)
 {
 #ifdef SW
+  assert(x1 >= 0 && x1 < img->xres);
+  assert(x2 >= 0 && x2 < img->xres);
   assert(y >= 0 && y < img->yres);
 #endif
 
@@ -264,13 +274,11 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   int sz = (dz > 0) ? 1 : -1;
 
   for (;; x1++) {
-      if (x1 >= 0) {
-          if (img->zbuffer[y*img->xres + x1] > z1) {
-              img->zbuffer[y*img->xres + x1] = z1;
-              gpSetImagePixel(img, x1, y, r, g, b);
-          }
+      if (img->zbuffer[y*img->xres + x1] > z1) {
+          img->zbuffer[y*img->xres + x1] = z1;
+          gpSetImagePixel(img, x1, y, r, g, b);
       }
-      if (x1 == x2 || x1 >= img->xres) break;
+      if (x1 == x2) break;
       z1 += slope;
       error += rem;
       if (error > dx) {
@@ -278,4 +286,9 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
           error -= dx;
       }
   }
+}
+
+void gpSetTimeout(bool val)
+{
+  time_out = val;
 }

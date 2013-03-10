@@ -11,14 +11,14 @@
 /*******************************************************************/
 
 _STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x400;
-_HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x4000;
+_HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x8000;
 
 /* Define Memories in the system */
 
 MEMORY
 {
    microblaze_0_i_bram_ctrl_microblaze_0_d_bram_ctrl : ORIGIN = 0x00000050, LENGTH = 0x0000FFB0
-   mcb_ddr2_S0_AXI_BASEADDR : ORIGIN = 0xA8000000, LENGTH = 0x08000000
+   mcb_ddr2_S0_AXI_BASEADDR : ORIGIN = 0xAC000000, LENGTH = 0x04000000
 }
 
 /* Specify the default entry point to the program */
@@ -49,7 +49,7 @@ SECTIONS
    *(.text)
    *(.text.*)
    *(.gnu.linkonce.t.*)
-} > microblaze_0_i_bram_ctrl_microblaze_0_d_bram_ctrl
+} > mcb_ddr2_S0_AXI_BASEADDR
 
 .init : {
    KEEP (*(.init))

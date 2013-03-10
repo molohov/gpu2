@@ -1,6 +1,8 @@
 #ifndef _DISPLAY_H
 #define _DISPLAY_H
 
+#include <stdbool.h>
+
 #ifndef GP_DISPLAY_TIMEOUT_IN_MS
 #define GP_DISPLAY_TIMEOUT_IN_MS -1
 #endif
@@ -38,5 +40,9 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
 void gpDisplayImage(gpImg *img);
 
 void gpReleaseImage(gpImg **img);
+
+void gpSetTimeout(bool val);
+
+int gpWaitKey();
 
 #endif
