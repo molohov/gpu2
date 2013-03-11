@@ -30,10 +30,16 @@ bool keyboard(int c)
       gpRotatePolyHierarchy(translations, 0.f, -.05f, 0.f);
       gpRotatePolyList(cube, 0.f, -.05f, 0.f);
       break;
-    case 'r':
+    case 'h':
+      gpTranslatePolyHierarchy(translations, .2f, 0.f, 0.f);
+      break;
+    case 'l':
+      gpTranslatePolyHierarchy(translations, -.2f, 0.f, 0.f);
+      break;
+    case 'k':
       gpTranslatePolyHierarchy(translations, 0.f, -.2f, 0.f);
       break;
-    case 'f':
+    case 'j':
       gpTranslatePolyHierarchy(translations, 0.f, .2f, 0.f);
       break;
     case 'q':
