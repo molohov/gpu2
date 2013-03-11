@@ -323,8 +323,20 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   // 5. subtract 256 from the length of the line = abs(x1 - x2)
   // 5. repeat until length of line = 0 
 
+  // guessing how many states there might be
+  reg [2:0] state, nextstate; 
+  reg [3:0] be, nextbe;
+  reg [1:0] beindex, nextbeindex;
+
+  localparam    IDLE        = 3'd0,  // reset state. calculate the 
+                LOAD_ZBUFF  = 3'd1,  // load zbuff MAX_LEN from pre calculated address and set AXI burst params accordingly
+                TRAVERSE_X  = 3'd2,
+                INTERP_Z    = 3'd3, // who knows how long this may take...assume it can calculate and write values in the same state (1 z-value and 1 byte-enable per 4 cycles)
+                WR_ZBUFF    = 3'd4, // burst the zbuffer and wait for completion
+                WR_FBUFF    = 3'd5; // burst the framebuffer and wait for completion. calculate the next burst addr
 
   // STATE MACHINE GOES HERE
+
 
   // ------------------------------------------------------
   // Example code to read/write user logic slave model s/w accessible registers
