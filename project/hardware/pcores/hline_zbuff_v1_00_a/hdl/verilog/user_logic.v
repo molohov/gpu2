@@ -26,7 +26,7 @@
 // Filename:          user_logic.v
 // Version:           1.00.a
 // Description:       User logic module.
-// Date:              Sun Mar 10 20:53:36 2013 (by Create and Import Peripheral Wizard)
+// Date:              Sun Mar 10 21:30:55 2013 (by Create and Import Peripheral Wizard)
 // Verilog Standard:  Verilog-2001
 //----------------------------------------------------------------------------
 // Naming Conventions:
@@ -110,7 +110,7 @@ module user_logic
 parameter C_MST_NATIVE_DATA_WIDTH        = 32;
 parameter C_LENGTH_WIDTH                 = 12;
 parameter C_MST_AWIDTH                   = 32;
-parameter C_NUM_REG                      = 8;
+parameter C_NUM_REG                      = 12;
 parameter C_SLV_DWIDTH                   = 32;
 // -- DO NOT EDIT ABOVE THIS LINE --------------------
 
@@ -172,8 +172,12 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg1;
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg2;
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg3;
-  wire       [3 : 0]                        slv_reg_write_sel;
-  wire       [3 : 0]                        slv_reg_read_sel;
+  reg        [C_SLV_DWIDTH-1 : 0]           slv_reg4;
+  reg        [C_SLV_DWIDTH-1 : 0]           slv_reg5;
+  reg        [C_SLV_DWIDTH-1 : 0]           slv_reg6;
+  reg        [C_SLV_DWIDTH-1 : 0]           slv_reg7;
+  wire       [7 : 0]                        slv_reg_write_sel;
+  wire       [7 : 0]                        slv_reg_read_sel;
   reg        [C_SLV_DWIDTH-1 : 0]           slv_ip2bus_data;
   wire                                      slv_read_ack;
   wire                                      slv_write_ack;
@@ -291,12 +295,6 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  
   // --USER logic implementation added here
 
-  // Define slave register mapping:
-  // slv_reg0 : x1
-  // slv_reg1 : x2
-  // slv_reg2 : z1
-  // slv_reg3 : z2
-
   // ------------------------------------------------------
   // Example code to read/write user logic slave model s/w accessible registers
   // 
@@ -317,10 +315,10 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   // ------------------------------------------------------
 
   assign
-    slv_reg_write_sel = Bus2IP_WrCE[3:0],
-    slv_reg_read_sel  = Bus2IP_RdCE[3:0],
-    slv_write_ack     = Bus2IP_WrCE[0] || Bus2IP_WrCE[1] || Bus2IP_WrCE[2] || Bus2IP_WrCE[3],
-    slv_read_ack      = Bus2IP_RdCE[0] || Bus2IP_RdCE[1] || Bus2IP_RdCE[2] || Bus2IP_RdCE[3];
+    slv_reg_write_sel = Bus2IP_WrCE[7:0],
+    slv_reg_read_sel  = Bus2IP_RdCE[7:0],
+    slv_write_ack     = Bus2IP_WrCE[0] || Bus2IP_WrCE[1] || Bus2IP_WrCE[2] || Bus2IP_WrCE[3] || Bus2IP_WrCE[4] || Bus2IP_WrCE[5] || Bus2IP_WrCE[6] || Bus2IP_WrCE[7],
+    slv_read_ack      = Bus2IP_RdCE[0] || Bus2IP_RdCE[1] || Bus2IP_RdCE[2] || Bus2IP_RdCE[3] || Bus2IP_RdCE[4] || Bus2IP_RdCE[5] || Bus2IP_RdCE[6] || Bus2IP_RdCE[7];
 
   // implement slave model register(s)
   always @( posedge Bus2IP_Clk )
@@ -332,43 +330,71 @@ input                                     bus2ip_mstwr_dst_dsc_n;
           slv_reg1 <= 0;
           slv_reg2 <= 0;
           slv_reg3 <= 0;
+          slv_reg4 <= 0;
+          slv_reg5 <= 0;
+          slv_reg6 <= 0;
+          slv_reg7 <= 0;
         end
       else
         case ( slv_reg_write_sel )
-          4'b1000 :
+          8'b10000000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg0[bit_index] <= Bus2IP_Data[bit_index];
-          4'b0100 :
+          8'b01000000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg1[bit_index] <= Bus2IP_Data[bit_index];
-          4'b0010 :
+          8'b00100000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg2[bit_index] <= Bus2IP_Data[bit_index];
-          4'b0001 :
+          8'b00010000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg3[bit_index] <= Bus2IP_Data[bit_index];
+          8'b00001000 :
+            for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
+              if ( Bus2IP_BE[byte_index] == 1 )
+                for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
+                  slv_reg4[bit_index] <= Bus2IP_Data[bit_index];
+          8'b00000100 :
+            for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
+              if ( Bus2IP_BE[byte_index] == 1 )
+                for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
+                  slv_reg5[bit_index] <= Bus2IP_Data[bit_index];
+          8'b00000010 :
+            for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
+              if ( Bus2IP_BE[byte_index] == 1 )
+                for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
+                  slv_reg6[bit_index] <= Bus2IP_Data[bit_index];
+          8'b00000001 :
+            for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
+              if ( Bus2IP_BE[byte_index] == 1 )
+                for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
+                  slv_reg7[bit_index] <= Bus2IP_Data[bit_index];
           default : ;
         endcase
 
     end // SLAVE_REG_WRITE_PROC
 
   // implement slave model register read mux
-  always @( slv_reg_read_sel or slv_reg0 or slv_reg1 or slv_reg2 or slv_reg3 )
+  always @( slv_reg_read_sel or slv_reg0 or slv_reg1 or slv_reg2 or slv_reg3 or slv_reg4 or slv_reg5 or slv_reg6 or slv_reg7 )
     begin: SLAVE_REG_READ_PROC
 
       case ( slv_reg_read_sel )
-        4'b1000 : slv_ip2bus_data <= slv_reg0;
-        4'b0100 : slv_ip2bus_data <= slv_reg1;
-        4'b0010 : slv_ip2bus_data <= slv_reg2;
-        4'b0001 : slv_ip2bus_data <= slv_reg3;
+        8'b10000000 : slv_ip2bus_data <= slv_reg0;
+        8'b01000000 : slv_ip2bus_data <= slv_reg1;
+        8'b00100000 : slv_ip2bus_data <= slv_reg2;
+        8'b00010000 : slv_ip2bus_data <= slv_reg3;
+        8'b00001000 : slv_ip2bus_data <= slv_reg4;
+        8'b00000100 : slv_ip2bus_data <= slv_reg5;
+        8'b00000010 : slv_ip2bus_data <= slv_reg6;
+        8'b00000001 : slv_ip2bus_data <= slv_reg7;
         default : slv_ip2bus_data <= 0;
       endcase
 
@@ -439,10 +465,10 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 //   5. write 0x0a to the go register, this will start the master write operation
 // 
 //----------------------------------------
-  assign mst_reg_write_req = Bus2IP_WrCE[4] || Bus2IP_WrCE[5] || Bus2IP_WrCE[6] || Bus2IP_WrCE[7];
-  assign mst_reg_read_req  = Bus2IP_RdCE[4] || Bus2IP_RdCE[5] || Bus2IP_RdCE[6] || Bus2IP_RdCE[7];
-  assign mst_reg_write_sel = Bus2IP_WrCE[7 : 4];
-  assign mst_reg_read_sel  = Bus2IP_RdCE[7 : 4];
+  assign mst_reg_write_req = Bus2IP_WrCE[8] || Bus2IP_WrCE[9] || Bus2IP_WrCE[10] || Bus2IP_WrCE[11];
+  assign mst_reg_read_req  = Bus2IP_RdCE[8] || Bus2IP_RdCE[9] || Bus2IP_RdCE[10] || Bus2IP_RdCE[11];
+  assign mst_reg_write_sel = Bus2IP_WrCE[11 : 8];
+  assign mst_reg_read_sel  = Bus2IP_RdCE[11 : 8];
   assign mst_write_ack     = mst_reg_write_req;
   assign mst_read_ack      = mst_reg_read_req;
 

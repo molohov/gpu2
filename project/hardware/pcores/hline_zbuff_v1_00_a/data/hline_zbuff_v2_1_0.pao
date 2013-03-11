@@ -1,11 +1,11 @@
 ##############################################################################
-## Filename:          C:/cygwin/home/Maximus/gpu2/project/hardware/pcores/hline_v1_00_a/data/hline_v2_1_0.pao
+## Filename:          C:/cygwin/home/Maximus/gpu2/project/hardware/pcores/hline_zbuff_v1_00_a/data/hline_zbuff_v2_1_0.pao
 ## Description:       Peripheral Analysis Order
-## Date:              Sun Mar 10 20:53:36 2013 (by Create and Import Peripheral Wizard)
+## Date:              Sun Mar 10 21:30:55 2013 (by Create and Import Peripheral Wizard)
 ##############################################################################
 
 lib proc_common_v3_00_a  all 
 lib axi_lite_ipif_v1_01_a  all 
 lib axi_master_burst_v1_00_a  all 
-lib hline_v1_00_a user_logic verilog
-lib hline_v1_00_a hline vhdl
+lib hline_zbuff_v1_00_a user_logic verilog
+lib hline_zbuff_v1_00_a hline_zbuff vhdl

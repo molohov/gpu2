@@ -1,5 +1,5 @@
 ------------------------------------------------------------------------------
--- hline.vhd - entity/architecture pair
+-- hline_zbuff.vhd - entity/architecture pair
 ------------------------------------------------------------------------------
 -- IMPORTANT:
 -- DO NOT MODIFY THIS FILE EXCEPT IN THE DESIGNATED SECTIONS.
@@ -32,10 +32,10 @@
 -- ***************************************************************************
 --
 ------------------------------------------------------------------------------
--- Filename:          hline.vhd
+-- Filename:          hline_zbuff.vhd
 -- Version:           1.00.a
 -- Description:       Top level design, instantiates library components and user logic.
--- Date:              Sun Mar 10 20:53:36 2013 (by Create and Import Peripheral Wizard)
+-- Date:              Sun Mar 10 21:30:55 2013 (by Create and Import Peripheral Wizard)
 -- VHDL Standard:     VHDL'93
 ------------------------------------------------------------------------------
 -- Naming Conventions:
@@ -150,7 +150,7 @@ use axi_master_burst_v1_00_a.axi_master_burst;
 --   m_axi_bresp                  -- AXI4 master: read response 
 ------------------------------------------------------------------------------
 
-entity hline is
+entity hline_zbuff is
   generic
   (
     -- ADD USER GENERICS BELOW THIS LINE ---------------
@@ -167,7 +167,7 @@ entity hline is
     C_BASEADDR                     : std_logic_vector     := X"FFFFFFFF";
     C_HIGHADDR                     : std_logic_vector     := X"00000000";
     C_FAMILY                       : string               := "virtex6";
-    C_NUM_REG                      : integer              := 4;
+    C_NUM_REG                      : integer              := 8;
     C_NUM_MEM                      : integer              := 1;
     C_SLV_AWIDTH                   : integer              := 32;
     C_SLV_DWIDTH                   : integer              := 32;
@@ -252,13 +252,13 @@ entity hline is
   attribute MAX_FANOUT of m_axi_aresetn       : signal is "10000";
   attribute SIGIS of m_axi_aclk       : signal is "Clk";
   attribute SIGIS of m_axi_aresetn       : signal is "Rst";
-end entity hline;
+end entity hline_zbuff;
 
 ------------------------------------------------------------------------------
 -- Architecture section
 ------------------------------------------------------------------------------
 
-architecture IMP of hline is
+architecture IMP of hline_zbuff is
 
   constant USER_SLV_DWIDTH                : integer              := C_S_AXI_DATA_WIDTH;
 
@@ -404,7 +404,7 @@ architecture IMP of hline is
       C_MST_NATIVE_DATA_WIDTH        : integer              := 32;
       C_LENGTH_WIDTH                 : integer              := 12;
       C_MST_AWIDTH                   : integer              := 32;
-      C_NUM_REG                      : integer              := 8;
+      C_NUM_REG                      : integer              := 12;
       C_SLV_DWIDTH                   : integer              := 32
       -- DO NOT EDIT ABOVE THIS LINE ---------------------
     );
