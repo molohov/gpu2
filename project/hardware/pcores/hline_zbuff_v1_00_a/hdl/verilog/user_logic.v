@@ -166,6 +166,14 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 //----------------------------------------------------------------------------
 
   // --USER nets declarations added here, as needed for user logic
+  wire       [C_SLV_DWIDTH-1 : 0]           fb_addr;
+  wire       [C_SLV_DWIDTH-1 : 0]           zbuff_addr;
+  wire       [C_SLV_DWIDTH-1 : 0]           y;
+  wire       [C_SLV_DWIDTH-1 : 0]           x1;
+  wire       [C_SLV_DWIDTH-1 : 0]           x2;
+  wire       [C_SLV_DWIDTH-1 : 0]           z1;
+  wire       [C_SLV_DWIDTH-1 : 0]           z2;
+  wire       [C_SLV_DWIDTH-1 : 0]           rgbx; 
 
   // Nets for user logic slave model s/w accessible register example
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg0;
@@ -294,6 +302,29 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  parameter                                  GO_BYTE_LANE = 15;
  
   // --USER logic implementation added here
+
+  assign    fb_addr    = slv_reg0;
+  assign    zbuff_addr = slv_reg1;
+  assign    y          = slv_reg2;
+  assign    x1         = slv_reg3;
+  assign    x2         = slv_reg4;
+  assign    z1         = slv_reg5;
+  assign    z2         = slv_reg6;
+  assign    rgbx       = slv_reg7;
+
+  // begin state machine that controls fb writing and zbuff comparison. in pseudocode:
+  // 1. burst the maximum length (256 words) into a FIFO that is also 256 words long
+  // 2. from x1 to x2
+  //    2a. calculate the interpolated z value for the current x value 
+  //    2b. check to see if the calculated z value is less than (therefore in front of) the existing z value
+  //    2c. if it is, update the z-write FIFO as well as the byte-enable FIFO (which represents replaced or not replaced)
+  // 3. burst write the z-line and use the byte-enable FIFO as byte-enables
+  // 4. burst write the fb to the appropriate address (using the rgbx value) and reuse the byte-enable FIFO 
+  // 5. subtract 256 from the length of the line = abs(x1 - x2)
+  // 5. repeat until length of line = 0 
+
+
+  // STATE MACHINE GOES HERE
 
   // ------------------------------------------------------
   // Example code to read/write user logic slave model s/w accessible registers
@@ -946,11 +977,11 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_fifo_valid_read_xfer  = !bus2ip_mstwr_dst_rdy_n & mst_llwr_sm_src_rdy;
   assign bus2ip_Reset   = !Bus2IP_Resetn;
  
-  // FIFO depth is 128 words. User can modify the depth based on their requirement.
+   // zbuffer read fifo. 256 words long.
    srl_fifo_f #(
      .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
-     .C_DEPTH(128))
-   DATA_CAPTURE_FIFO_I (
+     .C_DEPTH(256))
+   ZBUFF_READ_FIFO (
      .Clk(Bus2IP_Clk),
      .Reset(bus2ip_Reset),
      .FIFO_Write(mst_fifo_valid_write_xfer),
@@ -959,7 +990,37 @@ input                                     bus2ip_mstwr_dst_dsc_n;
      .Data_Out(ip2bus_mstwr_d),
      .FIFO_Full(),
      .FIFO_Empty(),
-     .Addr()); // DATA_CAPTURE_FIFO_I
+     .Addr()); // ZBUFF_READ_FIFO
+
+   // zbuffer write fifo. 256 words long.
+   srl_fifo_f #(
+     .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
+     .C_DEPTH(256))
+   ZBUFF_WRITE_FIFO (
+     .Clk(Bus2IP_Clk),
+     .Reset(bus2ip_Reset),
+     .FIFO_Write(),
+     .Data_In(),
+     .FIFO_Read(),
+     .Data_Out(),
+     .FIFO_Full(),
+     .FIFO_Empty(),
+     .Addr()); // ZBUFF_WRITE_FIFO
+
+   // byte-enable fifo. 256 words long, but 32/8 = 4 bits wide (4 bytes per 32 bit word).
+   srl_fifo_f #(
+     .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH/8),
+     .C_DEPTH(256))
+   BE_FIFO (
+     .Clk(Bus2IP_Clk),
+     .Reset(bus2ip_Reset),
+     .FIFO_Write(),
+     .Data_In(),
+     .FIFO_Read(),
+     .Data_Out(),
+     .FIFO_Full(),
+     .FIFO_Empty(),
+     .Addr()); // BE_WRITE_FIFO
  
   // ------------------------------------------------------------
   // Example code to drive IP to Bus signals
