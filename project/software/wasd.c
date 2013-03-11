@@ -2,12 +2,12 @@
 
 #define INITIAL_Z 1.5f
 
-gpPolyList *cube = NULL;
+gpPolyList *rotate_cube = NULL;
 gpPolyHierarchy *translations = NULL;
 
 void idle()
 {
-  gpRotatePolyList(cube, 0.f, 0.f, 0.1f);
+  gpRotatePolyList(rotate_cube, 0.f, 0.f, 0.1f);
   gpRenderAll(translations);
 }
 
@@ -21,14 +21,12 @@ bool keyboard(int c)
       break;
     case 'a':
       gpRotatePolyHierarchy(translations, 0.f, .05f, 0.f);
-      gpRotatePolyList(cube, 0.f, .05f, 0.f);
       break;
     case 's':
       gpTranslatePolyHierarchy(translations, 0.f, 0.f, .2f);
       break;
     case 'd':
       gpRotatePolyHierarchy(translations, 0.f, -.05f, 0.f);
-      gpRotatePolyList(cube, 0.f, -.05f, 0.f);
       break;
     case 'h':
       gpTranslatePolyHierarchy(translations, .2f, 0.f, 0.f);
@@ -55,14 +53,8 @@ bool keyboard(int c)
   return false;
 }
 
-/* User program */
-int main()
+gpPolyList *createCube()
 {
-  gpSetBackgroundColor(0x60, 0x00, 0xe0);
-  gpEnable(GP_ZBUFFER);
-  gpEnable(GP_PERSPECTIVE);
-  gpSetFrustrum(1.f, 20.f);
-
   // Cube
   gpPoly *z = gpCreatePoly(4);
   gpSetPolyVertex(z, 0, -.5f, -.5f, -.5f);
@@ -106,7 +98,7 @@ int main()
   gpSetPolyVertex(x2, 3, GP_INFER_COORD, .5f, -.5f);
   gpSetPolyColor(x2, 0x0, 0x5f, 0x0);
 
-  cube = gpCreatePolyList();
+  gpPolyList *cube = gpCreatePolyList();
   gpAddPolyToList(cube, z);
   gpAddPolyToList(cube, y);
   gpAddPolyToList(cube, x);
@@ -114,11 +106,30 @@ int main()
   gpAddPolyToList(cube, y2);
   gpAddPolyToList(cube, x2);
 
-  translations = gpCreatePolyHierarchy();
-  gpSetPolyHierarchyList(translations, cube);
-  gpTranslatePolyHierarchy(translations, 0.f, 0.f, INITIAL_Z);
+  return cube;
+}
 
-  gpRotatePolyList(cube, -0.4f, 0.4f, 0.2f);
+/* User program */
+int main()
+{
+  gpSetBackgroundColor(0x60, 0x00, 0xe0);
+  gpEnable(GP_ZBUFFER);
+  gpEnable(GP_PERSPECTIVE);
+  gpSetFrustrum(1.f, 20.f);
+
+  rotate_cube = createCube();
+
+  gpRotatePolyList(rotate_cube, -0.4f, 0.4f, 0.2f);
+
+  gpPolyList *ref_cube_list = createCube();
+  gpPolyHierarchy *ref_cube = gpCreatePolyHierarchy();
+  gpSetPolyHierarchyList(ref_cube, ref_cube_list);
+  gpTranslatePolyHierarchy(ref_cube, 3.f, 0.f, 0.f);
+
+  translations = gpCreatePolyHierarchy();
+  gpSetPolyHierarchyChild(translations, ref_cube);
+  gpSetPolyHierarchyList(translations, rotate_cube);
+  gpTranslatePolyHierarchy(translations, 0.f, 0.f, INITIAL_Z);
 
   gpRenderAll(translations);
 
