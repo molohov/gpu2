@@ -104,7 +104,7 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
 int gpWaitKey()
 {
   int c = cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
-  return (c == -1) ? 0 : c;
+  return (c == -1) ? 0 : c & 0xff;
 }
 
 #else
