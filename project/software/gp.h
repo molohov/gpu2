@@ -2,6 +2,7 @@
 #define _GP_H
 
 #include <stdbool.h>
+#include <math.h>
 
 #include "display.h"
 
