@@ -1,5 +1,7 @@
 #include "gp.h"
 
+#include <stdlib.h>
+
 #define INITIAL_Z 1.5f
 
 gpPolyList *rotate_cube = NULL;
