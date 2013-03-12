@@ -273,10 +273,15 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   int error = (dx + 1) / 2;
   int sz = (dz > 0) ? 1 : -1;
 
+  volatile unsigned *ptr = (volatile unsigned *)img->imageData;
+  ptr += (y * img->xres + x1);
+
   for (;; x1++) {
       if (img->zbuffer[y*img->xres + x1] > z1) {
           img->zbuffer[y*img->xres + x1] = z1;
-          gpSetImagePixel(img, x1, y, r, g, b);
+          *ptr++ = (r << 24) | (g << 16) | (b << 8);
+      } else {
+          ptr++;
       }
       if (x1 == x2) break;
       z1 += slope;
