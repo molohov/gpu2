@@ -1,3 +1,6 @@
 vlib work
 vlog ../fsm.v
-vsim work.fsm
+vlog fsm_tb.v
+vsim work.fsm_tb
+do wave.do
+run 10000
