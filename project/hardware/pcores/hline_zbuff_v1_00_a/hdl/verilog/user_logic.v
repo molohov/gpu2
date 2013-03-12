@@ -169,11 +169,13 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire       [C_SLV_DWIDTH-1 : 0]           fb_addr;
   wire       [C_SLV_DWIDTH-1 : 0]           zbuff_addr;
   wire       [C_SLV_DWIDTH-1 : 0]           y;
-  wire       [C_SLV_DWIDTH-1 : 0]           x1;
-  wire       [C_SLV_DWIDTH-1 : 0]           x2;
+  wire       [(C_SLV_DWIDTH/2)-1 : 0]       x1;
+  wire       [(C_SLV_DWIDTH/2)-1 : 0]       x2;
   wire       [C_SLV_DWIDTH-1 : 0]           z1;
   wire       [C_SLV_DWIDTH-1 : 0]           z2;
+  wire       [C_SLV_DWIDTH-1 : 0]           slope;
   wire       [C_SLV_DWIDTH-1 : 0]           rgbx; 
+  wire                                      zread_empty;
 
   // Nets for user logic slave model s/w accessible register example
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg0;
@@ -306,10 +308,11 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign    fb_addr    = slv_reg0;
   assign    zbuff_addr = slv_reg1;
   assign    y          = slv_reg2;
-  assign    x1         = slv_reg3;
-  assign    x2         = slv_reg4;
-  assign    z1         = slv_reg5;
-  assign    z2         = slv_reg6;
+  assign    x1         = slv_reg3[15:0];
+  assign    x2         = slv_reg3[31:16];
+  assign    z1         = slv_reg4;
+  assign    z2         = slv_reg5;
+  assign    slope      = slv_reg6;
   assign    rgbx       = slv_reg7;
 
 
@@ -976,7 +979,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
      .FIFO_Read(mst_fifo_valid_read_xfer),
      .Data_Out(ip2bus_mstwr_d),
      .FIFO_Full(),
-     .FIFO_Empty(),
+     .FIFO_Empty(zread_empty),
      .Addr()); // ZBUFF_READ_FIFO
 
    // zbuffer write fifo. 256 words long.
