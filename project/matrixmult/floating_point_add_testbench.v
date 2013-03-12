@@ -2,7 +2,7 @@
 
 //testbench for floating point operator generated using Xilinx coregen
 
-
+//note: latency for addition is 13 cycles, but pipelined so after 13 cycles, can get an answer every cycle
 module floating_point_add_testbench();
 
 	//core inputs

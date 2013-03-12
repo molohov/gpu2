@@ -7,12 +7,12 @@ module counter(
 		input clk,
 		input reset,
 		input in_ready,			//assert this for one cycle when providing module with fresh input
-		output done			//this is asserted when counter reaches N (ie: added all the products for this element of matrix)
-		output reg [log2N:0] count
+		output done,			//this is asserted when counter reaches N (ie: added all the products for this element of matrix)
+		output reg [2:0] count
 		);
 
 	parameter N = 4; 	//number of rows in matrix (number of additions required to generate one element of matrix result)
-	parameter log2N = 2;
+	//parameter log2N = 2;
 
 	assign done = (count == N) ? 1'b1 : 1'b0;
 
@@ -96,8 +96,6 @@ module matrixmultiplier (
 		input b_tvalid,
 		input [31:0] a,
 		input [31:0] b,
-		input a_tvalid,
-		input b_tvalid,
 		output [31:0] result0,
 		output [31:0] result1,
 		output [31:0] result2,
@@ -108,15 +106,32 @@ module matrixmultiplier (
 
 	wire [31:0] product_tdata;
 	wire product_tready;
-	wire product_tvalid, product_tuser;
-	wire [31:0] element;
+	wire product_tvalid; 
+	wire [2:0] product_tuser;
 	wire element_ready;
 
-	wire add_product_ready, add_b_tready, add_operation_tready, sum_tready, sum_tvalid, sum_tuser;
-	wire [4:0] count;
+	wire add_b_tready, add_operation_tready, sum_tready, sum1_tvalid, sum2_tvalid, sum3_tvalid; 
+	wire [2:0] count;
+	wire [31:0] sum1_tdata, sum2_tdata, sum3_tdata;
+	reg [31:0] prev_product;
+	reg prev2_product_tvalid;
+	//wire [31:0] sum1, sum2, sum3;
+	reg prev_product_tvalid;
 
 	assign product_tready = 1'b1;
 	assign sum_tready = 1'b1;
+	
+	always @ (posedge clk) begin
+		if (reset) 
+			prev_product_tvalid <= 1'b0;
+		else
+			begin
+			prev_product <= product_tdata;
+			prev_product_tvalid <= product_tvalid;
+			prev2_product_tvalid <= prev_product_tvalid;
+		end
+	end
+	
 	
 	floating_point_v6_1 fmul (
 	  .aclk(clk), // input aclk
@@ -134,29 +149,65 @@ module matrixmultiplier (
 
 	
 
-	floating_point_add_sub_v6_1 fadd (
+	floating_point_add_sub_v6_1 fadd1 (
 	  .aclk(clk), // input aclk
 	  .s_axis_a_tvalid(product_tvalid), // input s_axis_a_tvalid
 	  .s_axis_a_tready(add_product_tready), // output s_axis_a_tready
 	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
-	  .s_axis_b_tvalid(product_tvalid), // input s_axis_b_tvalid
+	  .s_axis_b_tvalid(prev2_product_tvalid), // input s_axis_b_tvalid
 	  .s_axis_b_tready(add_b_tready), // output s_axis_b_tready
-	  .s_axis_b_tdata((count == 4'b0) ? 0 : sum_tdata), // input [31 : 0] s_axis_b_tdata
+	  .s_axis_b_tdata(prev_product), // input [31 : 0] s_axis_b_tdata
 	  .s_axis_operation_tvalid(1'b1), // input s_axis_operation_tvalid
 	  .s_axis_operation_tready(add_operation_tready), // output s_axis_operation_tready
 	  .s_axis_operation_tdata(8'b0 /*ADD*/), // input [7 : 0] s_axis_operation_tdata
-	  .m_axis_result_tvalid(sum_tvalid), // output m_axis_result_tvalid
+	  .m_axis_result_tvalid(sum1_tvalid), // output m_axis_result_tvalid
 	  .m_axis_result_tready(sum_tready), // input m_axis_result_tready
-	  .m_axis_result_tdata(sum_tdata), // output [31 : 0] m_axis_result_tdata
-	  .m_axis_result_tuser(sum_tuser) // output [2 : 0] m_axis_result_tuser
+	  .m_axis_result_tdata(sum1_tdata), // output [31 : 0] m_axis_result_tdata
+	  .m_axis_result_tuser() // output [2 : 0] m_axis_result_tuser
 	);
+	
+
+	floating_point_add_sub_v6_1 fadd2 (
+	  .aclk(clk), // input aclk
+	  .s_axis_a_tvalid(product_tvalid), // input s_axis_a_tvalid
+	  .s_axis_a_tready(), // output s_axis_a_tready
+	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
+	  .s_axis_b_tvalid(sum1_tvalid), // input s_axis_b_tvalid
+	  .s_axis_b_tready(), // output s_axis_b_tready
+	  .s_axis_b_tdata(sum1_tdata), // input [31 : 0] s_axis_b_tdata
+	  .s_axis_operation_tvalid(1'b1), // input s_axis_operation_tvalid
+	  .s_axis_operation_tready(add_operation_tready), // output s_axis_operation_tready
+	  .s_axis_operation_tdata(8'b0 /*ADD*/), // input [7 : 0] s_axis_operation_tdata
+	  .m_axis_result_tvalid(sum2_tvalid), // output m_axis_result_tvalid
+	  .m_axis_result_tready(1'b1), // input m_axis_result_tready
+	  .m_axis_result_tdata(sum2_tdata), // output [31 : 0] m_axis_result_tdata
+	  .m_axis_result_tuser() // output [2 : 0] m_axis_result_tuser
+	);
+
+	floating_point_add_sub_v6_1 fadd3 (
+	  .aclk(clk), // input aclk
+	  .s_axis_a_tvalid(product_tvalid), // input s_axis_a_tvalid
+	  .s_axis_a_tready(), // output s_axis_a_tready
+	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
+	  .s_axis_b_tvalid(sum2_tvalid), // input s_axis_b_tvalid
+	  .s_axis_b_tready(), // output s_axis_b_tready
+	  .s_axis_b_tdata(sum2_tdata), // input [31 : 0] s_axis_b_tdata
+	  .s_axis_operation_tvalid(1'b1), // input s_axis_operation_tvalid
+	  .s_axis_operation_tready(add_operation_tready), // output s_axis_operation_tready
+	  .s_axis_operation_tdata(8'b0 /*ADD*/), // input [7 : 0] s_axis_operation_tdata
+	  .m_axis_result_tvalid(sum3_tvalid), // output m_axis_result_tvalid
+	  .m_axis_result_tready(1'b1), // input m_axis_result_tready
+	  .m_axis_result_tdata(sum3_tdata), // output [31 : 0] m_axis_result_tdata
+	  .m_axis_result_tuser() // output [2 : 0] m_axis_result_tuser
+	);
+
 
 	//note: there might be an issue with one cycle delay of count to get to input mux of
 	//fadd!!!!!!!!!!!!!---> check this in simulation!!!!!!!!!!!!!!!!!!!!!!	
 	counter count_dot_product_elements(
 		.clk(clk),
 		.reset(reset),
-		.in_ready(product_tready),//assert this for one cycle when providing module with fresh input
+		.in_ready(sum3_tvalid),//assert this for one cycle when providing module with fresh input
 		.done(element_ready),
 		.count(count)
 		);
@@ -164,7 +215,7 @@ module matrixmultiplier (
  	latch_matrixmult latch(
 		.clk(clk),
 		.reset(reset),
-		.element_in(sum_tdata),
+		.element_in(sum3_tdata),
 		.new_element(element_ready),	//need to pulse for one cycle only
 		.element0(result0),
 		.element1(result1),
@@ -174,152 +225,3 @@ module matrixmultiplier (
 		);
 
 endmodule
-
-////////////////////////////////////////////////////////
-
-
-
-
-module matrixmult_tb();
-
-   wire [15:0] row0_0;
-	wire [15:0] row0_1;
-	wire [15:0] row0_2;
-	wire [15:0] row0_3;
-
-	wire [15:0] row1_0;
-	wire [15:0] row1_1;
-	wire [15:0] row1_2;
-	wire [15:0] row1_3;
-
-	wire [15:0] row2_0;
-	wire [15:0] row2_1;
-	wire [15:0] row2_2;
-	wire [15:0] row2_3;
-
-	wire [15:0] row3_0;
-	wire [15:0] row3_1;
-	wire [15:0] row3_2;
-	wire [15:0] row3_3;
-
-	wire [15:0] pixelinT_0; 	//transpose of pixel
-	wire [15:0] pixelinT_1;
-	wire [15:0] pixelinT_2;
-	wire [15:0] pixelinT_3;
-
-	wire [31:0] pixelout_0;
-	wire [31:0] pixelout_1;
-	wire [31:0] pixelout_2;
-	wire [31:0] pixelout_3;
-
-
-
-   assign row0_0 = 16'd1;
-	assign row0_1 = 16'd1;
-	assign row0_2 = 16'd2;
-	assign row0_3 = 16'd3;
-
-	assign row1_0 = 16'd5;
-	assign row1_1 = 16'd6;
-	assign row1_2 = 16'd7;
-	assign row1_3 = 16'd3;
-
-	assign row2_0 = 16'd1;
-	assign row2_1 = 16'd2;
-	assign row2_2 = 16'd3;
-	assign row2_3 = 16'd2;
-
-	assign row3_0 = 16'd4;
-	assign row3_1 = 16'd5;
-	assign row3_2 = 16'd3;
-	assign row3_3 = 16'd5;
-
-	assign pixelinT_0 = 16'd2; 	//transpose of pixel
-	assign pixelinT_1 = 16'd5;
-	assign pixelinT_2 = 16'd3;
-	assign pixelinT_3 = 16'd1;
-
-
-
-
-	matrixmult dut(
-			.row0_0(row0_0),
-			.row0_1(row0_1),
-			.row0_2(row0_2),
-			.row0_3(row0_3),
-
-			.row1_0(row1_0),
-			.row1_1(row1_1),
-			.row1_2(row1_2),
-			.row1_3(row1_3),
-
-			.row2_0(row2_0),
-			.row2_1(row2_1),
-			.row2_2(row2_2),
-			.row2_3(row2_3),
-
-			.row3_0(row3_0),
-			.row3_1(row3_1),
-			.row3_2(row3_2),
-			.row3_3(row3_3),
-
-			.pixelinT_0(pixelinT_0),
-			.pixelinT_1(pixelinT_1),
-			.pixelinT_2(pixelinT_2),
-			.pixelinT_3(pixelinT_3),
-
-			.pixelout_0(pixelout_0),
-			.pixelout_1(pixelout_1),
-			.pixelout_2(pixelout_2),
-			.pixelout_3(pixelout_3)
-
-		);
-
-endmodule
-
-
-module matrixmult 
-(
-	input [15:0] row0_0,
-	input [15:0] row0_1,
-	input [15:0] row0_2,
-	input [15:0] row0_3,
-
-	input [15:0] row1_0,
-	input [15:0] row1_1,
-	input [15:0] row1_2,
-	input [15:0] row1_3,
-
-	input [15:0] row2_0,
-	input [15:0] row2_1,
-	input [15:0] row2_2,
-	input [15:0] row2_3,
-
-	input [15:0] row3_0,
-	input [15:0] row3_1,
-	input [15:0] row3_2,
-	input [15:0] row3_3,
-
-	input [15:0] pixelinT_0, 	//transpose of pixel
-	input [15:0] pixelinT_1,
-	input [15:0] pixelinT_2,
-	input [15:0] pixelinT_3,
-
-	output [31:0] pixelout_0,
-	output [31:0] pixelout_1,
-	output [31:0] pixelout_2,
-	output [31:0] pixelout_3
-
-
-);
-
-
-assign pixelout_0 = (row0_3 * pixelinT_3) + (row0_2 * pixelinT_2) + (row0_1 * pixelinT_1) + (row0_0 * pixelinT_0);
-assign pixelout_1 = (row1_3 * pixelinT_3) + (row1_2 * pixelinT_2) + (row1_1 * pixelinT_1) + (row1_0 * pixelinT_0);
-assign pixelout_2 = (row2_3 * pixelinT_3) + (row2_2 * pixelinT_2) + (row2_1 * pixelinT_1) + (row2_0 * pixelinT_0);
-assign pixelout_3 = (row3_3 * pixelinT_3) + (row3_2 * pixelinT_2) + (row3_1 * pixelinT_1) + (row3_0 * pixelinT_0);
-
-
-endmodule
-
-
