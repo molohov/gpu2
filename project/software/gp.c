@@ -8,7 +8,6 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
-#include <stdio.h>
 
 #include "gp.h"
 #include "display.h"
