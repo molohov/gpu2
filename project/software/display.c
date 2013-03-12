@@ -112,6 +112,7 @@ int gpWaitKey()
 #include <stdlib.h>
 
 #include "xparameters.h"
+#include "xuartlite_l.h"
 
 #define BYTES_PER_PIXEL 4
 
@@ -201,8 +202,7 @@ void gpDisplayImage(gpImg *img)
   } else {
     if (GP_DISPLAY_TIMEOUT_IN_MS == -1 && time_out) {
       // wait for user input
-      while (!*(volatile int *)(XPAR_RS232_UART_1_BASEADDR))
-        ;
+      XUartLite_RecvByte(XPAR_RS232_UART_1_BASEADDR);
     }
 
     hdmi_addr[1] = (int)img->imageData; // set frame base address
@@ -235,7 +235,7 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
 
 int gpWaitKey()
 {
-  return *((volatile int *)XPAR_RS232_UART_1_BASEADDR);
+  return XUartLite_ReadReg(XPAR_RS232_UART_1_BASEADDR, XUL_RX_FIFO_OFFSET);
 }
 #endif
  
