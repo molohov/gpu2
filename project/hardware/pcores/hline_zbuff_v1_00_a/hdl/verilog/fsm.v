@@ -13,6 +13,8 @@ module fsm (
     input [31:0]    z2,
     input           zread_empty,
     input [31:0]    zfifo_in,
+    input [31:0]    rem,
+    input [31:0]    err,
     input           axi_done,
 
     // outputs
@@ -45,8 +47,10 @@ module fsm (
     reg [3:0] be, nextbe;
     reg [1:0] beindex, nextbeindex;
     reg [31:0] addr_offset, nextaddr_offset;
-    reg [15:0] x_sum, nextx_sum, xcnt, next_xcnt;
-    reg [31:0] z_sum, nextz_sum;
+    reg [15:0] xsum, nextxsum, xcnt, next_xcnt;
+    reg [31:0] zsum, nextzsum;
+    reg [31:0] error, nexterror;
+    reg [31:0] dx, nextdx;
 
     // define states
     localparam  IDLE        = 3'd0, // reset state. 
@@ -62,11 +66,11 @@ module fsm (
 
     // Mealy state machine assignments
     assign addr = (state == WR_ZBUFF) ? zbuff_addr + addr_offset : fb_addr + addr_offset; 
-    assign rd_req = (state == LOAD_ZBUFF) && (x_sum > 0);
+    assign rd_req = (state == LOAD_ZBUFF) && (xsum > 0);
     assign wr_req = (state == WR_ZBUFF || state == WR_FBUFF);
     assign read_zfifo = (state == INTERP_Z);
     assign write_zfifo = read_zfifo;
-    assign z_out = z_sum;
+    assign z_out = zsum;
     assign read_zbuffout_fifo = (state == WR_ZBUFF);
     assign read_be_fifo = (state == WR_ZBUFF || state == WR_FBUFF);
 
@@ -78,9 +82,11 @@ module fsm (
             be          <= 4'd0;
             beindex     <= 2'd0;
             addr_offset <= 32'd0;
-            x_sum       <= 16'd0;
-            z_sum       <= 32'd0;
+            xsum       <= 16'd0;
+            zsum       <= 32'd0;
             xcnt        <= 16'd0;
+            error       <= 32'd0;
+            dx          <= 32'd0;
         end
         else
         begin
@@ -88,9 +94,11 @@ module fsm (
             be          <= nextbe;
             beindex     <= nextbeindex;
             addr_offset <= nextaddr_offset;
-            x_sum       <= nextx_sum;
-            z_sum       <= nextz_sum;
+            xsum       <= nextxsum;
+            zsum       <= nextzsum;
             xcnt        <= next_xcnt;
+            error       <= nexterror;
+            dx          <= nextdx;
         end
     end
 
@@ -100,9 +108,11 @@ module fsm (
         nextbe = be;
         nextbeindex = beindex;
         nextaddr_offset = addr_offset;
-        nextx_sum = x_sum;
-        nextz_sum = z_sum;
+        nextxsum = xsum;
+        nextzsum = zsum;
         next_xcnt = xcnt;
+        nexterror = error;
+        nextdx = dx;
 
         case (state)
             IDLE:
@@ -110,17 +120,19 @@ module fsm (
                 if (start)
                 begin
                     nextstate = LOAD_ZBUFF;
-                    nextx_sum = (x1 > x2) ? x1 - x2 : x2 - x1;
-                    nextz_sum = z1;
+                    nextxsum = (x1 > x2) ? x1 - x2 : x2 - x1;
+                    nextdx = nextxsum;
+                    nextzsum = z1;
                 end
             end
             LOAD_ZBUFF:
             begin
-                if (x_sum > 0)
+                if (xsum > 0)
                 begin
-                    nextx_sum = x_sum - 256;
+                    nextxsum = xsum - 256;
+                    next_xcnt = 256; 
+                    nexterror = error;
                     nextstate = TRAVERSE_X; 
-                    next_xcnt = 256;
                 end
                 else
                     nextstate = IDLE;
@@ -140,8 +152,15 @@ module fsm (
                 begin
                     next_xcnt = xcnt - 1;
                     nextbeindex = (beindex == 2'd3) ? 2'd0 : (beindex + 1'b1);
-                    nextbe[beindex] = (z_sum < zfifo_in) ? 1'b1 : 1'b0;
-                    nextz_sum = z_sum + slope;
+                    nextbe[beindex] = (zsum < zfifo_in) ? 1'b1 : 1'b0;
+                    nexterror = error + rem;
+                    if (error > dx)
+                    begin
+                         nextzsum = zsum + slope + ((slope > 0) ? 1 : -1);
+                         nexterror = error - dx;
+                    end
+                    else
+                         nextzsum = zsum + slope;
                 end
             end
             WR_ZBUFF:
@@ -158,7 +177,7 @@ module fsm (
             begin
                 // TODO: start the transfer, and clear the done bit when done
                 if (axi_done)
-                    nextstate = IDLE;
+                    nextstate = LOAD_ZBUFF;
             end
         endcase
     end

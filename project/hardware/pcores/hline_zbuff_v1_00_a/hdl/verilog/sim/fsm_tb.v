@@ -2,7 +2,7 @@ module fsm_tb ();
 
 reg clk, start, reset;
 reg zread_empty, axi_done; 
-reg [31:0] fb_addr, zbuff_addr, y, z1, z2, zfifo_in, slope;
+reg [31:0] fb_addr, zbuff_addr, y, z1, z2, zfifo_in, slope, err, rem;
 reg [15:0] x1, x2;
 
 wire [31:0] addr, z_out;
@@ -28,6 +28,8 @@ begin
     fb_addr = 32'h00000000;
     zbuff_addr = 32'h10000000;
     zread_empty = 1'b0;
+    rem = 32'd255;
+    err = 32'd128; // (256 + 1) / 2
     @ (posedge read_zbuffout_fifo)
     // fake an axi signal 
     axi_done = 1;
@@ -54,6 +56,8 @@ fsm fsm_dut (
     .z2 (z2),
     .zread_empty (zread_empty),
     .zfifo_in (zfifo_in),
+    .rem (rem),
+    .err (err),
     .axi_done (axi_done),
 
     .rd_req (rd_req),
