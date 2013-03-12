@@ -10,6 +10,8 @@ add wave -noupdate -radix hexadecimal /fsm_tb/x1
 add wave -noupdate -radix hexadecimal /fsm_tb/x2
 add wave -noupdate -radix hexadecimal /fsm_tb/z1
 add wave -noupdate -radix hexadecimal /fsm_tb/z2
+add wave -noupdate -radix hexadecimal /fsm_tb/rem
+add wave -noupdate -radix hexadecimal /fsm_tb/err
 add wave -noupdate -radix hexadecimal /fsm_tb/slope
 add wave -noupdate -radix hexadecimal /fsm_tb/z_out
 add wave -noupdate /fsm_tb/zfifo_in

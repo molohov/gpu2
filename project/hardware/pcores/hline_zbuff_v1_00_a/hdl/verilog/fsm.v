@@ -154,10 +154,10 @@ module fsm (
                     nextbeindex = (beindex == 2'd3) ? 2'd0 : (beindex + 1'b1);
                     nextbe[beindex] = (zsum < zfifo_in) ? 1'b1 : 1'b0;
                     nexterror = error + rem;
-                    if (error > dx)
+                    if (error + rem > dx)
                     begin
                          nextzsum = zsum + slope + ((slope > 0) ? 1 : -1);
-                         nexterror = error - dx;
+                         nexterror = error + rem - dx;
                     end
                     else
                          nextzsum = zsum + slope;
