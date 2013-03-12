@@ -45,7 +45,7 @@ module fsm (
     reg [3:0] be, nextbe;
     reg [1:0] beindex, nextbeindex;
     reg [31:0] addr_offset, nextaddr_offset;
-    reg [15:0] x_sum, nextx_sum;
+    reg [15:0] x_sum, nextx_sum, xcnt, next_xcnt;
     reg [31:0] z_sum, nextz_sum;
 
     // define states
@@ -80,6 +80,7 @@ module fsm (
             addr_offset <= 32'd0;
             x_sum       <= 16'd0;
             z_sum       <= 32'd0;
+            xcnt        <= 16'd0;
         end
         else
         begin
@@ -89,6 +90,7 @@ module fsm (
             addr_offset <= nextaddr_offset;
             x_sum       <= nextx_sum;
             z_sum       <= nextz_sum;
+            xcnt        <= next_xcnt;
         end
     end
 
@@ -100,6 +102,7 @@ module fsm (
         nextaddr_offset = addr_offset;
         nextx_sum = x_sum;
         nextz_sum = z_sum;
+        next_xcnt = xcnt;
 
         case (state)
             IDLE:
@@ -117,6 +120,7 @@ module fsm (
                 begin
                     nextx_sum = x_sum - 256;
                     nextstate = TRAVERSE_X; 
+                    next_xcnt = 256;
                 end
                 else
                     nextstate = IDLE;
@@ -130,8 +134,15 @@ module fsm (
             INTERP_Z:
             // write a new z value every cycle (for 256 cycles)
             begin
-                nextbeindex = (beindex == 2'd3) ? 2'd0 : (beindex + 1'b1);
-                nextbe[beindex] = (z_sum < zfifo_in) ? 1'b1 : 1'b0;
+                if (xcnt == 0)
+                    nextstate = WR_ZBUFF;
+                else
+                begin
+                    next_xcnt = xcnt - 1;
+                    nextbeindex = (beindex == 2'd3) ? 2'd0 : (beindex + 1'b1);
+                    nextbe[beindex] = (z_sum < zfifo_in) ? 1'b1 : 1'b0;
+                    nextz_sum = z_sum + slope;
+                end
             end
             WR_ZBUFF:
             begin
