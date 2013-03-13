@@ -27,6 +27,7 @@ add wave -noupdate /fsm_tb/zread_empty
 add wave -noupdate /fsm_tb/axi_done
 add wave -noupdate /fsm_tb/fsm_dut/state
 add wave -noupdate -radix unsigned /fsm_tb/fsm_dut/xcnt
+add wave -noupdate -radix unsigned /fsm_tb/fsm_dut/error
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {1653 ps} 0}
 quietly wave cursor active 1

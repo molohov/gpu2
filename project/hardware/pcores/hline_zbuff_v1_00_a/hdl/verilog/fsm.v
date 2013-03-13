@@ -131,7 +131,7 @@ module fsm (
                 begin
                     nextxsum = xsum - 256;
                     next_xcnt = 256; 
-                    nexterror = error;
+                    nexterror = err + rem;
                     nextstate = TRAVERSE_X; 
                 end
                 else
@@ -154,7 +154,7 @@ module fsm (
                     nextbeindex = (beindex == 2'd3) ? 2'd0 : (beindex + 1'b1);
                     nextbe[beindex] = (zsum < zfifo_in) ? 1'b1 : 1'b0;
                     nexterror = error + rem;
-                    if (error + rem > dx)
+                    if (error > dx)
                     begin
                          nextzsum = zsum + slope + ((slope > 0) ? 1 : -1);
                          nexterror = error + rem - dx;
