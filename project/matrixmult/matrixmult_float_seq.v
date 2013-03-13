@@ -29,6 +29,23 @@ module counter(
 	end
 endmodule
 
+//shift register of length N
+module shift_reg(
+		input clk,
+		input in,
+		output reg out
+		);
+	parameter N = 4;
+
+	reg [N-1:0] shift = 'b0;
+
+	always @ (posedge clk)
+	begin
+		out <= shift[0];
+		shift <= {in, shift[N-1:1]};
+	end
+endmodule
+
 //latch matrix result elements and count up to 4 (then you have all elements of result matrix ready)
 module latch_matrixmult(
 		input clk,
@@ -172,13 +189,19 @@ module matrixmultiplier (
 	  .m_axis_result_tuser(sum_tuser) // output [2 : 0] m_axis_result_tuser
 	);
 
-	counter #(.N(11)) runcouter(
+	shift_reg #(.N(11)) run_counter(
+		.clk(clk),
+		.in(a_tvalid),
+		.out(run_counter)
+	);
+
+/*	counter #(.N(11)) runcouter(
 		.clk(clk),
 		.reset(reset),
 		.in_ready(product_tvalid), 
 		.done(runcount_tvalid),
 		.count(run_count)
-	);
+	);*/
 
 	counter #(.N(5)) element_counter( //almost worked before without the 5 param overide!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		.clk(clk),
@@ -262,7 +285,7 @@ module matrixmultiplier (
 		.clk(clk),
 		.reset(reset),
 		.element_in(sum_tdata),
-		.new_element(sum_tvalid & (element_count == 4)/*element_ready*/),	//need to pulse for one cycle only
+		.new_element(sum_tvalid && (element_count == 4)/*element_ready*/),	//need to pulse for one cycle only
 		.element0(result0),
 		.element1(result1),
 		.element2(result2),
