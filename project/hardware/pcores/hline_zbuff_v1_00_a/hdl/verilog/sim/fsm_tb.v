@@ -40,6 +40,32 @@ begin
     @ (negedge clk)
     axi_done = 1;
     //end transaction
+    @ (negedge clk)
+    reset = 1;
+    @ (negedge clk)
+    reset = 0;
+    start = 1;
+    y = 32'h00001234;
+    x1 = 0;
+    x2 = 512;
+    z1 = 0;
+    z2 = 32'hffffffff;
+    slope = 32'h007fffff; //ffffffff / 512
+    fb_addr = 32'h00000000;
+    zbuff_addr = 32'h10000000;
+    zread_empty = 1'b0;
+    rem = 32'd511;
+    err = 32'd256; // (512 + 1) / 2
+    @ (posedge read_zbuffout_fifo)
+    // fake an axi signal 
+    axi_done = 1;
+    @ (negedge clk)
+    @ (negedge clk)
+    axi_done = 0;
+    @ (negedge clk)
+    @ (negedge clk)
+    axi_done = 1;
+    //end transaction
 end
 
 fsm fsm_dut (
