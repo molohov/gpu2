@@ -180,7 +180,7 @@ module matrixmultiplier (
 		.count(run_count)
 	);
 
-	counter element_counter(
+	counter #(.N(5)) element_counter( //almost worked before without the 5 param overide!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		.clk(clk),
 		.reset(reset),
 		.in_ready(sum_tvalid),
@@ -262,7 +262,7 @@ module matrixmultiplier (
 		.clk(clk),
 		.reset(reset),
 		.element_in(sum_tdata),
-		.new_element(element_ready),	//need to pulse for one cycle only
+		.new_element(sum_tvalid & (element_count == 4)/*element_ready*/),	//need to pulse for one cycle only
 		.element0(result0),
 		.element1(result1),
 		.element2(result2),
