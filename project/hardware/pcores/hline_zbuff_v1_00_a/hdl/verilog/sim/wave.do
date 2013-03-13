@@ -10,6 +10,8 @@ add wave -noupdate -radix hexadecimal /fsm_tb/x1
 add wave -noupdate -radix hexadecimal /fsm_tb/x2
 add wave -noupdate -radix hexadecimal /fsm_tb/z1
 add wave -noupdate -radix hexadecimal /fsm_tb/z2
+add wave -noupdate -radix hexadecimal /fsm_tb/rem
+add wave -noupdate -radix hexadecimal /fsm_tb/err
 add wave -noupdate -radix hexadecimal /fsm_tb/slope
 add wave -noupdate -radix hexadecimal /fsm_tb/z_out
 add wave -noupdate /fsm_tb/zfifo_in
@@ -25,6 +27,7 @@ add wave -noupdate /fsm_tb/zread_empty
 add wave -noupdate /fsm_tb/axi_done
 add wave -noupdate /fsm_tb/fsm_dut/state
 add wave -noupdate -radix unsigned /fsm_tb/fsm_dut/xcnt
+add wave -noupdate -radix unsigned /fsm_tb/fsm_dut/error
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {1653 ps} 0}
 quietly wave cursor active 1
