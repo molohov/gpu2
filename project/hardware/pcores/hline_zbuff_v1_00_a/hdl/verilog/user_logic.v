@@ -26,7 +26,7 @@
 // Filename:          user_logic.v
 // Version:           1.00.a
 // Description:       User logic module.
-// Date:              Sun Mar 10 21:30:55 2013 (by Create and Import Peripheral Wizard)
+// Date:              Wed Mar 13 13:59:27 2013 (by Create and Import Peripheral Wizard)
 // Verilog Standard:  Verilog-2001
 //----------------------------------------------------------------------------
 // Naming Conventions:
@@ -110,7 +110,7 @@ module user_logic
 parameter C_MST_NATIVE_DATA_WIDTH        = 32;
 parameter C_LENGTH_WIDTH                 = 12;
 parameter C_MST_AWIDTH                   = 32;
-parameter C_NUM_REG                      = 12;
+parameter C_NUM_REG                      = 16;
 parameter C_SLV_DWIDTH                   = 32;
 // -- DO NOT EDIT ABOVE THIS LINE --------------------
 
@@ -166,16 +166,6 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 //----------------------------------------------------------------------------
 
   // --USER nets declarations added here, as needed for user logic
-  wire       [C_SLV_DWIDTH-1 : 0]           fb_addr;
-  wire       [C_SLV_DWIDTH-1 : 0]           zbuff_addr;
-  wire       [C_SLV_DWIDTH-1 : 0]           y;
-  wire       [(C_SLV_DWIDTH/2)-1 : 0]       x1;
-  wire       [(C_SLV_DWIDTH/2)-1 : 0]       x2;
-  wire       [C_SLV_DWIDTH-1 : 0]           z1;
-  wire       [C_SLV_DWIDTH-1 : 0]           z2;
-  wire       [C_SLV_DWIDTH-1 : 0]           slope;
-  wire       [C_SLV_DWIDTH-1 : 0]           rgbx; 
-  wire                                      zread_empty;
 
   // Nets for user logic slave model s/w accessible register example
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg0;
@@ -186,8 +176,12 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg5;
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg6;
   reg        [C_SLV_DWIDTH-1 : 0]           slv_reg7;
-  wire       [7 : 0]                        slv_reg_write_sel;
-  wire       [7 : 0]                        slv_reg_read_sel;
+  reg        [C_SLV_DWIDTH-1 : 0]           slv_reg8;
+  reg        [C_SLV_DWIDTH-1 : 0]           slv_reg9;
+  reg        [C_SLV_DWIDTH-1 : 0]           slv_reg10;
+  reg        [C_SLV_DWIDTH-1 : 0]           slv_reg11;
+  wire       [11 : 0]                       slv_reg_write_sel;
+  wire       [11 : 0]                       slv_reg_read_sel;
   reg        [C_SLV_DWIDTH-1 : 0]           slv_ip2bus_data;
   wire                                      slv_read_ack;
   wire                                      slv_write_ack;
@@ -304,18 +298,62 @@ input                                     bus2ip_mstwr_dst_dsc_n;
  parameter                                  GO_BYTE_LANE = 15;
  
   // --USER logic implementation added here
+  wire       [C_SLV_DWIDTH-1 : 0]           fb_addr;
+  wire       [C_SLV_DWIDTH-1 : 0]           zbuff_addr;
+  wire       [C_SLV_DWIDTH-1 : 0]           y;
+  wire       [C_SLV_DWIDTH-1 : 0]           x1;
+  wire       [C_SLV_DWIDTH-1 : 0]           x2;
+  wire       [C_SLV_DWIDTH-1 : 0]           z1;
+  wire       [C_SLV_DWIDTH-1 : 0]           z2;
+  wire       [C_SLV_DWIDTH-1 : 0]           slope;
+  wire       [C_SLV_DWIDTH-1 : 0]           rgbx; 
+  wire       [C_SLV_DWIDTH-1 : 0]           err; 
+  wire       [C_SLV_DWIDTH-1 : 0]           rem; 
+  wire                                      zread_empty;
 
   assign    fb_addr    = slv_reg0;
   assign    zbuff_addr = slv_reg1;
   assign    y          = slv_reg2;
-  assign    x1         = slv_reg3[15:0];
-  assign    x2         = slv_reg3[31:16];
-  assign    z1         = slv_reg4;
-  assign    z2         = slv_reg5;
-  assign    slope      = slv_reg6;
-  assign    rgbx       = slv_reg7;
+  assign    x1         = slv_reg3;
+  assign    x2         = slv_reg4;
+  assign    z1         = slv_reg5;
+  assign    z2         = slv_reg6;
+  assign    slope      = slv_reg7;
+  assign    rgbx       = slv_reg8;
+  assign    err        = slv_reg9;
+  assign    rem        = slv_reg10;
 
+  fsm fsm_inst (
+    // inputs
+    .clk (clk),
+    .nreset (nreset),
+    .start (start),
+    .fb_addr (fb_addr),
+    .zbuff_addr (zbuff_addr),
+    .y (y),
+    .x1 (x1),
+    .x2 (x2),
+    .slope (slope),
+    .z1 (z1),
+    .z2 (z2),
+    .zread_empty (zread_empty),
+    .zfifo_in (zfifo_in),
+    .rem (rem),
+    .err (err),
+    .axi_done (axi_done),
 
+    // outputs
+    .rd_req (rd_req),
+    .wr_req (wr_req),
+    .addr (addr),
+    .byteenable (byteenable),
+    .read_zfifo (read_zfifo),
+    .write_zfifo (write_zfifo),
+    .z_out (z_out),
+    .read_zbuffout_fifo (read_zbuffout_fifo),
+    .read_be_fifo (read_be_fifo)
+);
+  
   // ------------------------------------------------------
   // Example code to read/write user logic slave model s/w accessible registers
   // 
@@ -336,10 +374,10 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   // ------------------------------------------------------
 
   assign
-    slv_reg_write_sel = Bus2IP_WrCE[7:0],
-    slv_reg_read_sel  = Bus2IP_RdCE[7:0],
-    slv_write_ack     = Bus2IP_WrCE[0] || Bus2IP_WrCE[1] || Bus2IP_WrCE[2] || Bus2IP_WrCE[3] || Bus2IP_WrCE[4] || Bus2IP_WrCE[5] || Bus2IP_WrCE[6] || Bus2IP_WrCE[7],
-    slv_read_ack      = Bus2IP_RdCE[0] || Bus2IP_RdCE[1] || Bus2IP_RdCE[2] || Bus2IP_RdCE[3] || Bus2IP_RdCE[4] || Bus2IP_RdCE[5] || Bus2IP_RdCE[6] || Bus2IP_RdCE[7];
+    slv_reg_write_sel = Bus2IP_WrCE[11:0],
+    slv_reg_read_sel  = Bus2IP_RdCE[11:0],
+    slv_write_ack     = Bus2IP_WrCE[0] || Bus2IP_WrCE[1] || Bus2IP_WrCE[2] || Bus2IP_WrCE[3] || Bus2IP_WrCE[4] || Bus2IP_WrCE[5] || Bus2IP_WrCE[6] || Bus2IP_WrCE[7] || Bus2IP_WrCE[8] || Bus2IP_WrCE[9] || Bus2IP_WrCE[10] || Bus2IP_WrCE[11],
+    slv_read_ack      = Bus2IP_RdCE[0] || Bus2IP_RdCE[1] || Bus2IP_RdCE[2] || Bus2IP_RdCE[3] || Bus2IP_RdCE[4] || Bus2IP_RdCE[5] || Bus2IP_RdCE[6] || Bus2IP_RdCE[7] || Bus2IP_RdCE[8] || Bus2IP_RdCE[9] || Bus2IP_RdCE[10] || Bus2IP_RdCE[11];
 
   // implement slave model register(s)
   always @( posedge Bus2IP_Clk )
@@ -355,67 +393,95 @@ input                                     bus2ip_mstwr_dst_dsc_n;
           slv_reg5 <= 0;
           slv_reg6 <= 0;
           slv_reg7 <= 0;
+          slv_reg8 <= 0;
+          slv_reg9 <= 0;
+          slv_reg10 <= 0;
+          slv_reg11 <= 0;
         end
       else
         case ( slv_reg_write_sel )
-          8'b10000000 :
+          12'b100000000000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg0[bit_index] <= Bus2IP_Data[bit_index];
-          8'b01000000 :
+          12'b010000000000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg1[bit_index] <= Bus2IP_Data[bit_index];
-          8'b00100000 :
+          12'b001000000000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg2[bit_index] <= Bus2IP_Data[bit_index];
-          8'b00010000 :
+          12'b000100000000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg3[bit_index] <= Bus2IP_Data[bit_index];
-          8'b00001000 :
+          12'b000010000000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg4[bit_index] <= Bus2IP_Data[bit_index];
-          8'b00000100 :
+          12'b000001000000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg5[bit_index] <= Bus2IP_Data[bit_index];
-          8'b00000010 :
+          12'b000000100000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg6[bit_index] <= Bus2IP_Data[bit_index];
-          8'b00000001 :
+          12'b000000010000 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg7[bit_index] <= Bus2IP_Data[bit_index];
+          12'b000000001000 :
+            for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
+              if ( Bus2IP_BE[byte_index] == 1 )
+                for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
+                  slv_reg8[bit_index] <= Bus2IP_Data[bit_index];
+          12'b000000000100 :
+            for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
+              if ( Bus2IP_BE[byte_index] == 1 )
+                for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
+                  slv_reg9[bit_index] <= Bus2IP_Data[bit_index];
+          12'b000000000010 :
+            for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
+              if ( Bus2IP_BE[byte_index] == 1 )
+                for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
+                  slv_reg10[bit_index] <= Bus2IP_Data[bit_index];
+          12'b000000000001 :
+            for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
+              if ( Bus2IP_BE[byte_index] == 1 )
+                for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
+                  slv_reg11[bit_index] <= Bus2IP_Data[bit_index];
           default : ;
         endcase
 
     end // SLAVE_REG_WRITE_PROC
 
   // implement slave model register read mux
-  always @( slv_reg_read_sel or slv_reg0 or slv_reg1 or slv_reg2 or slv_reg3 or slv_reg4 or slv_reg5 or slv_reg6 or slv_reg7 )
+  always @( slv_reg_read_sel or slv_reg0 or slv_reg1 or slv_reg2 or slv_reg3 or slv_reg4 or slv_reg5 or slv_reg6 or slv_reg7 or slv_reg8 or slv_reg9 or slv_reg10 or slv_reg11 )
     begin: SLAVE_REG_READ_PROC
 
       case ( slv_reg_read_sel )
-        8'b10000000 : slv_ip2bus_data <= slv_reg0;
-        8'b01000000 : slv_ip2bus_data <= slv_reg1;
-        8'b00100000 : slv_ip2bus_data <= slv_reg2;
-        8'b00010000 : slv_ip2bus_data <= slv_reg3;
-        8'b00001000 : slv_ip2bus_data <= slv_reg4;
-        8'b00000100 : slv_ip2bus_data <= slv_reg5;
-        8'b00000010 : slv_ip2bus_data <= slv_reg6;
-        8'b00000001 : slv_ip2bus_data <= slv_reg7;
+        12'b100000000000 : slv_ip2bus_data <= slv_reg0;
+        12'b010000000000 : slv_ip2bus_data <= slv_reg1;
+        12'b001000000000 : slv_ip2bus_data <= slv_reg2;
+        12'b000100000000 : slv_ip2bus_data <= slv_reg3;
+        12'b000010000000 : slv_ip2bus_data <= slv_reg4;
+        12'b000001000000 : slv_ip2bus_data <= slv_reg5;
+        12'b000000100000 : slv_ip2bus_data <= slv_reg6;
+        12'b000000010000 : slv_ip2bus_data <= slv_reg7;
+        12'b000000001000 : slv_ip2bus_data <= slv_reg8;
+        12'b000000000100 : slv_ip2bus_data <= slv_reg9;
+        12'b000000000010 : slv_ip2bus_data <= slv_reg10;
+        12'b000000000001 : slv_ip2bus_data <= slv_reg11;
         default : slv_ip2bus_data <= 0;
       endcase
 
@@ -486,10 +552,10 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 //   5. write 0x0a to the go register, this will start the master write operation
 // 
 //----------------------------------------
-  assign mst_reg_write_req = Bus2IP_WrCE[8] || Bus2IP_WrCE[9] || Bus2IP_WrCE[10] || Bus2IP_WrCE[11];
-  assign mst_reg_read_req  = Bus2IP_RdCE[8] || Bus2IP_RdCE[9] || Bus2IP_RdCE[10] || Bus2IP_RdCE[11];
-  assign mst_reg_write_sel = Bus2IP_WrCE[11 : 8];
-  assign mst_reg_read_sel  = Bus2IP_RdCE[11 : 8];
+  assign mst_reg_write_req = Bus2IP_WrCE[12] || Bus2IP_WrCE[13] || Bus2IP_WrCE[14] || Bus2IP_WrCE[15];
+  assign mst_reg_read_req  = Bus2IP_RdCE[12] || Bus2IP_RdCE[13] || Bus2IP_RdCE[14] || Bus2IP_RdCE[15];
+  assign mst_reg_write_sel = Bus2IP_WrCE[15 : 12];
+  assign mst_reg_read_sel  = Bus2IP_RdCE[15 : 12];
   assign mst_write_ack     = mst_reg_write_req;
   assign mst_read_ack      = mst_reg_read_req;
 
@@ -967,11 +1033,11 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_fifo_valid_read_xfer  = !bus2ip_mstwr_dst_rdy_n & mst_llwr_sm_src_rdy;
   assign bus2ip_Reset   = !Bus2IP_Resetn;
  
-   // zbuffer read fifo. 256 words long.
+  // FIFO depth is 128 words. User can modify the depth based on their requirement.
    srl_fifo_f #(
      .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
-     .C_DEPTH(256))
-   ZBUFF_READ_FIFO (
+     .C_DEPTH(128))
+   DATA_CAPTURE_FIFO_I (
      .Clk(Bus2IP_Clk),
      .Reset(bus2ip_Reset),
      .FIFO_Write(mst_fifo_valid_write_xfer),
@@ -979,38 +1045,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
      .FIFO_Read(mst_fifo_valid_read_xfer),
      .Data_Out(ip2bus_mstwr_d),
      .FIFO_Full(),
-     .FIFO_Empty(zread_empty),
-     .Addr()); // ZBUFF_READ_FIFO
-
-   // zbuffer write fifo. 256 words long.
-   srl_fifo_f #(
-     .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
-     .C_DEPTH(256))
-   ZBUFF_WRITE_FIFO (
-     .Clk(Bus2IP_Clk),
-     .Reset(bus2ip_Reset),
-     .FIFO_Write(),
-     .Data_In(),
-     .FIFO_Read(),
-     .Data_Out(),
-     .FIFO_Full(),
      .FIFO_Empty(),
-     .Addr()); // ZBUFF_WRITE_FIFO
-
-   // byte-enable fifo. 256 words long, but 32/8 = 4 bits wide (4 bytes per 32 bit word).
-   srl_fifo_f #(
-     .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH/8),
-     .C_DEPTH(256))
-   BE_FIFO (
-     .Clk(Bus2IP_Clk),
-     .Reset(bus2ip_Reset),
-     .FIFO_Write(),
-     .Data_In(),
-     .FIFO_Read(),
-     .Data_Out(),
-     .FIFO_Full(),
-     .FIFO_Empty(),
-     .Addr()); // BE_WRITE_FIFO
+     .Addr()); // DATA_CAPTURE_FIFO_I
  
   // ------------------------------------------------------------
   // Example code to drive IP to Bus signals

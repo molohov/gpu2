@@ -35,7 +35,7 @@
 -- Filename:          hline_zbuff.vhd
 -- Version:           1.00.a
 -- Description:       Top level design, instantiates library components and user logic.
--- Date:              Sun Mar 10 21:30:55 2013 (by Create and Import Peripheral Wizard)
+-- Date:              Wed Mar 13 13:59:27 2013 (by Create and Import Peripheral Wizard)
 -- VHDL Standard:     VHDL'93
 ------------------------------------------------------------------------------
 -- Naming Conventions:
@@ -167,13 +167,13 @@ entity hline_zbuff is
     C_BASEADDR                     : std_logic_vector     := X"FFFFFFFF";
     C_HIGHADDR                     : std_logic_vector     := X"00000000";
     C_FAMILY                       : string               := "virtex6";
-    C_NUM_REG                      : integer              := 8;
+    C_NUM_REG                      : integer              := 12;
     C_NUM_MEM                      : integer              := 1;
     C_SLV_AWIDTH                   : integer              := 32;
     C_SLV_DWIDTH                   : integer              := 32;
     C_M_AXI_ADDR_WIDTH             : integer              := 32;
     C_M_AXI_DATA_WIDTH             : integer              := 32;
-    C_MAX_BURST_LEN                : integer              := 16;
+    C_MAX_BURST_LEN                : integer              := 256;
     C_NATIVE_DATA_WIDTH            : integer              := 32;
     C_LENGTH_WIDTH                 : integer              := 13;
     C_ADDR_PIPE_DEPTH              : integer              := 1
@@ -404,7 +404,7 @@ architecture IMP of hline_zbuff is
       C_MST_NATIVE_DATA_WIDTH        : integer              := 32;
       C_LENGTH_WIDTH                 : integer              := 12;
       C_MST_AWIDTH                   : integer              := 32;
-      C_NUM_REG                      : integer              := 12;
+      C_NUM_REG                      : integer              := 16;
       C_SLV_DWIDTH                   : integer              := 32
       -- DO NOT EDIT ABOVE THIS LINE ---------------------
     );

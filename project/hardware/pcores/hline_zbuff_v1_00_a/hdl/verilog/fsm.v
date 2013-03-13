@@ -21,9 +21,10 @@ module fsm (
     output          rd_req,
     output          wr_req,
     output [31:0]   addr,
-    output [1:0]    byteenable,
+    output          byteenable,
     output          read_zfifo,
     output          write_zfifo,
+    output          write_befifo,
     output [31:0]   z_out,
     output          read_zbuffout_fifo,
     output          read_be_fifo
@@ -44,8 +45,8 @@ module fsm (
 
     // guessing how many states there might be
     reg [2:0] state, nextstate; 
-    reg [3:0] be, nextbe;
-    reg [1:0] beindex, nextbeindex;
+    reg be, nextbe;
+    reg writebe, nextwritebe;
     reg [31:0] addr_offset, nextaddr_offset;
     reg [15:0] xsum, nextxsum, xcnt, next_xcnt;
     reg [31:0] zsum, nextzsum;
@@ -80,25 +81,25 @@ module fsm (
         begin
             state       <= IDLE;
             be          <= 4'd0;
-            beindex     <= 2'd0;
             addr_offset <= 32'd0;
-            xsum       <= 16'd0;
-            zsum       <= 32'd0;
+            xsum        <= 16'd0;
+            zsum        <= 32'd0;
             xcnt        <= 16'd0;
             error       <= 32'd0;
             dx          <= 32'd0;
+	    writebe     <= 1'd0;
         end
         else
         begin
             state       <= nextstate;
             be          <= nextbe;
-            beindex     <= nextbeindex;
             addr_offset <= nextaddr_offset;
-            xsum       <= nextxsum;
-            zsum       <= nextzsum;
+            xsum        <= nextxsum;
+            zsum        <= nextzsum;
             xcnt        <= next_xcnt;
             error       <= nexterror;
             dx          <= nextdx;
+	    writebe     <= nextwritebe;
         end
     end
 
@@ -106,13 +107,13 @@ module fsm (
     begin
         nextstate = state;
         nextbe = be;
-        nextbeindex = beindex;
         nextaddr_offset = addr_offset;
         nextxsum = xsum;
         nextzsum = zsum;
         next_xcnt = xcnt;
         nexterror = error;
         nextdx = dx;
+	nextwritebe = writebe;
 
         case (state)
             IDLE:
@@ -147,12 +148,15 @@ module fsm (
             // write a new z value every cycle (for 256 cycles)
             begin
                 if (xcnt == 0)
+		begin
                     nextstate = WR_ZBUFF;
+		    nextwritebe = 1'd0;
+		end    
                 else
                 begin
                     next_xcnt = xcnt - 1;
-                    nextbeindex = (beindex == 2'd3) ? 2'd0 : (beindex + 1'b1);
-                    nextbe[beindex] = (zsum < zfifo_in) ? 1'b1 : 1'b0;
+		    nextwritebe = 1'd1;
+                    nextbe = (zsum < zfifo_in) ? 1'b1 : 1'b0;
                     nexterror = error + rem;
                     if (error > dx)
                     begin

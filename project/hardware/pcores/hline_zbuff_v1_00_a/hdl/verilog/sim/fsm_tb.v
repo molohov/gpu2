@@ -92,6 +92,7 @@ fsm fsm_dut (
     .byteenable (byteenable),
     .read_zfifo (read_zfifo),
     .write_zfifo (write_zfifo),
+    .write_befifo (write_befifo),
     .z_out (z_out),
     .read_zbuffout_fifo (read_zbuffout_fifo),
     .read_be_fifo (read_be_fifo)
