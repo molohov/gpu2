@@ -32,17 +32,23 @@ endmodule
 //shift register of length N
 module shift_reg(
 		input clk,
+		input reset,
 		input in,
 		output reg out
 		);
 	parameter N = 4;
 
-	reg [N-1:0] shift = 'b0;
+	reg [N-1:0] shift;
 
 	always @ (posedge clk)
 	begin
-		out <= shift[0];
-		shift <= {in, shift[N-1:1]};
+		if (reset)
+			shift = {N{1'b0}};
+		else
+		begin
+			shift <= {in, shift[N-1:1]};
+			out <= shift[1];
+		end
 	end
 endmodule
 
@@ -189,9 +195,10 @@ module matrixmultiplier (
 	  .m_axis_result_tuser(sum_tuser) // output [2 : 0] m_axis_result_tuser
 	);
 
-	shift_reg #(.N(11)) run_counter(
+	shift_reg #(.N(11)) runcounter(
 		.clk(clk),
-		.in(a_tvalid),
+		.reset(reset),
+		.in(product_tvalid),
 		.out(run_counter)
 	);
 
