@@ -310,6 +310,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire       [C_SLV_DWIDTH-1 : 0]           err; 
   wire       [C_SLV_DWIDTH-1 : 0]           rem; 
   wire                                      zread_empty;
+  wire                                      intermediate_be_fanout;
 
   assign    fb_addr    = slv_reg0;
   assign    zbuff_addr = slv_reg1;
@@ -322,11 +323,12 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign    rgbx       = slv_reg8;
   assign    err        = slv_reg9;
   assign    rem        = slv_reg10;
+  assign    start      = slv_reg11[0];
 
   fsm fsm_inst (
     // inputs
     .clk (clk),
-    .nreset (nreset),
+    .nreset (Bus2IP_Resetn),
     .start (start),
     .fb_addr (fb_addr),
     .zbuff_addr (zbuff_addr),
@@ -340,18 +342,19 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .zfifo_in (zfifo_in),
     .rem (rem),
     .err (err),
-    .axi_done (axi_done),
+    .axi_done (mst_reg[1][0]),
 
     // outputs
-    .rd_req (rd_req),
-    .wr_req (wr_req),
+    .rd_req (ip2bus_mstrd_req),
+    .wr_req (ip2bus_mstwr_req),
     .addr (addr),
     .byteenable (byteenable),
     .read_zfifo (read_zfifo),
     .write_zfifo (write_zfifo),
     .z_out (z_out),
     .read_zbuffout_fifo (read_zbuffout_fifo),
-    .read_be_fifo (read_be_fifo)
+    .read_be_fifo (read_be_fifo),
+    .write_be_fifo (write_be_fifo)
 );
   
   // ------------------------------------------------------
@@ -667,8 +670,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   // user logic master command interface assignments
   assign ip2bus_mstrd_req  = mst_cmd_sm_rd_req;
   assign ip2bus_mstwr_req  = mst_cmd_sm_wr_req;
-  assign ip2bus_mst_addr   = mst_cmd_sm_ip2bus_addr;
-  assign ip2bus_mst_be     = mst_cmd_sm_ip2bus_be;
+  assign ip2bus_mst_addr   = addr;
+  assign ip2bus_mst_be     = {4{intermediate_be_fanout}};
   assign ip2bus_mst_type   = mst_cmd_sm_xfer_type;
   assign ip2bus_mst_length = mst_cmd_sm_xfer_length;
   assign ip2bus_mst_lock   = mst_cmd_sm_bus_lock;
@@ -1033,20 +1036,50 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_fifo_valid_read_xfer  = !bus2ip_mstwr_dst_rdy_n & mst_llwr_sm_src_rdy;
   assign bus2ip_Reset   = !Bus2IP_Resetn;
  
-  // FIFO depth is 128 words. User can modify the depth based on their requirement.
+   // z-buffer read FIFO. 256 (max burst length) long
    srl_fifo_f #(
      .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
-     .C_DEPTH(128))
-   DATA_CAPTURE_FIFO_I (
+     .C_DEPTH(256))
+   ZBUFF_READ_FIFO (
      .Clk(Bus2IP_Clk),
      .Reset(bus2ip_Reset),
      .FIFO_Write(mst_fifo_valid_write_xfer),
      .Data_In(bus2ip_mstrd_d),
-     .FIFO_Read(mst_fifo_valid_read_xfer),
-     .Data_Out(ip2bus_mstwr_d),
+     .FIFO_Read(read_zfifo),
+     .Data_Out(zfifo_in),
+     .FIFO_Full(),
+     .FIFO_Empty(zread_empty),
+     .Addr()); // ZBUFF_READ_FIFO
+
+   // z-buffer out FIFO. 256 (max burst length) long
+   srl_fifo_f #(
+     .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
+     .C_DEPTH(256))
+   ZBUFF_WRITE_FIFO (
+     .Clk(Bus2IP_Clk),
+     .Reset(bus2ip_Reset),
+     .FIFO_Write(write_zfifo),
+     .Data_In(z_out),
+     .FIFO_Read(read_zbuffout_fifo),
+     .Data_Out(ip2bus_mstwr_d & read_zbuffout_zfifo),
      .FIFO_Full(),
      .FIFO_Empty(),
-     .Addr()); // DATA_CAPTURE_FIFO_I
+     .Addr()); // ZBUFF_WRITE_FIFO
+
+   // byte-enable out FIFO. 256 (max burst length) long, but 1 bit wide (ho ho ho)
+   srl_fifo_f #(
+     .C_DWIDTH(1),
+     .C_DEPTH(256))
+   BE_WRITE_FIFO (
+     .Clk(Bus2IP_Clk),
+     .Reset(bus2ip_Reset),
+     .FIFO_Write(write_be_fifo),
+     .Data_In(byteenable),
+     .FIFO_Read(read_be_fifo & mst_fifo_valid_read_xfer),
+     .Data_Out(intermediate_be_fanout),
+     .FIFO_Full(),
+     .FIFO_Empty(),
+     .Addr()); // BE_WRITE_FIFO
  
   // ------------------------------------------------------------
   // Example code to drive IP to Bus signals

@@ -27,7 +27,8 @@ module fsm (
     output          write_befifo,
     output [31:0]   z_out,
     output          read_zbuffout_fifo,
-    output          read_be_fifo
+    output          read_be_fifo,
+    output          write_be_fifo
 );
 
     // ENGLISH LANGUAGE CODE:
@@ -73,6 +74,8 @@ module fsm (
     assign write_zfifo = read_zfifo;
     assign z_out = zsum;
     assign read_zbuffout_fifo = (state == WR_ZBUFF);
+    // whilst read_be_fifo may be on for a long time b/c of this Mealy assignment, it will be ANDed with the appropriate 
+    // external AXI signal connecting to the fifo, so this signal acts like a mux.
     assign read_be_fifo = (state == WR_ZBUFF || state == WR_FBUFF);
 
     always @ (posedge clk)
