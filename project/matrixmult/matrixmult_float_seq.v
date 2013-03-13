@@ -8,7 +8,7 @@ module counter(
 		input reset,
 		input in_ready,			//assert this for one cycle when providing module with fresh input
 		output done,			//this is asserted when counter reaches N (ie: added all the products for this element of matrix)
-		output reg [2:0] count
+		output reg [3:0] count
 		);
 
 	parameter N = 4; 	//number of rows in matrix (number of additions required to generate one element of matrix result)
@@ -88,6 +88,24 @@ module latch_matrixmult(
 
 endmodule
 
+module register (
+	input clk,
+	input reset,
+	input enable,
+	input d,
+	output reg q);
+
+	always @ (posedge clk) begin
+
+		if (reset)
+			q <= 1'b0;
+		else if (enable)
+			 q <= d;
+	end
+		
+
+endmodule
+
 //provide 2 inputs at a time and assert inputs_ready to start, then keep going
 module matrixmultiplier (
 		input clk,
@@ -107,32 +125,22 @@ module matrixmultiplier (
 	wire [31:0] product_tdata;
 	wire product_tready;
 	wire product_tvalid; 
-	wire [2:0] product_tuser;
+	wire [2:0] product_tuser, sum_tuser;
 	wire element_ready;
 
-	wire add_b_tready, add_operation_tready, sum_tready, sum1_tvalid, sum2_tvalid, sum3_tvalid; 
-	wire [2:0] count;
-	wire [31:0] sum1_tdata, sum2_tdata, sum3_tdata;
+	wire add1_operation_tready, sum_tready, sum_tvalid;
+	wire a_tready, b_tready, a1_tready,b1_tready;
+	wire [3:0] element_count, run_count;
+	wire runcount_tvalid;
+
+	wire [31:0] sum_tdata;
 	reg [31:0] prev_product;
 	reg prev2_product_tvalid;
 	//wire [31:0] sum1, sum2, sum3;
 	reg prev_product_tvalid;
 
-	assign product_tready = 1'b1;
-	assign sum_tready = 1'b1;
-	
-	always @ (posedge clk) begin
-		if (reset) 
-			prev_product_tvalid <= 1'b0;
-		else
-			begin
-			prev_product <= product_tdata;
-			prev_product_tvalid <= product_tvalid;
-			prev2_product_tvalid <= prev_product_tvalid;
-		end
-	end
-	
-	
+
+		
 	floating_point_v6_1 fmul (
 	  .aclk(clk), // input aclk
 	  .s_axis_a_tvalid(a_tvalid), // input s_axis_a_tvalid
@@ -142,63 +150,99 @@ module matrixmultiplier (
 	  .s_axis_b_tready(b_tready), // output s_axis_b_tready
 	  .s_axis_b_tdata(b), // input [31 : 0] s_axis_b_tdata
 	  .m_axis_result_tvalid(product_tvalid), // output m_axis_result_tvalid
-	  .m_axis_result_tready(product_tready), // input m_axis_result_tready
+	  .m_axis_result_tready(runcount_tvalid), // input m_axis_result_tready
 	  .m_axis_result_tdata(product_tdata), // output [31 : 0] m_axis_result_tdata
 	  .m_axis_result_tuser(product_tuser) // output [2 : 0] m_axis_result_tuser
 	);
 
+	floating_point_add_sub_v6_1 fadd1 (
+	  .aclk(clk), // input aclk
+	  .s_axis_a_tvalid(runcount_tvalid), // input s_axis_a_tvalid
+	  .s_axis_a_tready(a1_tready), // output s_axis_a_tready
+	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
+	  .s_axis_b_tvalid(runcount_tvalid), // input s_axis_b_tvalid
+	  .s_axis_b_tready(b1_tready), // output s_axis_b_tready
+	  .s_axis_b_tdata((element_count == 0) ? 32'b0 : sum_tdata ), // input [31 : 0] s_axis_b_tdata
+	  .s_axis_operation_tvalid(1'b1), // input s_axis_operation_tvalid
+	  .s_axis_operation_tready(add1_operation_tready), // output s_axis_operation_tready
+	  .s_axis_operation_tdata(8'b0 ), // input [7 : 0] s_axis_operation_tdata
+	  .m_axis_result_tvalid(sum_tvalid), // output m_axis_result_tvalid
+	  .m_axis_result_tready(1'b1), // input m_axis_result_tready
+	  .m_axis_result_tdata(sum_tdata), // output [31 : 0] m_axis_result_tdata
+	  .m_axis_result_tuser(sum_tuser) // output [2 : 0] m_axis_result_tuser
+	);
+
+	counter #(.N(11)) runcouter(
+		.clk(clk),
+		.reset(reset),
+		.in_ready(product_tvalid), 
+		.done(runcount_tvalid),
+		.count(run_count)
+	);
+
+	counter element_counter(
+		.clk(clk),
+		.reset(reset),
+		.in_ready(sum_tvalid),
+		.done(element_ready),
+		.count(element_count)
+	);
+
 	
 
+
+	
+/*
 	floating_point_add_sub_v6_1 fadd1 (
 	  .aclk(clk), // input aclk
 	  .s_axis_a_tvalid(product_tvalid), // input s_axis_a_tvalid
-	  .s_axis_a_tready(add_product_tready), // output s_axis_a_tready
+	  .s_axis_a_tready(a1_tready), // output s_axis_a_tready
 	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
-	  .s_axis_b_tvalid(prev2_product_tvalid), // input s_axis_b_tvalid
-	  .s_axis_b_tready(add_b_tready), // output s_axis_b_tready
+	  .s_axis_b_tvalid(prev_product_tvalid), // input s_axis_b_tvalid
+	  .s_axis_b_tready(b1_tready), // output s_axis_b_tready
 	  .s_axis_b_tdata(prev_product), // input [31 : 0] s_axis_b_tdata
 	  .s_axis_operation_tvalid(1'b1), // input s_axis_operation_tvalid
-	  .s_axis_operation_tready(add_operation_tready), // output s_axis_operation_tready
-	  .s_axis_operation_tdata(8'b0 /*ADD*/), // input [7 : 0] s_axis_operation_tdata
+	  .s_axis_operation_tready(add1_operation_tready), // output s_axis_operation_tready
+	  .s_axis_operation_tdata(8'b0 ), // input [7 : 0] s_axis_operation_tdata
 	  .m_axis_result_tvalid(sum1_tvalid), // output m_axis_result_tvalid
 	  .m_axis_result_tready(sum_tready), // input m_axis_result_tready
 	  .m_axis_result_tdata(sum1_tdata), // output [31 : 0] m_axis_result_tdata
-	  .m_axis_result_tuser() // output [2 : 0] m_axis_result_tuser
+	  .m_axis_result_tuser(sum1_tuser) // output [2 : 0] m_axis_result_tuser
 	);
 	
 
 	floating_point_add_sub_v6_1 fadd2 (
 	  .aclk(clk), // input aclk
 	  .s_axis_a_tvalid(product_tvalid), // input s_axis_a_tvalid
-	  .s_axis_a_tready(), // output s_axis_a_tready
+	  .s_axis_a_tready(a2_tready), // output s_axis_a_tready
 	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
 	  .s_axis_b_tvalid(sum1_tvalid), // input s_axis_b_tvalid
-	  .s_axis_b_tready(), // output s_axis_b_tready
+	  .s_axis_b_tready(b2_tready), // output s_axis_b_tready
 	  .s_axis_b_tdata(sum1_tdata), // input [31 : 0] s_axis_b_tdata
 	  .s_axis_operation_tvalid(1'b1), // input s_axis_operation_tvalid
-	  .s_axis_operation_tready(add_operation_tready), // output s_axis_operation_tready
-	  .s_axis_operation_tdata(8'b0 /*ADD*/), // input [7 : 0] s_axis_operation_tdata
+	  .s_axis_operation_tready(add2_operation_tready), // output s_axis_operation_tready
+	  .s_axis_operation_tdata(8'b0), // input [7 : 0] s_axis_operation_tdata
 	  .m_axis_result_tvalid(sum2_tvalid), // output m_axis_result_tvalid
 	  .m_axis_result_tready(1'b1), // input m_axis_result_tready
 	  .m_axis_result_tdata(sum2_tdata), // output [31 : 0] m_axis_result_tdata
-	  .m_axis_result_tuser() // output [2 : 0] m_axis_result_tuser
+	  .m_axis_result_tuser(sum2_tuser) // output [2 : 0] m_axis_result_tuser
 	);
 
 	floating_point_add_sub_v6_1 fadd3 (
 	  .aclk(clk), // input aclk
 	  .s_axis_a_tvalid(product_tvalid), // input s_axis_a_tvalid
-	  .s_axis_a_tready(), // output s_axis_a_tready
+	  .s_axis_a_tready(a3_tready), // output s_axis_a_tready
 	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
 	  .s_axis_b_tvalid(sum2_tvalid), // input s_axis_b_tvalid
-	  .s_axis_b_tready(), // output s_axis_b_tready
+	  .s_axis_b_tready(b3_tready), // output s_axis_b_tready
 	  .s_axis_b_tdata(sum2_tdata), // input [31 : 0] s_axis_b_tdata
 	  .s_axis_operation_tvalid(1'b1), // input s_axis_operation_tvalid
-	  .s_axis_operation_tready(add_operation_tready), // output s_axis_operation_tready
-	  .s_axis_operation_tdata(8'b0 /*ADD*/), // input [7 : 0] s_axis_operation_tdata
+	  .s_axis_operation_tready(add3_operation_tready), // output s_axis_operation_tready
+	  .s_axis_operation_tdata(8'b0 ), // input [7 : 0] s_axis_operation_tdata
 	  .m_axis_result_tvalid(sum3_tvalid), // output m_axis_result_tvalid
 	  .m_axis_result_tready(1'b1), // input m_axis_result_tready
 	  .m_axis_result_tdata(sum3_tdata), // output [31 : 0] m_axis_result_tdata
-	  .m_axis_result_tuser() // output [2 : 0] m_axis_result_tuser
+	  .m_axis_result_tuser(sum3_tuser) // output [2 : 0] m_axis_result_tuser
 	);
 
 
@@ -211,11 +255,13 @@ module matrixmultiplier (
 		.done(element_ready),
 		.count(count)
 		);
+*/
 
- 	latch_matrixmult latch(
+
+	latch_matrixmult latch(
 		.clk(clk),
 		.reset(reset),
-		.element_in(sum3_tdata),
+		.element_in(sum_tdata),
 		.new_element(element_ready),	//need to pulse for one cycle only
 		.element0(result0),
 		.element1(result1),

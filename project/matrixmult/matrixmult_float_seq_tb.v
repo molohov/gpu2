@@ -163,7 +163,8 @@ module matrixmult_tb();
 		in1 <= row3_3;
 		in2 <= pixelinT_3;
 		
-
+	@ (negedge clk);
+		inputs_ready <= 1'b0;
 
 	end
 	
