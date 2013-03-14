@@ -123,18 +123,15 @@ module matrixmultiplier (
 
 
 	wire [31:0] product_tdata;
-	wire product_tready;
 	wire product_tvalid; 
 	wire [2:0] product_tuser, sum_tuser;
 	wire element_ready;
 
-	wire add1_operation_tready, sum_tready, sum_tvalid;
+	wire add1_operation_tready, sum_tvalid;
 	wire a_tready, b_tready, a1_tready,b1_tready;
-	wire [3:0] element_count, run_count;
-	wire runcount_tvalid;
+	wire [3:0] element_count;
 
 	wire [31:0] sum_tdata;
-	reg [31:0] prev_product;
 
 
 		
@@ -157,9 +154,9 @@ module matrixmultiplier (
 	  .s_axis_a_tvalid(product_tvalid), // input s_axis_a_tvalid
 	  .s_axis_a_tready(a1_tready), // output s_axis_a_tready
 	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
-	  .s_axis_b_tvalid(product_tvalid), // input s_axis_b_tvalid
+	  .s_axis_b_tvalid((element_count == 0 && product_tvalid) || sum_tvalid), // input s_axis_b_tvalid
 	  .s_axis_b_tready(b1_tready), // output s_axis_b_tready
-	  .s_axis_b_tdata((element_count == 0) ? 32'b0 : sum_tdata ), // input [31 : 0] s_axis_b_tdata
+	  .s_axis_b_tdata((element_count == 0) ? 32'b0 : sum_tdata), // input [31 : 0] s_axis_b_tdata
 	  .s_axis_operation_tvalid(product_tvalid), // input s_axis_operation_tvalid
 	  .s_axis_operation_tready(add1_operation_tready), // output s_axis_operation_tready
 	  .s_axis_operation_tdata(8'b0), // input [7 : 0] s_axis_operation_tdata
@@ -172,7 +169,7 @@ module matrixmultiplier (
 	counter #(.N(4)) element_counter(
 		.clk(clk),
 		.reset(reset),
-		.in_ready(sum_tvalid),
+		.in_ready(product_tvalid),
 		.done(element_ready),
 		.count(element_count)
 	);
