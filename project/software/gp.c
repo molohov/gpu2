@@ -1332,7 +1332,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
 
         do {
             // left
-            while (1) {
+            while (y <= y_left_1) {
                 int e2 = 2*left_err;
                 if (y == y_left_1 && x_left_0 == x_left_1) break;
                 if (e2 > -left_dy) {
@@ -1353,7 +1353,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
                 }
             }
             // right
-            while (1) {
+            while (y <= y_right_1) {
                 int e2 = 2*right_err;
                 if (y == y_right_1 && x_right_0 == x_right_1) break;
                 if (e2 > -right_dy) {
