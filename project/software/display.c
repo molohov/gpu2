@@ -235,7 +235,10 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
 
 int gpWaitKey()
 {
-  return XUartLite_ReadReg(XPAR_RS232_UART_1_BASEADDR, XUL_RX_FIFO_OFFSET);
+  if (!XUartLite_IsReceiveEmpty(XPAR_RS232_UART_1_BASEADDR)) {
+    return XUartLite_ReadReg(XPAR_RS232_UART_1_BASEADDR, XUL_RX_FIFO_OFFSET);
+  }
+  return 0;
 }
 #endif
  
