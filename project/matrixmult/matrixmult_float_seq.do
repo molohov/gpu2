@@ -13,4 +13,4 @@ vsim work.matrixmult_tb work.glbl
 add wave -position insertpoint  \
 -radix hexadecimal sim:/matrixmult_tb/* \
 -radix hexadecimal sim:/matrixmult_tb/dut/*
-run 4000 ns
+run 6000 ns
