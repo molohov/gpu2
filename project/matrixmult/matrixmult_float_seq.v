@@ -14,7 +14,7 @@ module counter(
 	parameter N = 4; 	//number of rows in matrix (number of additions required to generate one element of matrix result)
 	//parameter log2N = 2;
 
-	assign done = (count == N) ? 1'b1 : 1'b0;
+	assign done = (count == N-1 && in_ready);
 
 	always @ (posedge clk)
 	begin
@@ -22,33 +22,10 @@ module counter(
 			begin
 				count <= 'b0;
 			end
-		else if (in_ready && !done) //don't keep adding if done
+		else if (in_ready)
 			begin
 				count <= count + 1'b1;
 			end
-	end
-endmodule
-
-//shift register of length N
-module shift_reg(
-		input clk,
-		input reset,
-		input in,
-		output reg out
-		);
-	parameter N = 4;
-
-	reg [N-1:0] shift;
-
-	always @ (posedge clk)
-	begin
-		if (reset)
-			shift = {N{1'b0}};
-		else
-		begin
-			shift <= {in, shift[N-1:1]};
-			out <= shift[1];
-		end
 	end
 endmodule
 
@@ -76,56 +53,56 @@ module latch_matrixmult(
 			element1 <= 32'b0;
 			element2 <= 32'b0;
 			element3 <= 32'b0;
-			done_matrix <= 1'b0;
 			count <= 3'b0;
+			done_matrix <= 1'b0;
 			end
 		else if (new_element && count == 0)	
 			begin
 			element0 <= element_in;
+			element1 <= element1;
+			element2 <= element2;
+			element3 <= element3;
 			count <= count + 1'b1;
 			done_matrix <= 1'b0;
 			end
 		else if (new_element && count == 1)	
 			begin
+			element0 <= element0;
 			element1 <= element_in;
+			element2 <= element2;
+			element3 <= element3;
 			count <= count + 1'b1;
 			done_matrix <= 1'b0;
 			end
 		else if (new_element && count == 2)	
 			begin
+			element0 <= element0;
+			element1 <= element1;
 			element2 <= element_in;
+			element3 <= element3;
 			count <= count + 1'b1;
 			done_matrix <= 1'b0;
 			end
 		else if (new_element && count == 3)	
 			begin
+			element0 <= element0;
+			element1 <= element1;
+			element2 <= element2;
 			element3 <= element_in;
-			count <= count + 1'b1;
+			count <= 3'b0;
 			done_matrix <= 1'b1;
 			end
-	
-
-
+		else
+			begin
+			element0 <= element0;
+			element1 <= element1;
+			element2 <= element2;
+			element3 <= element3;
+			count <= 3'b0;
+			done_matrix <= 1'b0;
+			end
 	end
 
-
-endmodule
-
-module register (
-	input clk,
-	input reset,
-	input enable,
-	input d,
-	output reg q);
-
-	always @ (posedge clk) begin
-
-		if (reset)
-			q <= 1'b0;
-		else if (enable)
-			 q <= d;
-	end
-		
 
 endmodule
 
@@ -158,9 +135,6 @@ module matrixmultiplier (
 
 	wire [31:0] sum_tdata;
 	reg [31:0] prev_product;
-	reg prev2_product_tvalid;
-	//wire [31:0] sum1, sum2, sum3;
-	reg prev_product_tvalid;
 
 
 		
@@ -173,44 +147,29 @@ module matrixmultiplier (
 	  .s_axis_b_tready(b_tready), // output s_axis_b_tready
 	  .s_axis_b_tdata(b), // input [31 : 0] s_axis_b_tdata
 	  .m_axis_result_tvalid(product_tvalid), // output m_axis_result_tvalid
-	  .m_axis_result_tready(runcount_tvalid), // input m_axis_result_tready
+	  .m_axis_result_tready(a1_tready && b1_tready), // input m_axis_result_tready
 	  .m_axis_result_tdata(product_tdata), // output [31 : 0] m_axis_result_tdata
 	  .m_axis_result_tuser(product_tuser) // output [2 : 0] m_axis_result_tuser
 	);
 
 	floating_point_add_sub_v6_1 fadd1 (
 	  .aclk(clk), // input aclk
-	  .s_axis_a_tvalid(runcount_tvalid), // input s_axis_a_tvalid
+	  .s_axis_a_tvalid(product_tvalid), // input s_axis_a_tvalid
 	  .s_axis_a_tready(a1_tready), // output s_axis_a_tready
 	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
-	  .s_axis_b_tvalid(runcount_tvalid), // input s_axis_b_tvalid
+	  .s_axis_b_tvalid(product_tvalid), // input s_axis_b_tvalid
 	  .s_axis_b_tready(b1_tready), // output s_axis_b_tready
 	  .s_axis_b_tdata((element_count == 0) ? 32'b0 : sum_tdata ), // input [31 : 0] s_axis_b_tdata
-	  .s_axis_operation_tvalid(1'b1), // input s_axis_operation_tvalid
+	  .s_axis_operation_tvalid(product_tvalid), // input s_axis_operation_tvalid
 	  .s_axis_operation_tready(add1_operation_tready), // output s_axis_operation_tready
-	  .s_axis_operation_tdata(8'b0 ), // input [7 : 0] s_axis_operation_tdata
+	  .s_axis_operation_tdata(8'b0), // input [7 : 0] s_axis_operation_tdata
 	  .m_axis_result_tvalid(sum_tvalid), // output m_axis_result_tvalid
 	  .m_axis_result_tready(1'b1), // input m_axis_result_tready
 	  .m_axis_result_tdata(sum_tdata), // output [31 : 0] m_axis_result_tdata
 	  .m_axis_result_tuser(sum_tuser) // output [2 : 0] m_axis_result_tuser
 	);
 
-	shift_reg #(.N(11)) runcounter(
-		.clk(clk),
-		.reset(reset),
-		.in(product_tvalid),
-		.out(run_counter)
-	);
-
-/*	counter #(.N(11)) runcouter(
-		.clk(clk),
-		.reset(reset),
-		.in_ready(product_tvalid), 
-		.done(runcount_tvalid),
-		.count(run_count)
-	);*/
-
-	counter #(.N(5)) element_counter( //almost worked before without the 5 param overide!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	counter #(.N(4)) element_counter(
 		.clk(clk),
 		.reset(reset),
 		.in_ready(sum_tvalid),
@@ -218,81 +177,12 @@ module matrixmultiplier (
 		.count(element_count)
 	);
 
-	
-
-
-	
-/*
-	floating_point_add_sub_v6_1 fadd1 (
-	  .aclk(clk), // input aclk
-	  .s_axis_a_tvalid(product_tvalid), // input s_axis_a_tvalid
-	  .s_axis_a_tready(a1_tready), // output s_axis_a_tready
-	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
-	  .s_axis_b_tvalid(prev_product_tvalid), // input s_axis_b_tvalid
-	  .s_axis_b_tready(b1_tready), // output s_axis_b_tready
-	  .s_axis_b_tdata(prev_product), // input [31 : 0] s_axis_b_tdata
-	  .s_axis_operation_tvalid(1'b1), // input s_axis_operation_tvalid
-	  .s_axis_operation_tready(add1_operation_tready), // output s_axis_operation_tready
-	  .s_axis_operation_tdata(8'b0 ), // input [7 : 0] s_axis_operation_tdata
-	  .m_axis_result_tvalid(sum1_tvalid), // output m_axis_result_tvalid
-	  .m_axis_result_tready(sum_tready), // input m_axis_result_tready
-	  .m_axis_result_tdata(sum1_tdata), // output [31 : 0] m_axis_result_tdata
-	  .m_axis_result_tuser(sum1_tuser) // output [2 : 0] m_axis_result_tuser
-	);
-	
-
-	floating_point_add_sub_v6_1 fadd2 (
-	  .aclk(clk), // input aclk
-	  .s_axis_a_tvalid(product_tvalid), // input s_axis_a_tvalid
-	  .s_axis_a_tready(a2_tready), // output s_axis_a_tready
-	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
-	  .s_axis_b_tvalid(sum1_tvalid), // input s_axis_b_tvalid
-	  .s_axis_b_tready(b2_tready), // output s_axis_b_tready
-	  .s_axis_b_tdata(sum1_tdata), // input [31 : 0] s_axis_b_tdata
-	  .s_axis_operation_tvalid(1'b1), // input s_axis_operation_tvalid
-	  .s_axis_operation_tready(add2_operation_tready), // output s_axis_operation_tready
-	  .s_axis_operation_tdata(8'b0), // input [7 : 0] s_axis_operation_tdata
-	  .m_axis_result_tvalid(sum2_tvalid), // output m_axis_result_tvalid
-	  .m_axis_result_tready(1'b1), // input m_axis_result_tready
-	  .m_axis_result_tdata(sum2_tdata), // output [31 : 0] m_axis_result_tdata
-	  .m_axis_result_tuser(sum2_tuser) // output [2 : 0] m_axis_result_tuser
-	);
-
-	floating_point_add_sub_v6_1 fadd3 (
-	  .aclk(clk), // input aclk
-	  .s_axis_a_tvalid(product_tvalid), // input s_axis_a_tvalid
-	  .s_axis_a_tready(a3_tready), // output s_axis_a_tready
-	  .s_axis_a_tdata(product_tdata), // input [31 : 0] s_axis_a_tdata
-	  .s_axis_b_tvalid(sum2_tvalid), // input s_axis_b_tvalid
-	  .s_axis_b_tready(b3_tready), // output s_axis_b_tready
-	  .s_axis_b_tdata(sum2_tdata), // input [31 : 0] s_axis_b_tdata
-	  .s_axis_operation_tvalid(1'b1), // input s_axis_operation_tvalid
-	  .s_axis_operation_tready(add3_operation_tready), // output s_axis_operation_tready
-	  .s_axis_operation_tdata(8'b0 ), // input [7 : 0] s_axis_operation_tdata
-	  .m_axis_result_tvalid(sum3_tvalid), // output m_axis_result_tvalid
-	  .m_axis_result_tready(1'b1), // input m_axis_result_tready
-	  .m_axis_result_tdata(sum3_tdata), // output [31 : 0] m_axis_result_tdata
-	  .m_axis_result_tuser(sum3_tuser) // output [2 : 0] m_axis_result_tuser
-	);
-
-
-	//note: there might be an issue with one cycle delay of count to get to input mux of
-	//fadd!!!!!!!!!!!!!---> check this in simulation!!!!!!!!!!!!!!!!!!!!!!	
-	counter count_dot_product_elements(
-		.clk(clk),
-		.reset(reset),
-		.in_ready(sum3_tvalid),//assert this for one cycle when providing module with fresh input
-		.done(element_ready),
-		.count(count)
-		);
-*/
-
 
 	latch_matrixmult latch(
 		.clk(clk),
 		.reset(reset),
 		.element_in(sum_tdata),
-		.new_element(sum_tvalid && (element_count == 4)/*element_ready*/),	//need to pulse for one cycle only
+		.new_element(element_ready),	//need to pulse for one cycle only
 		.element0(result0),
 		.element1(result1),
 		.element2(result2),
