@@ -27,11 +27,6 @@ module matrixmult_tb();
 	wire [31:0] pixelinT_2;
 	wire [31:0] pixelinT_3;
 
-	wire [31:0] pixelout_0;
-	wire [31:0] pixelout_1;
-	wire [31:0] pixelout_2;
-	wire [31:0] pixelout_3;
-
 
    	assign row0_0 = 32'h4124CCCD; //10.3
 	assign row0_1 = 32'h40C80000; //6.25
