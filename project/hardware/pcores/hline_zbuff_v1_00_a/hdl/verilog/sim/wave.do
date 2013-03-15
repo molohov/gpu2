@@ -5,11 +5,8 @@ add wave -noupdate /fsm_tb/start
 add wave -noupdate /fsm_tb/reset
 add wave -noupdate -radix hexadecimal /fsm_tb/fb_addr
 add wave -noupdate -radix hexadecimal /fsm_tb/zbuff_addr
-add wave -noupdate -radix hexadecimal /fsm_tb/y
-add wave -noupdate -radix hexadecimal /fsm_tb/x1
-add wave -noupdate -radix hexadecimal /fsm_tb/x2
+add wave -noupdate -radix hexadecimal /fsm_tb/dx
 add wave -noupdate -radix hexadecimal /fsm_tb/z1
-add wave -noupdate -radix hexadecimal /fsm_tb/z2
 add wave -noupdate -radix hexadecimal /fsm_tb/rem
 add wave -noupdate -radix hexadecimal /fsm_tb/err
 add wave -noupdate -radix hexadecimal /fsm_tb/slope
@@ -22,6 +19,7 @@ add wave -noupdate /fsm_tb/read_zfifo
 add wave -noupdate /fsm_tb/write_zfifo
 add wave -noupdate /fsm_tb/read_zbuffout_fifo
 add wave -noupdate /fsm_tb/read_be_fifo
+add wave -noupdate /fsm_tb/write_be_fifo
 add wave -noupdate /fsm_tb/byteenable
 add wave -noupdate /fsm_tb/zread_empty
 add wave -noupdate /fsm_tb/axi_done
@@ -45,4 +43,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {10500 ps}
+WaveRestoreZoom {0 ps} {5000 ps}

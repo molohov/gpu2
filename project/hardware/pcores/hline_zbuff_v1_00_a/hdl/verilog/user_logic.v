@@ -301,8 +301,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire       [C_SLV_DWIDTH-1 : 0]           fb_addr;
   wire       [C_SLV_DWIDTH-1 : 0]           zbuff_addr;
   wire       [C_SLV_DWIDTH-1 : 0]           y;
-  wire       [C_SLV_DWIDTH-1 : 0]           x1;
-  wire       [C_SLV_DWIDTH-1 : 0]           x2;
+  wire       [C_SLV_DWIDTH-1 : 0]           dx;
   wire       [C_SLV_DWIDTH-1 : 0]           z1;
   wire       [C_SLV_DWIDTH-1 : 0]           z2;
   wire       [C_SLV_DWIDTH-1 : 0]           slope;
@@ -315,14 +314,13 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign    fb_addr    = slv_reg0;
   assign    zbuff_addr = slv_reg1;
   assign    y          = slv_reg2;
-  assign    x1         = slv_reg3;
-  assign    x2         = slv_reg4;
-  assign    z1         = slv_reg5;
-  assign    z2         = slv_reg6;
-  assign    slope      = slv_reg7;
-  assign    rgbx       = slv_reg8;
-  assign    err        = slv_reg9;
-  assign    rem        = slv_reg10;
+  assign    dx         = slv_reg3;
+  assign    z1         = slv_reg4;
+  assign    slope      = slv_reg5;
+  assign    rgbx       = slv_reg6;
+  assign    err        = slv_reg7;
+  assign    rem        = slv_reg8;
+  // can be whichever register
   assign    start      = slv_reg11[0];
 
   fsm fsm_inst (
@@ -332,12 +330,9 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .start (start),
     .fb_addr (fb_addr),
     .zbuff_addr (zbuff_addr),
-    .y (y),
-    .x1 (x1),
-    .x2 (x2),
+    .dx (dx),
     .slope (slope),
     .z1 (z1),
-    .z2 (z2),
     .zread_empty (zread_empty),
     .zfifo_in (zfifo_in),
     .rem (rem),

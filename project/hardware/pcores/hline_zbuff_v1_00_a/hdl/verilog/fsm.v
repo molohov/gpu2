@@ -5,12 +5,9 @@ module fsm (
     input           start,
     input [31:0]    fb_addr,
     input [31:0]    zbuff_addr,
-    input [31:0]    y,
-    input [15:0]    x1,
-    input [15:0]    x2,
+    input [31:0]    dx,
     input [31:0]    slope,
     input [31:0]    z1,
-    input [31:0]    z2,
     input           zread_empty,
     input [31:0]    zfifo_in,
     input [31:0]    rem,
@@ -21,6 +18,7 @@ module fsm (
     output          rd_req,
     output          wr_req,
     output [31:0]   addr,
+    // byteenable is a single bit because it represents whether the entire word is written or not
     output          byteenable,
     output          read_zfifo,
     output          write_zfifo,
@@ -52,7 +50,6 @@ module fsm (
     reg [15:0] xsum, nextxsum, xcnt, next_xcnt;
     reg [31:0] zsum, nextzsum;
     reg [31:0] error, nexterror;
-    reg [31:0] dx, nextdx;
 
     // define states
     localparam  IDLE        = 3'd0, // reset state. 
@@ -77,19 +74,19 @@ module fsm (
     // whilst read_be_fifo may be on for a long time b/c of this Mealy assignment, it will be ANDed with the appropriate 
     // external AXI signal connecting to the fifo, so this signal acts like a mux.
     assign read_be_fifo = (state == WR_ZBUFF || state == WR_FBUFF);
+    assign byteenable = be;
 
     always @ (posedge clk)
     begin
         if (!nreset)
         begin
             state       <= IDLE;
-            be          <= 4'd0;
+            be          <= 0;
             addr_offset <= 32'd0;
             xsum        <= 16'd0;
             zsum        <= 32'd0;
             xcnt        <= 16'd0;
             error       <= 32'd0;
-            dx          <= 32'd0;
 	    writebe     <= 1'd0;
         end
         else
@@ -101,7 +98,6 @@ module fsm (
             zsum        <= nextzsum;
             xcnt        <= next_xcnt;
             error       <= nexterror;
-            dx          <= nextdx;
 	    writebe     <= nextwritebe;
         end
     end
@@ -115,7 +111,6 @@ module fsm (
         nextzsum = zsum;
         next_xcnt = xcnt;
         nexterror = error;
-        nextdx = dx;
 	nextwritebe = writebe;
 
         case (state)
@@ -124,9 +119,9 @@ module fsm (
                 if (start)
                 begin
                     nextstate = LOAD_ZBUFF;
-                    nextxsum = (x1 > x2) ? x1 - x2 : x2 - x1;
-                    nextdx = nextxsum;
+                    nextxsum = dx; // dx is precalculated by sw
                     nextzsum = z1;
+                    nextaddr_offset = 32'd0;
                 end
             end
             LOAD_ZBUFF:
@@ -184,7 +179,10 @@ module fsm (
             begin
                 // TODO: start the transfer, and clear the done bit when done
                 if (axi_done)
+                begin
                     nextstate = LOAD_ZBUFF;
+                    nextaddr_offset = addr_offset + 32'd256;
+                end
             end
         endcase
     end
