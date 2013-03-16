@@ -21,12 +21,12 @@ int main (void)
 
 	hline_pcore[0] = (int)fbuff;
 	hline_pcore[1] = (int)zbuff;
-	hline_pcore[3] = 256;
-	hline_pcore[4] = 0;
-	hline_pcore[5] = 0x00ffffff;
-	hline_pcore[6] = 0xdeadbeef;
-	hline_pcore[7] = 128;
-	hline_pcore[8] = 255;
+	hline_pcore[2] = 256;
+	hline_pcore[3] = 0;
+	hline_pcore[4] = 0x00ffffff;
+	hline_pcore[5] = 0xdeadbeef;
+	hline_pcore[6] = 128;
+	hline_pcore[7] = 255;
 	// start it
 
 	hline_pcore[11] = 1;

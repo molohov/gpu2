@@ -316,13 +316,12 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 
   assign    fb_addr    = slv_reg0;
   assign    zbuff_addr = slv_reg1;
-  assign    y          = slv_reg2;
-  assign    dx         = slv_reg3;
-  assign    z1         = slv_reg4;
-  assign    slope      = slv_reg5;
-  assign    rgbx       = slv_reg6;
-  assign    err        = slv_reg7;
-  assign    rem        = slv_reg8;
+  assign    dx         = slv_reg2;
+  assign    z1         = slv_reg3;
+  assign    slope      = slv_reg4;
+  assign    rgbx       = slv_reg5;
+  assign    err        = slv_reg6;
+  assign    rem        = slv_reg7;
   // can be whichever register
   assign    start      = slv_reg11[0];
   assign    ip2bus_mstwr = read_zbuffout_fifo ? zbuff_out : rgbx;  
