@@ -324,7 +324,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign    rem        = slv_reg7;
   // can be whichever register
   assign    start      = slv_reg11[0];
-  assign    ip2bus_mstwr = read_zbuffout_fifo ? zbuff_out : rgbx;  
+  assign    ip2bus_mstwr_d = read_zbuffout_fifo ? zbuff_out : rgbx;  
 
   fsm fsm_inst (
     // inputs
