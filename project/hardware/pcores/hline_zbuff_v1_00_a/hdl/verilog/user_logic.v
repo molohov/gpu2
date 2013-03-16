@@ -561,12 +561,12 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_read_ack      = mst_reg_read_req;
 
   // rip control bits from master model registers
-  assign mst_cntl_rd_req   = mst_reg[0][0];
-  assign mst_cntl_wr_req   = mst_reg[0][1];
-  assign mst_cntl_bus_lock = mst_reg[0][2];
-  assign mst_cntl_burst    = mst_reg[0][3];
-  assign mst_ip2bus_addr   = {mst_reg[7], mst_reg[6], mst_reg[5], mst_reg[4]};
-  assign mst_ip2bus_be     = {mst_reg[9], mst_reg[8]};
+  assign mst_cntl_rd_req   = axi_rd_req;
+  assign mst_cntl_wr_req   = axi_wr_req;
+  assign mst_cntl_bus_lock = 1'b0;
+  assign mst_cntl_burst    = 1'b1;
+  assign mst_ip2bus_addr   = addr;
+  assign mst_ip2bus_be     = {16{intermediate_be_fanout}};
   assign mst_xfer_reg_len  = {mst_reg[14][3 : 0], mst_reg[13], mst_reg[12]};// changed to 20 bits 
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
 
@@ -628,7 +628,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
           mst_go <= 1'b0;
         end
       else  
-        if ( mst_cmd_sm_busy == 1'b0 && mst_byte_we[GO_BYTE_LANE] == 1'b1 && Bus2IP_Data[(GO_BYTE_LANE-(GO_BYTE_LANE/BE_WIDTH)*BE_WIDTH)*8 +: 8] == GO_DATA_KEY)
+        if ( mst_cmd_sm_busy == 1'b0 && (axi_rd_req | axi_wr_req))
           begin
             mst_go   <= 1'b1;
           end
@@ -666,10 +666,10 @@ input                                     bus2ip_mstwr_dst_dsc_n;
       endcase
     end //MASTER_REG_READ_PROC	
   // user logic master command interface assignments
-  assign ip2bus_mstrd_req  = mst_cmd_sm_rd_req | axi_rd_req;
-  assign ip2bus_mstwr_req  = mst_cmd_sm_wr_req | axi_wr_req;
-  assign ip2bus_mst_addr   = addr;
-  assign ip2bus_mst_be     = {4{intermediate_be_fanout}};
+  assign ip2bus_mstrd_req  = mst_cmd_sm_rd_req;
+  assign ip2bus_mstwr_req  = mst_cmd_sm_wr_req;
+  assign ip2bus_mst_addr   = mst_cmd_sm_ip2bus_addr;
+  assign ip2bus_mst_be     = mst_cmd_sm_ip2bus_be;
   assign ip2bus_mst_type   = mst_cmd_sm_xfer_type;
   assign ip2bus_mst_length = mst_cmd_sm_xfer_length;
   assign ip2bus_mst_lock   = mst_cmd_sm_bus_lock;
