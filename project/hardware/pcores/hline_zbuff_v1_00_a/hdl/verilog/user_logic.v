@@ -310,6 +310,9 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire       [C_SLV_DWIDTH-1 : 0]           rem; 
   wire                                      zread_empty;
   wire                                      intermediate_be_fanout;
+  wire       [C_SLV_DWIDTH-1 : 0]           zbuff_out; 
+  wire                                      axi_rd_req;
+  wire                                      axi_wr_req;
 
   assign    fb_addr    = slv_reg0;
   assign    zbuff_addr = slv_reg1;
@@ -322,6 +325,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign    rem        = slv_reg8;
   // can be whichever register
   assign    start      = slv_reg11[0];
+  assign    ip2bus_mstwr = read_zbuffout_fifo ? zbuff_out : rgbx;  
 
   fsm fsm_inst (
     // inputs
@@ -340,8 +344,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .axi_done (mst_reg[1][0]),
 
     // outputs
-    .rd_req (ip2bus_mstrd_req),
-    .wr_req (ip2bus_mstwr_req),
+    .rd_req (axi_rd_req),
+    .wr_req (axi_wr_req),
     .addr (addr),
     .byteenable (byteenable),
     .read_zfifo (read_zfifo),
@@ -663,8 +667,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
       endcase
     end //MASTER_REG_READ_PROC	
   // user logic master command interface assignments
-  assign ip2bus_mstrd_req  = mst_cmd_sm_rd_req;
-  assign ip2bus_mstwr_req  = mst_cmd_sm_wr_req;
+  assign ip2bus_mstrd_req  = mst_cmd_sm_rd_req | axi_rd_req;
+  assign ip2bus_mstwr_req  = mst_cmd_sm_wr_req | axi_wr_req;
   assign ip2bus_mst_addr   = addr;
   assign ip2bus_mst_be     = {4{intermediate_be_fanout}};
   assign ip2bus_mst_type   = mst_cmd_sm_xfer_type;
@@ -1056,7 +1060,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
      .FIFO_Write(write_zfifo),
      .Data_In(z_out),
      .FIFO_Read(read_zbuffout_fifo),
-     .Data_Out(ip2bus_mstwr_d & read_zbuffout_zfifo),
+     .Data_Out(zbuff_out),
      .FIFO_Full(),
      .FIFO_Empty(),
      .Addr()); // ZBUFF_WRITE_FIFO
