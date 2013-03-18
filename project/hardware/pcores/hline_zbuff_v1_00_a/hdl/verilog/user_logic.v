@@ -307,11 +307,15 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire       [C_SLV_DWIDTH-1 : 0]           rgbx; 
   wire       [C_SLV_DWIDTH-1 : 0]           err; 
   wire       [C_SLV_DWIDTH-1 : 0]           rem; 
-  wire                                      zread_empty;
-  wire                                      intermediate_be_fanout;
   wire       [C_SLV_DWIDTH-1 : 0]           zbuff_out; 
+  wire       [C_SLV_DWIDTH-1 : 0]           zfifo_in; 
+  wire       [C_SLV_DWIDTH-1 : 0]           addr; 
+  wire       [C_SLV_DWIDTH-1 : 0]           z_out; 
   wire                                      axi_rd_req;
   wire                                      axi_wr_req;
+  wire                                      zread_empty;
+  wire                                      intermediate_be_fanout;
+  wire                                      write_be_fifo;
   wire [2:0] curr_state;
   wire read_zbuffout_fifo;
 

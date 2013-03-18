@@ -25,7 +25,6 @@ module fsm (
     output          byteenable,
     output          read_zfifo,
     output          write_zfifo,
-    output          write_befifo,
     output [31:0]   z_out,
     output          read_zbuffout_fifo,
     output          read_be_fifo,
@@ -80,7 +79,8 @@ module fsm (
     assign byteenable = be;
     assign curr_state = state;
     assign start_out = start;
-
+    assign write_be_fifo = writebe;
+ 
     always @ (posedge clk)
     begin
         if (!nreset)
