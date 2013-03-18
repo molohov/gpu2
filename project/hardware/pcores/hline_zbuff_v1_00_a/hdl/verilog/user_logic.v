@@ -316,6 +316,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire                                      zread_empty;
   wire                                      intermediate_be_fanout;
   wire                                      write_be_fifo;
+  wire                                      start;
   wire [2:0] curr_state;
   wire read_zbuffout_fifo;
 
@@ -335,7 +336,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 
   fsm fsm_inst (
     // inputs
-    .clk (clk),
+    .clk (Bus2IP_Clk),
     .nreset (Bus2IP_Resetn),
     .start (start),
     .fb_addr (fb_addr),
@@ -347,8 +348,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .zfifo_in (zfifo_in),
     .rem (rem),
     .err (err),
-    //.axi_done (mst_reg[1][0]),
-    .axi_done (1'b0),
+    .axi_done (mst_reg[1][0]),
 
     // outputs
     .curr_state (curr_state),
@@ -577,7 +577,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_cntl_bus_lock = 1'b0;
   assign mst_cntl_burst    = 1'b1;
   assign mst_ip2bus_addr   = addr;
-  assign mst_ip2bus_be     = axi_rd_req ? 16'hffff : {16{intermediate_be_fanout}};
+  assign mst_ip2bus_be     = 16'hffff;
   assign mst_xfer_reg_len  = 20'd256;// changed to 20 bits 
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
 

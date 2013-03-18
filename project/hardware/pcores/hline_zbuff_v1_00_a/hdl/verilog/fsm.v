@@ -54,7 +54,7 @@ module fsm (
     reg [31:0] error, nexterror;
 
     // define states
-    localparam  IDLE        = 3'd7, // reset state. 
+    localparam  IDLE        = 3'd0, // reset state. 
                 LOAD_ZBUFF  = 3'd1, // load zbuff MAX_LEN from pre calculated address 
                                     // and set AXI burst params accordingly
                 TRAVERSE_X  = 3'd2,
@@ -62,7 +62,7 @@ module fsm (
                                     // assume it can calculate and write values in the same 
                                     // state (1 z-value and 1 byte-enable per 4 cycles)
                 WR_ZBUFF    = 3'd4, // burst the zbuffer and wait for completion
-                WR_FBUFF    = 3'd5; // burst the framebuffer and wait for completion. 
+                WR_FBUFF    = 3'd5, // burst the framebuffer and wait for completion. 
                                     // calculate the next burst addr
 
     // Mealy state machine assignments
