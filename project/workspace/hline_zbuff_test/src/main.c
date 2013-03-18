@@ -6,30 +6,44 @@
 
 #define printf xil_printf   /* a smaller footprint printf */
 
-int main (void)
+int main ()
 {
-	int * hline_pcore = (int *)XPAR_HLINE_ZBUFF_0_BASEADDR;
-	int * fbuff = (int *)0xAC000000;
-	int * zbuff = fbuff + 1024;
+	volatile int * hline_pcore = (int *)XPAR_HLINE_ZBUFF_0_BASEADDR;
+	char * hline_offset = (char *)(hline_pcore + 64);
+	unsigned int * fbuff = (unsigned int *)0xAC000000;
+	unsigned int * zbuff = fbuff + 1024;
+
+	printf("%x, %x", (int)fbuff, (int)zbuff);
 
 	int i = 0;
-	while (i < 1024) {
-		fbuff[i] = 0;
-		zbuff[i] = 0xffffffff;
+	while (i < 256) {
+		fbuff[i] = i;
+		zbuff[i] = 0xffffffff-i;
 		i++;
 	}
 
 	hline_pcore[0] = (int)fbuff;
 	hline_pcore[1] = (int)zbuff;
-	hline_pcore[2] = 256;
-	hline_pcore[3] = 0;
-	hline_pcore[4] = 0x00ffffff;
-	hline_pcore[5] = 0xdeadbeef;
-	hline_pcore[6] = 128;
-	hline_pcore[7] = 255;
+	hline_pcore[2] = 512; //dx
+	hline_pcore[3] = 0;  //z1
+	hline_pcore[4] = 0x00ffffff; //slope
+	hline_pcore[5] = 0xdeadbeef; //rgbx
+	hline_pcore[6] = 128; //error
+	hline_pcore[7] = 255; //remainder
 	// start it
 
 	hline_pcore[11] = 1;
+	i = 0;
 
+	volatile char * debug = (char *)(hline_pcore + 9);
+	printf("fifo head: %x  | ", hline_pcore[8]);
+	printf("curr_state: %x | ", debug[0]);
+	printf("zempty: %x | ", debug[1]);
+	printf("started: %x || ", debug[2]);
+
+	printf("status reg: %x | ", hline_offset[1]);
+	printf("bus2ip_mstrd: %x | ", hline_pcore[0]);
+	printf("mst_fifo_valid: %x | ", hline_pcore[1]);
+	printf("ip2bus_mstwr: %x | ", hline_pcore[2]);
 	return 0;
 }
