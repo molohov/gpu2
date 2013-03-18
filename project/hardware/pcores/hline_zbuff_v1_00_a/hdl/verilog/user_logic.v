@@ -300,7 +300,6 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   // --USER logic implementation added here
   wire       [C_SLV_DWIDTH-1 : 0]           fb_addr;
   wire       [C_SLV_DWIDTH-1 : 0]           zbuff_addr;
-  wire       [C_SLV_DWIDTH-1 : 0]           y;
   wire       [C_SLV_DWIDTH-1 : 0]           dx;
   wire       [C_SLV_DWIDTH-1 : 0]           z1;
   wire       [C_SLV_DWIDTH-1 : 0]           z2;
@@ -313,6 +312,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire       [C_SLV_DWIDTH-1 : 0]           zbuff_out; 
   wire                                      axi_rd_req;
   wire                                      axi_wr_req;
+  wire [2:0] curr_state;
+  wire read_zbuffout_fifo;
 
   assign    fb_addr    = slv_reg0;
   assign    zbuff_addr = slv_reg1;
@@ -325,6 +326,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   // can be whichever register
   assign    start      = slv_reg11[0];
   assign    ip2bus_mstwr_d = read_zbuffout_fifo ? zbuff_out : rgbx;  
+  
+
 
   fsm fsm_inst (
     // inputs
@@ -340,9 +343,12 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .zfifo_in (zfifo_in),
     .rem (rem),
     .err (err),
-    .axi_done (mst_reg[1][0]),
+    //.axi_done (mst_reg[1][0]),
+    .axi_done (1'b0),
 
     // outputs
+    .curr_state (curr_state),
+    .start_out (start_out),
     .rd_req (axi_rd_req),
     .wr_req (axi_wr_req),
     .addr (addr),
@@ -353,7 +359,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .read_zbuffout_fifo (read_zbuffout_fifo),
     .read_be_fifo (read_be_fifo),
     .write_be_fifo (write_be_fifo)
-);
+    );
   
   // ------------------------------------------------------
   // Example code to read/write user logic slave model s/w accessible registers
@@ -471,17 +477,18 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     begin: SLAVE_REG_READ_PROC
 
       case ( slv_reg_read_sel )
-        12'b100000000000 : slv_ip2bus_data <= slv_reg0;
-        12'b010000000000 : slv_ip2bus_data <= slv_reg1;
-        12'b001000000000 : slv_ip2bus_data <= slv_reg2;
+        12'b100000000000 : slv_ip2bus_data <= bus2ip_mstrd_d;
+        12'b010000000000 : slv_ip2bus_data <= mst_fifo_valid_read_xfer;
+        12'b001000000000 : slv_ip2bus_data <= ip2bus_mstwr_d;
         12'b000100000000 : slv_ip2bus_data <= slv_reg3;
         12'b000010000000 : slv_ip2bus_data <= slv_reg4;
         12'b000001000000 : slv_ip2bus_data <= slv_reg5;
         12'b000000100000 : slv_ip2bus_data <= slv_reg6;
         12'b000000010000 : slv_ip2bus_data <= slv_reg7;
-        12'b000000001000 : slv_ip2bus_data <= slv_reg8;
-        12'b000000000100 : slv_ip2bus_data <= slv_reg9;
-        12'b000000000010 : slv_ip2bus_data <= slv_reg10;
+        // DEBUG 
+        12'b000000001000 : slv_ip2bus_data <= zfifo_in; // should be head of FIFO
+        12'b000000000100 : slv_ip2bus_data <= {15'd0, start_out, 7'd0, zread_empty, 5'b0, curr_state};
+        12'b000000000010 : slv_ip2bus_data <= addr;
         12'b000000000001 : slv_ip2bus_data <= slv_reg11;
         default : slv_ip2bus_data <= 0;
       endcase
@@ -566,8 +573,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_cntl_bus_lock = 1'b0;
   assign mst_cntl_burst    = 1'b1;
   assign mst_ip2bus_addr   = addr;
-  assign mst_ip2bus_be     = {16{intermediate_be_fanout}};
-  assign mst_xfer_reg_len  = {mst_reg[14][3 : 0], mst_reg[13], mst_reg[12]};// changed to 20 bits 
+  assign mst_ip2bus_be     = axi_rd_req ? 16'hffff : {16{intermediate_be_fanout}};
+  assign mst_xfer_reg_len  = 20'd256;// changed to 20 bits 
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
 
   // implement byte write enable for each byte slice of the master model registers
