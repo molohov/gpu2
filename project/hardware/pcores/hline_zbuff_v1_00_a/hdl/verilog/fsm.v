@@ -62,7 +62,7 @@ module fsm (
                                     // assume it can calculate and write values in the same 
                                     // state (1 z-value and 1 byte-enable per 4 cycles)
                 WR_ZBUFF    = 3'd4, // burst the zbuffer and wait for completion
-                WR_FBUFF    = 3'd5, // burst the framebuffer and wait for completion. 
+                WR_FBUFF    = 3'd5; // burst the framebuffer and wait for completion. 
                                     // calculate the next burst addr
 
     // Mealy state machine assignments
@@ -71,7 +71,7 @@ module fsm (
     assign wr_req = (state == WR_ZBUFF || state == WR_FBUFF);
     assign read_zfifo = (state == INTERP_Z);
     assign write_zfifo = read_zfifo;
-    assign z_out = zsum;
+    assign z_out = (zsum < zfifo_in) ? zsum : zfifo_in;
     assign read_zbuffout_fifo = (state == WR_ZBUFF);
     // whilst read_be_fifo may be on for a long time b/c of this Mealy assignment, it will be ANDed with the appropriate 
     // external AXI signal connecting to the fifo, so this signal acts like a mux.
