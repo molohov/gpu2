@@ -317,6 +317,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire                                      intermediate_be_fanout;
   wire                                      write_be_fifo;
   wire                                      start;
+  wire                                      clear_done;
   wire [2:0] curr_state;
   wire read_zbuffout_fifo;
   wire [8:0] fifo_addr;
@@ -363,7 +364,8 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .z_out (z_out),
     .read_zbuffout_fifo (read_zbuffout_fifo),
     .read_be_fifo (read_be_fifo),
-    .write_be_fifo (write_be_fifo)
+    .write_be_fifo (write_be_fifo),
+    .clear_done (clear_done)
     );
   
   // ------------------------------------------------------
@@ -606,11 +608,14 @@ input                                     bus2ip_mstwr_dst_dsc_n;
           
     		 mst_reg[1][1] <= mst_cmd_sm_busy;  
       
-          if (mst_byte_we[1] == 1'b1 )
+          if (mst_byte_we[1] == 1'b1 || clear_done)
           // INSERT CLEAR DONE CODE HERE
           // allows a clear of the 'Done'/'error'/'timeout'
             begin
-              mst_reg[1][0] <= Bus2IP_Data[(1-(1/BE_WIDTH)*BE_WIDTH)*8];
+              if (clear_done)
+                mst_reg[1][0] <= 0;
+              else
+                mst_reg[1][0] <= Bus2IP_Data[(1-(1/BE_WIDTH)*BE_WIDTH)*8];
               mst_reg[1][2] <= Bus2IP_Data[(1-(1/BE_WIDTH)*BE_WIDTH)*8+2];
               mst_reg[1][3] <= Bus2IP_Data[(1-(1/BE_WIDTH)*BE_WIDTH)*8+3];
             end
