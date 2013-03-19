@@ -1,5 +1,5 @@
 module fsm (
-    // inputs
+    // INPUTS
     input           clk,
     input           nreset,
     input           start,
@@ -8,27 +8,31 @@ module fsm (
     input [31:0]    dx,
     input [31:0]    slope,
     input [31:0]    z1,
-    input           zread_empty,
-    input [31:0]    zfifo_in,
     input [31:0]    rem,
     input [31:0]    err,
+    input [31:0]    rgbx, 
+    input [31:0]    z_fifo_in,
+    input [31:0]    f_fifo_in,
     input           axi_done,
 
-    // outputs
-    //DEBUG OUTPUTS
-    output [2:0]    curr_state,
+    // OUTPUTS
+    // DEBUG
+    output [3:0]    curr_state,
     output          start_out,
+    // signals to AXI bus
     output          rd_req,
     output          wr_req,
     output [31:0]   addr,
-    // byteenable is a single bit because it represents whether the entire word is written or not
-    output          byteenable,
-    output          read_zfifo,
-    output          write_zfifo,
+    output          done,
+    // signals to pcore FIFOs
+    output          axi_bus_to_z_fifo,
+    output          axi_bus_to_f_fifo,
+    output          read_in_fifos,
+    output          write_out_fifos,
+    output          read_z_out_fifo,
+    output          read_f_out_fifo,
     output [31:0]   z_out,
-    output          read_zbuffout_fifo,
-    output          read_be_fifo,
-    output          write_be_fifo
+    output [31:0]   f_out
 );
 
     // ENGLISH LANGUAGE CODE:
@@ -45,121 +49,120 @@ module fsm (
     // wires
 
     // guessing how many states there might be
-    reg [2:0] state, nextstate; 
-    reg be, nextbe;
-    reg writebe, nextwritebe;
+    reg [3:0] state, nextstate; 
     reg [31:0] addr_offset, nextaddr_offset;
-    reg [15:0] xsum, nextxsum, xcnt, next_xcnt;
+    reg [15:0] xsum, nextxsum, xcnt, nextxcnt;
     reg [31:0] zsum, nextzsum;
     reg [31:0] error, nexterror;
 
     // define states
-    localparam  IDLE        = 3'd0, // reset state. 
-                LOAD_ZBUFF  = 3'd1, // load zbuff MAX_LEN from pre calculated address 
-                                    // and set AXI burst params accordingly
-                TRAVERSE_X  = 3'd2,
-                INTERP_Z    = 3'd3, // who knows how long this may take...
+    localparam  RELAX_AND_CHILL = 4'd0,
+                INIT        = 4'd1, // idle state. 
+                LOOP_START  = 4'd2, // calculate the address to burst read from for fbuff and zbuff, and check 
+                                    // to see if the loop will terminate or not
+                LOAD_ZBUFF  = 4'd3, // issue rd_req from zbuff into zbuff_fifo
+                LOAD_FBUFF  = 4'd4, // issue rd_req from fbuff into fbuff_fifo
+                INTERP_Z    = 4'd5, // who knows how long this may take...
                                     // assume it can calculate and write values in the same 
                                     // state (1 z-value and 1 byte-enable per 4 cycles)
-                WR_ZBUFF    = 3'd4, // burst the zbuffer and wait for completion
-                WR_FBUFF    = 3'd5; // burst the framebuffer and wait for completion. 
+                WR_ZBUFF    = 4'd6, // burst the zbuffer and wait for completion
+                WR_FBUFF    = 4'd7, // burst the framebuffer and wait for completion. 
                                     // calculate the next burst addr
+                DONE        = 4'd8; // self explanatory
 
     // Mealy state machine assignments
-    assign addr = (state == WR_FBUFF) ? fb_addr + addr_offset : zbuff_addr + addr_offset; 
-    assign rd_req = (state == TRAVERSE_X);
+    assign addr = (state == WR_FBUFF || state == LOAD_FBUFF) ? fb_addr + addr_offset : zbuff_addr + addr_offset; 
+    assign rd_req = (state == LOAD_ZBUFF || state == LOAD_FBUFF);
     assign wr_req = (state == WR_ZBUFF || state == WR_FBUFF);
-    assign read_zfifo = (state == INTERP_Z);
-    assign write_zfifo = read_zfifo;
-    assign z_out = (zsum < zfifo_in) ? zsum : zfifo_in;
-    assign read_zbuffout_fifo = (state == WR_ZBUFF);
-    // whilst read_be_fifo may be on for a long time b/c of this Mealy assignment, it will be ANDed with the appropriate 
-    // external AXI signal connecting to the fifo, so this signal acts like a mux.
-    assign read_be_fifo = (state == WR_ZBUFF || state == WR_FBUFF);
-    assign byteenable = be;
+    assign read_in_fifos = (state == INTERP_Z);
+    assign write_out_fifos = read_in_fifos;
+    assign z_out = (zsum < z_fifo_in) ? zsum : z_fifo_in;
+    assign f_out = (zsum < z_fifo_in) ? rgbx : f_fifo_in;
+    assign read_z_out_fifo = (state == WR_ZBUFF);
+    assign read_f_out_fifo = (state == WR_FBUFF);
+    assign axi_bus_to_z_fifo = (state == LOAD_ZBUFF);
+    assign axi_bus_to_f_fifo = (state == LOAD_FBUFF);
+    assign done = (state == DONE);
+
     assign curr_state = state;
     assign start_out = start;
-    assign write_be_fifo = writebe;
  
     always @ (posedge clk)
     begin
         if (!nreset)
         begin
-            state       <= IDLE;
-            be          <= 0;
+            state       <= RELAX_AND_CHILL;
             addr_offset <= 32'd0;
             xsum        <= 16'd0;
             zsum        <= 32'd0;
             xcnt        <= 16'd0;
             error       <= 32'd0;
-            writebe     <= 1'd0;
         end
         else
         begin
             state       <= nextstate;
-            be          <= nextbe;
             addr_offset <= nextaddr_offset;
             xsum        <= nextxsum;
             zsum        <= nextzsum;
-            xcnt        <= next_xcnt;
+            xcnt        <= nextxcnt;
             error       <= nexterror;
-            writebe     <= nextwritebe;
         end
     end
 
     always @ (*)
     begin
         nextstate = state;
-        nextbe = be;
         nextaddr_offset = addr_offset;
         nextxsum = xsum;
         nextzsum = zsum;
-        next_xcnt = xcnt;
+        nextxcnt = xcnt;
         nexterror = error;
-        nextwritebe = writebe;
 
         case (state)
-            IDLE:
+            RELAX_AND_CHILL:
             begin
                 if (start)
-                begin
-                    nextstate = LOAD_ZBUFF;
-                    nextxsum = dx; // dx is precalculated by sw
-                    nextzsum = z1;
-                    nextaddr_offset = 32'd0;
-                end
+                    nextstate = INIT;
             end
-            LOAD_ZBUFF:
+            INIT:
+            begin
+                nextstate = LOOP_START;
+                nextxsum = dx; // dx is precalculated by sw
+                nextzsum = z1;
+                nextaddr_offset = 32'd0;
+            end
+            LOOP_START:
             begin
                 if (xsum > 0)
                 begin
                     nextxsum = xsum - 256;
-                    next_xcnt = 256; 
+                    nextxcnt = 256; 
                     nexterror = err + rem;
-                    nextstate = TRAVERSE_X; 
+                    nextstate = LOAD_ZBUFF; 
                 end
                 else
-                    nextstate = IDLE;
+                    nextstate = DONE;
             end
-            TRAVERSE_X:
+            LOAD_ZBUFF:
             begin
-                // wait for the fifo to have something
-                if (!zread_empty)
+                // wait for AXI completion
+                if (axi_done)
+                    nextstate = LOAD_FBUFF;
+            end
+            LOAD_FBUFF:
+            begin
+                // wait for AXI completion
+                if (axi_done)
                     nextstate = INTERP_Z;
             end
             INTERP_Z:
             // write a new z value every cycle (for 256 cycles)
             begin
                 if (xcnt == 0)
-                begin
                     nextstate = WR_ZBUFF;
-                    nextwritebe = 1'd0;
-                end    
                 else
                 begin
-                    next_xcnt = xcnt - 1;
-                    nextwritebe = 1'd1;
-                    nextbe = (zsum < zfifo_in) ? 1'b1 : 1'b0;
+                    nextxcnt = xcnt - 1;
                     nexterror = error + rem;
                     if (error > dx)
                     begin
@@ -172,23 +175,24 @@ module fsm (
             end
             WR_ZBUFF:
             begin
-                // TODO: start the transfer with the correct go signal
-                // wr_req is already high (mealy state machine)
-                // control the read signals to the zbuff fifo 
-                // poll the done signal from the AXI bus
+                // wait for AXI completion
                 if (axi_done)
                     nextstate = WR_FBUFF;
-                // TODO: clear the done bit
             end
             WR_FBUFF:
             begin
-                // TODO: start the transfer, and clear the done bit when done
+                // wait for AXI completion
                 if (axi_done)
                 begin
-                    nextstate = LOAD_ZBUFF;
+                    nextstate = LOOP_START;
                     nextaddr_offset = addr_offset + 32'd256;
                 end
             end
+            DONE: 
+            begin
+                if (start)
+                nextstate = INIT;
+            end    
         endcase
     end
 
