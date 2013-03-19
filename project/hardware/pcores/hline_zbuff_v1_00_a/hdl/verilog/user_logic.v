@@ -472,6 +472,10 @@ input                                     bus2ip_mstwr_dst_dsc_n;
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg11[bit_index] <= Bus2IP_Data[bit_index];
+              else
+                // Pulse start (ie set to 0 if not being written by master)
+                for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
+                  slv_reg11[bit_index] <= 1'b0;
           default : ;
         endcase
 
