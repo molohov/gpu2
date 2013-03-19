@@ -319,6 +319,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire                                      start;
   wire [2:0] curr_state;
   wire read_zbuffout_fifo;
+  wire [8:0] fifo_addr;
 
   assign    fb_addr    = slv_reg0;
   assign    zbuff_addr = slv_reg1;
@@ -482,7 +483,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 
       case ( slv_reg_read_sel )
         12'b100000000000 : slv_ip2bus_data <= bus2ip_mstrd_d;
-        12'b010000000000 : slv_ip2bus_data <= mst_fifo_valid_read_xfer;
+        12'b010000000000 : slv_ip2bus_data <= mst_fifo_valid_write_xfer;
         12'b001000000000 : slv_ip2bus_data <= ip2bus_mstwr_d;
         12'b000100000000 : slv_ip2bus_data <= slv_reg3;
         12'b000010000000 : slv_ip2bus_data <= slv_reg4;
@@ -493,7 +494,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
         12'b000000001000 : slv_ip2bus_data <= zfifo_in; // should be head of FIFO
         12'b000000000100 : slv_ip2bus_data <= {15'd0, start_out, 7'd0, zread_empty, 5'b0, curr_state};
         12'b000000000010 : slv_ip2bus_data <= addr;
-        12'b000000000001 : slv_ip2bus_data <= slv_reg11;
+        12'b000000000001 : slv_ip2bus_data <= {23'd0, fifo_addr};
         default : slv_ip2bus_data <= 0;
       endcase
 
@@ -578,7 +579,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_cntl_burst    = 1'b1;
   assign mst_ip2bus_addr   = addr;
   assign mst_ip2bus_be     = 16'hffff;
-  assign mst_xfer_reg_len  = 20'd256;// changed to 20 bits 
+  assign mst_xfer_reg_len  = 20'd1024;// changed to 20 bits 
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
 
   // implement byte write enable for each byte slice of the master model registers
@@ -606,6 +607,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     		 mst_reg[1][1] <= mst_cmd_sm_busy;  
       
           if (mst_byte_we[1] == 1'b1 )
+          // INSERT CLEAR DONE CODE HERE
           // allows a clear of the 'Done'/'error'/'timeout'
             begin
               mst_reg[1][0] <= Bus2IP_Data[(1-(1/BE_WIDTH)*BE_WIDTH)*8];
@@ -1058,7 +1060,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
      .Data_Out(zfifo_in),
      .FIFO_Full(),
      .FIFO_Empty(zread_empty),
-     .Addr()); // ZBUFF_READ_FIFO
+     .Addr(fifo_addr)); // ZBUFF_READ_FIFO
 
    // z-buffer out FIFO. 256 (max burst length) long
    srl_fifo_f #(

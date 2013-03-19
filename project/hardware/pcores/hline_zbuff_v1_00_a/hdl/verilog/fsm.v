@@ -67,7 +67,7 @@ module fsm (
 
     // Mealy state machine assignments
     assign addr = (state == WR_FBUFF) ? fb_addr + addr_offset : zbuff_addr + addr_offset; 
-    assign rd_req = (state == LOAD_ZBUFF) && (xsum != 0);
+    assign rd_req = (state == TRAVERSE_X);
     assign wr_req = (state == WR_ZBUFF || state == WR_FBUFF);
     assign read_zfifo = (state == INTERP_Z);
     assign write_zfifo = read_zfifo;
