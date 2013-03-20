@@ -166,6 +166,7 @@ input                                     FSL_M_Full;
    // consistent with the sequence they are written in the
    // driver's matrixmult.c file
 
+   wire write_enable;
    assign FSL_S_Read  = (state == Read_Inputs) ? FSL_S_Exists : 0; 
    assign FSL_M_Write = (state == Write_Outputs & write_enable == 1) ? ~FSL_M_Full : 0;
 
@@ -177,7 +178,6 @@ input                                     FSL_M_Full;
    assign FLS_S_Data = data_out;
 
    wire [2:0] count;	
-   wire write_enable;
    wire done;
    wire toggle_avalid, toggle_bvalid;
 	
@@ -300,7 +300,7 @@ module posedge_pulse(
 		input clk,
 		input reset,
 		input [2:0] signal,
-		output signal_pulse
+		output reg signal_pulse
 
 		);
 
