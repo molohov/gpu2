@@ -3,19 +3,33 @@
 #include <math.h>
 #include <stdlib.h>
 
-#ifndef MAX
-#define MAX(a,b) (a > b ? a : b)
-#endif
-
-#ifndef MIN
-#define MIN(a,b) (a < b ? a : b)
-#endif
-
 gpPolyHierarchy *h = NULL;
+gpPolyHierarchy *elevator = NULL;
 
 void idle()
 {
   // do nothing
+  static float elevator_y = 0.f;
+  static const float MAX_Y = 8.f;
+  static const float DELTA_Y = .5f;
+
+  static bool going_up = true;
+
+  if (going_up) {
+    gpTranslatePolyHierarchy(elevator, 0.f, DELTA_Y, 0.f);
+    elevator_y += DELTA_Y;
+    if (elevator_y >= MAX_Y) {
+      going_up = false;
+    }
+  } else {
+    gpTranslatePolyHierarchy(elevator, 0.f, -DELTA_Y, 0.f);
+    elevator_y -= DELTA_Y;
+    if (elevator_y <= 0.f) {
+      going_up = true;
+    }
+  }
+
+  gpRenderAll(h);
 }
 
 bool keyboard(int c)
@@ -131,9 +145,57 @@ int main()
   gpSetPolyColor(floor, 0x40, 0x20, 0x20);
   gpAddPolyToList(stair_list, floor);
 
+  gpPolyList *elevator_list = gpCreatePolyList();
+
+  gpPoly *elevator_back = gpCreatePoly(4);
+  gpSetPolyVertex(elevator_back, 0, -.5f, 0.f, .25f);
+  gpSetPolyVertex(elevator_back, 1, .5f, 0.f, .25f);
+  gpSetPolyVertex(elevator_back, 2, .5f, 2.f, .25f);
+  gpSetPolyVertex(elevator_back, 3, -.5f, 2.f, GP_INFER_COORD);
+  gpSetPolyColor(elevator_back, 0x60, 0x60, 0x60);
+
+  gpPoly *elevator_left = gpCreatePoly(4);
+  gpSetPolyVertex(elevator_left, 0, -.5f, 0.f, -.25f);
+  gpSetPolyVertex(elevator_left, 1, -.5f, 0.f, .25f);
+  gpSetPolyVertex(elevator_left, 2, -.5f, 2.f, .25f);
+  gpSetPolyVertex(elevator_left, 3, GP_INFER_COORD, 2.f, -.25f);
+  gpSetPolyColor(elevator_left, 0xc0, 0xc0, 0xc0);
+
+  gpPoly *elevator_right = gpCreatePoly(4);
+  gpSetPolyVertex(elevator_right, 0, .5f, 0.f, -.25f);
+  gpSetPolyVertex(elevator_right, 1, .5f, 0.f, .25f);
+  gpSetPolyVertex(elevator_right, 2, .5f, 2.f, .25f);
+  gpSetPolyVertex(elevator_right, 3, GP_INFER_COORD, 2.f, -.25f);
+  gpSetPolyColor(elevator_right, 0xc0, 0xc0, 0xc0);
+
+  gpPoly *elevator_top = gpCreatePoly(4);
+  gpSetPolyVertex(elevator_top, 0, -.5f, 2.f, -.25f);
+  gpSetPolyVertex(elevator_top, 1, .5f, 2.f, -.25f);
+  gpSetPolyVertex(elevator_top, 2, .5f, 2.f, .25f);
+  gpSetPolyVertex(elevator_top, 3, -.5f, GP_INFER_COORD, .25f);
+  gpSetPolyColor(elevator_top, 0x90, 0x90, 0x90);
+
+  gpPoly *elevator_bottom = gpCreatePoly(4);
+  gpSetPolyVertex(elevator_bottom, 0, -.5f, 0.f, -.25f);
+  gpSetPolyVertex(elevator_bottom, 1, .5f, 0.f, -.25f);
+  gpSetPolyVertex(elevator_bottom, 2, .5f, 0.f, .25f);
+  gpSetPolyVertex(elevator_bottom, 3, -.5f, GP_INFER_COORD, .25f);
+  gpSetPolyColor(elevator_bottom, 0x90, 0x90, 0x90);
+
+  gpAddPolyToList(elevator_list, elevator_back);
+  gpAddPolyToList(elevator_list, elevator_left);
+  gpAddPolyToList(elevator_list, elevator_right);
+  gpAddPolyToList(elevator_list, elevator_top);
+  gpAddPolyToList(elevator_list, elevator_bottom);
+
+  elevator = gpCreatePolyHierarchy();
+  gpSetPolyHierarchyList(elevator, elevator_list);
+  gpTranslatePolyHierarchy(elevator, -5.f, 0.f, 0.f);
+
   h = gpCreatePolyHierarchy();
   gpSetPolyHierarchyList(h, stair_list);
-  gpRotatePolyHierarchy(h, 0.f, .7854f, 0.f);
+  gpSetPolyHierarchyChild(h, elevator);
+  gpRotatePolyList(stair_list, 0.f, .7854f, 0.f);
   gpTranslatePolyHierarchy(h, 0.f, -2.f, 10.f);
 
   gpRenderAll(h);
