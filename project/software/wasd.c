@@ -93,7 +93,7 @@ gpPolyList *createStairs()
     gpSetPolyVertex(y, 1, OUTER_RADIUS, (i + 1) * HEIGHT, 0.f);
     gpSetPolyVertex(y, 2, OUTER_RADIUS * cosf(DELTA_ANGLE), (i + 1) * HEIGHT, OUTER_RADIUS * sinf(DELTA_ANGLE));
     gpSetPolyVertex(y, 3, INNER_RADIUS * cosf(DELTA_ANGLE), GP_INFER_COORD, INNER_RADIUS * sinf(DELTA_ANGLE));
-    gpSetPolyColor(y, 0xff - i - NUM_STAIRS, 0xff - i - NUM_STAIRS, 0xff - i - NUM_STAIRS);
+    gpSetPolyColor(y, 0xff - i - 4 * NUM_STAIRS, 0xff - i - 4 * NUM_STAIRS, 0xff - i - 4 * NUM_STAIRS);
     gpRotatePoly(y, 0.f, angle, 0.f);
 
     gpPoly *x = gpCreatePoly(4);
@@ -118,14 +118,23 @@ int main()
   gpSetBackgroundColor(0x60, 0x00, 0xe0);
   gpEnable(GP_ZBUFFER);
   gpEnable(GP_PERSPECTIVE);
-  gpSetFrustrum(1.f, 20.f);
+  gpSetFrustrum(2.f, 50.f);
 
   gpPolyList *stair_list = createStairs();
+
+  static const int FLOOR_LEN = 4.f;
+  gpPoly *floor = gpCreatePoly(4);
+  gpSetPolyVertex(floor, 0, 0.f, 0.f, -FLOOR_LEN);
+  gpSetPolyVertex(floor, 1, FLOOR_LEN, 0.f, 0.f);
+  gpSetPolyVertex(floor, 2, 0.f, 0.f, FLOOR_LEN);
+  gpSetPolyVertex(floor, 3, -FLOOR_LEN, GP_INFER_COORD, 0.f);
+  gpSetPolyColor(floor, 0x40, 0x20, 0x20);
+  gpAddPolyToList(stair_list, floor);
 
   h = gpCreatePolyHierarchy();
   gpSetPolyHierarchyList(h, stair_list);
   gpRotatePolyHierarchy(h, 0.f, .7854f, 0.f);
-  gpTranslatePolyHierarchy(h, 0.f, -2.f, 7.5f);
+  gpTranslatePolyHierarchy(h, 0.f, -2.f, 10.f);
 
   gpRenderAll(h);
 
