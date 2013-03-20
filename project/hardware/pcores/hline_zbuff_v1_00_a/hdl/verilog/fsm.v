@@ -74,7 +74,7 @@ module fsm (
     assign addr = (state == WR_FBUFF || state == LOAD_FBUFF) ? fb_addr + addr_offset : zbuff_addr + addr_offset; 
     assign rd_req = (state == LOAD_ZBUFF || state == LOAD_FBUFF);
     assign wr_req = (state == WR_ZBUFF || state == WR_FBUFF);
-    assign read_in_fifos = (state == INTERP_Z);
+    assign read_in_fifos = (state == INTERP_Z) && (xcnt != 0);
     assign write_out_fifos = read_in_fifos;
     assign z_out = (zsum < z_fifo_in) ? zsum : z_fifo_in;
     assign f_out = (zsum < z_fifo_in) ? rgbx : f_fifo_in;

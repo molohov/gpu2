@@ -278,10 +278,10 @@ input                                     bus2ip_mstwr_dst_dsc_n;
 // signals for master model write locallink interface state machine
  parameter   [2 : 0]                        LLWR_IDLE = 3'b000, 
                                             LLWR_SNGL_INIT = 3'b001, 
-                             LLWR_SNGL = 3'b010, 
-                             LLWR_BRST_INIT = 3'b011, 
-                             LLWR_BRST = 3'b100, 
-                             LLWR_BRST_LAST_BEAT = 3'b101;
+                                            LLWR_SNGL = 3'b010, 
+                                            LLWR_BRST_INIT = 3'b011, 
+                                            LLWR_BRST = 3'b100, 
+                                            LLWR_BRST_LAST_BEAT = 3'b101;
  
  reg         [2 : 0]                        mst_llwr_sm_state;
  reg                                        mst_llwr_sm_src_rdy;
@@ -308,19 +308,22 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire       [C_SLV_DWIDTH-1 : 0]           err; 
   wire       [C_SLV_DWIDTH-1 : 0]           rem; 
   wire       [C_SLV_DWIDTH-1 : 0]           zbuff_out; 
-  wire       [C_SLV_DWIDTH-1 : 0]           zfifo_in; 
+  wire       [C_SLV_DWIDTH-1 : 0]           fbuff_out; 
+  wire       [C_SLV_DWIDTH-1 : 0]           z_fifo_in; 
+  wire       [C_SLV_DWIDTH-1 : 0]           f_fifo_in; 
   wire       [C_SLV_DWIDTH-1 : 0]           addr; 
   wire       [C_SLV_DWIDTH-1 : 0]           z_out; 
+  wire       [C_SLV_DWIDTH-1 : 0]           f_out; 
   wire                                      axi_rd_req;
   wire                                      axi_wr_req;
   wire                                      zread_empty;
-  wire                                      intermediate_be_fanout;
-  wire                                      write_be_fifo;
   wire                                      start;
   wire                                      clear_done;
-  wire [2:0] curr_state;
-  wire read_zbuffout_fifo;
-  wire [8:0] fifo_addr;
+  wire                                      axi_done;
+  wire                                      read_z_out_fifo;
+  wire       [3:0]                          curr_state;
+  wire                                      read_in_fifos;
+  wire                                      write_out_fifos;
 
   assign    fb_addr    = slv_reg0;
   assign    zbuff_addr = slv_reg1;
@@ -332,12 +335,12 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign    rem        = slv_reg7;
   // can be whichever register
   assign    start      = slv_reg11[0];
-  assign    ip2bus_mstwr_d = read_zbuffout_fifo ? zbuff_out : rgbx;  
+  assign    axi_done   = mst_cmd_sm_set_done; 
+  assign    ip2bus_mstwr_d = read_z_out_fifo ? zbuff_out : fbuff_out;  
   
 
 
   fsm fsm_inst (
-    // inputs
     .clk (Bus2IP_Clk),
     .nreset (Bus2IP_Resetn),
     .start (start),
@@ -346,26 +349,27 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .dx (dx),
     .slope (slope),
     .z1 (z1),
-    .zread_empty (zread_empty),
-    .zfifo_in (zfifo_in),
     .rem (rem),
     .err (err),
-    .axi_done (mst_reg[1][0]),
+    .rgbx (rgbx),
+    .z_fifo_in (z_fifo_in),
+    .f_fifo_in (f_fifo_in),
+    .axi_done (axi_done),
 
-    // outputs
     .curr_state (curr_state),
     .start_out (start_out),
     .rd_req (axi_rd_req),
     .wr_req (axi_wr_req),
     .addr (addr),
-    .byteenable (byteenable),
-    .read_zfifo (read_zfifo),
-    .write_zfifo (write_zfifo),
+    .done (done),
+    .axi_bus_to_z_fifo (axi_bus_to_z_fifo),
+    .axi_bus_to_f_fifo (axi_bus_to_f_fifo),
+    .read_in_fifos (read_in_fifos),
+    .write_out_fifos (write_out_fifos),
+    .read_z_out_fifo (read_z_out_fifo),
+    .read_f_out_fifo (read_f_out_fifo),
     .z_out (z_out),
-    .read_zbuffout_fifo (read_zbuffout_fifo),
-    .read_be_fifo (read_be_fifo),
-    .write_be_fifo (write_be_fifo),
-    .clear_done (clear_done)
+    .f_out (f_out)
     );
   
   // ------------------------------------------------------
@@ -495,12 +499,12 @@ input                                     bus2ip_mstwr_dst_dsc_n;
         12'b000010000000 : slv_ip2bus_data <= slv_reg4;
         12'b000001000000 : slv_ip2bus_data <= slv_reg5;
         12'b000000100000 : slv_ip2bus_data <= slv_reg6;
-        12'b000000010000 : slv_ip2bus_data <= slv_reg7;
+        12'b000000010000 : slv_ip2bus_data <= {31'd0, done};
         // DEBUG 
-        12'b000000001000 : slv_ip2bus_data <= zfifo_in; // should be head of FIFO
-        12'b000000000100 : slv_ip2bus_data <= {15'd0, start_out, 7'd0, zread_empty, 5'b0, curr_state};
-        12'b000000000010 : slv_ip2bus_data <= addr;
-        12'b000000000001 : slv_ip2bus_data <= {23'd0, fifo_addr};
+        12'b000000001000 : slv_ip2bus_data <= z_fifo_in; // should be head of FIFO
+        12'b000000000100 : slv_ip2bus_data <= f_fifo_in; 
+        12'b000000000010 : slv_ip2bus_data <= {6'd0, mst_cmd_sm_state, 7'd0, mst_cmd_sm_wr_req, 7'd0, mst_cmd_sm_rd_req, 4'b0, curr_state};
+        12'b000000000001 : slv_ip2bus_data <= addr;
         default : slv_ip2bus_data <= 0;
       endcase
 
@@ -612,14 +616,10 @@ input                                     bus2ip_mstwr_dst_dsc_n;
           
     		 mst_reg[1][1] <= mst_cmd_sm_busy;  
       
-          if (mst_byte_we[1] == 1'b1 || clear_done)
-          // INSERT CLEAR DONE CODE HERE
+          if (mst_byte_we[1] == 1'b1)
           // allows a clear of the 'Done'/'error'/'timeout'
             begin
-              if (clear_done)
-                mst_reg[1][0] <= 0;
-              else
-                mst_reg[1][0] <= Bus2IP_Data[(1-(1/BE_WIDTH)*BE_WIDTH)*8];
+              mst_reg[1][0] <= Bus2IP_Data[(1-(1/BE_WIDTH)*BE_WIDTH)*8];
               mst_reg[1][2] <= Bus2IP_Data[(1-(1/BE_WIDTH)*BE_WIDTH)*8+2];
               mst_reg[1][3] <= Bus2IP_Data[(1-(1/BE_WIDTH)*BE_WIDTH)*8+3];
             end
@@ -1056,50 +1056,66 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_fifo_valid_read_xfer  = !bus2ip_mstwr_dst_rdy_n & mst_llwr_sm_src_rdy;
   assign bus2ip_Reset   = !Bus2IP_Resetn;
  
-   // z-buffer read FIFO. 256 (max burst length) long
+   // z-buffer read FIFO
    srl_fifo_f #(
      .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
      .C_DEPTH(256))
    ZBUFF_READ_FIFO (
      .Clk(Bus2IP_Clk),
      .Reset(bus2ip_Reset),
-     .FIFO_Write(mst_fifo_valid_write_xfer),
+     .FIFO_Write(mst_fifo_valid_write_xfer & axi_bus_to_z_fifo),
      .Data_In(bus2ip_mstrd_d),
-     .FIFO_Read(read_zfifo),
-     .Data_Out(zfifo_in),
+     .FIFO_Read(read_in_fifos),
+     .Data_Out(z_fifo_in),
      .FIFO_Full(),
-     .FIFO_Empty(zread_empty),
-     .Addr(fifo_addr)); // ZBUFF_READ_FIFO
+     .FIFO_Empty(),
+     .Addr()); // ZBUFF_READ_FIFO
 
-   // z-buffer out FIFO. 256 (max burst length) long
+   // z-buffer out FIFO
    srl_fifo_f #(
      .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
      .C_DEPTH(256))
    ZBUFF_WRITE_FIFO (
      .Clk(Bus2IP_Clk),
      .Reset(bus2ip_Reset),
-     .FIFO_Write(write_zfifo),
+     .FIFO_Write(write_out_fifos),
      .Data_In(z_out),
-     .FIFO_Read(read_zbuffout_fifo),
+     .FIFO_Read(read_z_out_fifo & mst_fifo_valid_read_xfer),
      .Data_Out(zbuff_out),
      .FIFO_Full(),
      .FIFO_Empty(),
      .Addr()); // ZBUFF_WRITE_FIFO
-
-   // byte-enable out FIFO. 256 (max burst length) long, but 1 bit wide (ho ho ho)
+        
+   // frame buffer read FIFO
    srl_fifo_f #(
-     .C_DWIDTH(1),
+     .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
      .C_DEPTH(256))
-   BE_WRITE_FIFO (
+   FBUFF_READ_FIFO (
      .Clk(Bus2IP_Clk),
      .Reset(bus2ip_Reset),
-     .FIFO_Write(write_be_fifo),
-     .Data_In(byteenable),
-     .FIFO_Read(read_be_fifo & mst_fifo_valid_read_xfer),
-     .Data_Out(intermediate_be_fanout),
+     .FIFO_Write(mst_fifo_valid_write_xfer & axi_bus_to_f_fifo),
+     .Data_In(bus2ip_mstrd_d),
+     .FIFO_Read(read_in_fifos),
+     .Data_Out(f_fifo_in),
      .FIFO_Full(),
      .FIFO_Empty(),
-     .Addr()); // BE_WRITE_FIFO
+     .Addr()); // FBUFF_READ_FIFO
+
+   // frame buffer out FIFO
+   srl_fifo_f #(
+     .C_DWIDTH(C_MST_NATIVE_DATA_WIDTH),
+     .C_DEPTH(256))
+   FBUFF_WRITE_FIFO (
+     .Clk(Bus2IP_Clk),
+     .Reset(bus2ip_Reset),
+     .FIFO_Write(write_out_fifos),
+     .Data_In(f_out),
+     .FIFO_Read(read_f_out_fifo & mst_fifo_valid_read_xfer),
+     .Data_Out(fbuff_out),
+     .FIFO_Full(),
+     .FIFO_Empty(),
+     .Addr()); // FBUFF_WRITE_FIFO
+
  
   // ------------------------------------------------------------
   // Example code to drive IP to Bus signals
