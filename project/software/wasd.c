@@ -8,7 +8,6 @@ gpPolyHierarchy *elevator = NULL;
 
 void idle()
 {
-  // do nothing
   static float elevator_y = 0.f;
   static const float MAX_Y = 8.f;
   static const float DELTA_Y = .5f;
