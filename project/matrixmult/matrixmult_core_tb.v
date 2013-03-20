@@ -1,4 +1,6 @@
-module matrixmult_tb();
+`timescale 1 ns / 1 ns
+
+module matrixmult_core_tb();
 
 
 	wire FSL_S_Read;
