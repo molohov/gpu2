@@ -1,16 +1,34 @@
 #include "gp.h"
 
+#include <math.h>
 #include <stdlib.h>
 
-#define INITIAL_Z 1.5f
-
-gpPolyList *rotate_cube = NULL;
-gpPolyHierarchy *translations = NULL;
+gpPolyHierarchy *h = NULL;
+gpPolyHierarchy *elevator = NULL;
 
 void idle()
 {
-  gpRotatePolyList(rotate_cube, 0.f, 0.f, 0.1f);
-  gpRenderAll(translations);
+  static float elevator_y = 0.f;
+  static const float MAX_Y = 8.f;
+  static const float DELTA_Y = .5f;
+
+  static bool going_up = true;
+
+  if (going_up) {
+    gpTranslatePolyHierarchy(elevator, 0.f, DELTA_Y, 0.f);
+    elevator_y += DELTA_Y;
+    if (elevator_y >= MAX_Y) {
+      going_up = false;
+    }
+  } else {
+    gpTranslatePolyHierarchy(elevator, 0.f, -DELTA_Y, 0.f);
+    elevator_y -= DELTA_Y;
+    if (elevator_y <= 0.f) {
+      going_up = true;
+    }
+  }
+
+  gpRenderAll(h);
 }
 
 bool keyboard(int c)
@@ -19,28 +37,34 @@ bool keyboard(int c)
 
   switch (c) {
     case 'w':
-      gpTranslatePolyHierarchy(translations, 0.f, 0.f, -.2f);
+      gpTranslatePolyHierarchy(h, 0.f, 0.f, -.2f);
       break;
     case 'a':
-      gpRotatePolyHierarchy(translations, 0.f, .05f, 0.f);
+      gpRotatePolyHierarchy(h, 0.f, .05f, 0.f);
       break;
     case 's':
-      gpTranslatePolyHierarchy(translations, 0.f, 0.f, .2f);
+      gpTranslatePolyHierarchy(h, 0.f, 0.f, .2f);
       break;
     case 'd':
-      gpRotatePolyHierarchy(translations, 0.f, -.05f, 0.f);
+      gpRotatePolyHierarchy(h, 0.f, -.05f, 0.f);
+      break;
+    case 'r':
+      gpRotatePolyHierarchy(h, .05f, 0.f, 0.f);
+      break;
+    case 'f':
+      gpRotatePolyHierarchy(h, -.05f, 0.f, 0.f);
       break;
     case 'h':
-      gpTranslatePolyHierarchy(translations, .2f, 0.f, 0.f);
+      gpTranslatePolyHierarchy(h, .2f, 0.f, 0.f);
       break;
     case 'l':
-      gpTranslatePolyHierarchy(translations, -.2f, 0.f, 0.f);
+      gpTranslatePolyHierarchy(h, -.2f, 0.f, 0.f);
       break;
     case 'k':
-      gpTranslatePolyHierarchy(translations, 0.f, -.2f, 0.f);
+      gpTranslatePolyHierarchy(h, 0.f, -.2f, 0.f);
       break;
     case 'j':
-      gpTranslatePolyHierarchy(translations, 0.f, .2f, 0.f);
+      gpTranslatePolyHierarchy(h, 0.f, .2f, 0.f);
       break;
     case 'q':
       return true;
@@ -48,67 +72,57 @@ bool keyboard(int c)
       render = false;
       break;
   }
+
   if (render) {
-    gpRenderAll(translations);
+    gpRenderAll(h);
   }
 
   return false;
 }
 
-gpPolyList *createCube()
+gpPolyList *createStairs()
 {
-  // Cube
-  gpPoly *z = gpCreatePoly(4);
-  gpSetPolyVertex(z, 0, -.5f, -.5f, -.5f);
-  gpSetPolyVertex(z, 1, -.5f, .5f, -.5f);
-  gpSetPolyVertex(z, 2, .5f, .5f, -.5f);
-  gpSetPolyVertex(z, 3, .5f, -.5f, GP_INFER_COORD);
-  gpSetPolyColor(z, 0xff, 0x0, 0x0);
+  gpPolyList *stairs = gpCreatePolyList();
 
-  gpPoly *z2 = gpCreatePoly(4);
-  gpSetPolyVertex(z2, 0, -.5f, -.5f, .5f);
-  gpSetPolyVertex(z2, 1, -.5f, .5f, .5f);
-  gpSetPolyVertex(z2, 2, .5f, .5f, .5f);
-  gpSetPolyVertex(z2, 3, .5f, -.5f, GP_INFER_COORD);
-  gpSetPolyColor(z2, 0x0, 0xdf, 0x0);
+  static const int NUM_STAIRS = 20;
+  static const float DELTA_ANGLE = 2 * 3.14159265f / NUM_STAIRS;
+  static const float INNER_RADIUS = .25f;
+  static const float OUTER_RADIUS = 3.5f;
+  static const float HEIGHT = .4f;
 
-  gpPoly *y = gpCreatePoly(4);
-  gpSetPolyVertex(y, 0, -.5f, .5f, -.5f);
-  gpSetPolyVertex(y, 1, -.5f, .5f, .5f);
-  gpSetPolyVertex(y, 2, .5f, .5f, .5f);
-  gpSetPolyVertex(y, 3, .5f, GP_INFER_COORD, -.5f);
-  gpSetPolyColor(y, 0xbf, 0x0, 0x0);
+  for (int i = 0; i < NUM_STAIRS; i++) {
+    float angle = -i * DELTA_ANGLE;
 
-  gpPoly *y2 = gpCreatePoly(4);
-  gpSetPolyVertex(y2, 0, -.5f, -.5f, -.5f);
-  gpSetPolyVertex(y2, 1, -.5f, -.5f, .5f);
-  gpSetPolyVertex(y2, 2, .5f, -.5f, .5f);
-  gpSetPolyVertex(y2, 3, .5f, GP_INFER_COORD, -.5f);
-  gpSetPolyColor(y2, 0x0, 0xaf, 0x0);
+    gpPoly *z = gpCreatePoly(4);
+    gpSetPolyVertex(z, 0, INNER_RADIUS, i * HEIGHT, 0.f);
+    gpSetPolyVertex(z, 1, OUTER_RADIUS, i * HEIGHT, 0.f);
+    gpSetPolyVertex(z, 2, OUTER_RADIUS, (i + 1) * HEIGHT, 0.f);
+    gpSetPolyVertex(z, 3, INNER_RADIUS, (i + 1) * HEIGHT, GP_INFER_COORD);
+    gpSetPolyColor(z, 0xff - i, 0xff - i, 0xff - i);
+    gpRotatePoly(z, 0.f, angle, 0.f);
 
-  gpPoly *x = gpCreatePoly(4);
-  gpSetPolyVertex(x, 0, .5f, -.5f, -.5f);
-  gpSetPolyVertex(x, 1, .5f, -.5f, .5f);
-  gpSetPolyVertex(x, 2, .5f, .5f, .5f);
-  gpSetPolyVertex(x, 3, GP_INFER_COORD, .5f, -.5f);
-  gpSetPolyColor(x, 0x7f, 0x0, 0x0);
+    gpPoly *y = gpCreatePoly(4);
+    gpSetPolyVertex(y, 0, INNER_RADIUS, (i + 1) * HEIGHT, 0.f);
+    gpSetPolyVertex(y, 1, OUTER_RADIUS, (i + 1) * HEIGHT, 0.f);
+    gpSetPolyVertex(y, 2, OUTER_RADIUS * cosf(DELTA_ANGLE), (i + 1) * HEIGHT, OUTER_RADIUS * sinf(DELTA_ANGLE));
+    gpSetPolyVertex(y, 3, INNER_RADIUS * cosf(DELTA_ANGLE), GP_INFER_COORD, INNER_RADIUS * sinf(DELTA_ANGLE));
+    gpSetPolyColor(y, 0xff - i - 4 * NUM_STAIRS, 0xff - i - 4 * NUM_STAIRS, 0xff - i - 4 * NUM_STAIRS);
+    gpRotatePoly(y, 0.f, angle, 0.f);
 
-  gpPoly *x2 = gpCreatePoly(4);
-  gpSetPolyVertex(x2, 0, -.5f, -.5f, -.5f);
-  gpSetPolyVertex(x2, 1, -.5f, -.5f, .5f);
-  gpSetPolyVertex(x2, 2, -.5f, .5f, .5f);
-  gpSetPolyVertex(x2, 3, GP_INFER_COORD, .5f, -.5f);
-  gpSetPolyColor(x2, 0x0, 0x5f, 0x0);
+    gpPoly *x = gpCreatePoly(4);
+    gpSetPolyVertex(x, 0, INNER_RADIUS, 0.f, 0.f);
+    gpSetPolyVertex(x, 1, INNER_RADIUS, (i + 1) * HEIGHT, 0.f);
+    gpSetPolyVertex(x, 2, INNER_RADIUS * cosf(DELTA_ANGLE), (i + 1) * HEIGHT, INNER_RADIUS * sinf(DELTA_ANGLE));
+    gpSetPolyVertex(x, 3, GP_INFER_COORD, 0.f, INNER_RADIUS * sinf(DELTA_ANGLE));
+    gpSetPolyColor(x, 0x7f + 2 * NUM_STAIRS, 0x7f + 2 * NUM_STAIRS, 0x7f + 2 * NUM_STAIRS);
+    gpRotatePoly(x, 0.f, angle, 0.f);
 
-  gpPolyList *cube = gpCreatePolyList();
-  gpAddPolyToList(cube, z);
-  gpAddPolyToList(cube, y);
-  gpAddPolyToList(cube, x);
-  gpAddPolyToList(cube, z2);
-  gpAddPolyToList(cube, y2);
-  gpAddPolyToList(cube, x2);
+    gpAddPolyToList(stairs, z);
+    gpAddPolyToList(stairs, y);
+    gpAddPolyToList(stairs, x);
+  }
 
-  return cube;
+  return stairs;
 }
 
 /* User program */
@@ -117,27 +131,77 @@ int main()
   gpSetBackgroundColor(0x60, 0x00, 0xe0);
   gpEnable(GP_ZBUFFER);
   gpEnable(GP_PERSPECTIVE);
-  gpSetFrustrum(1.f, 20.f);
+  gpSetFrustrum(2.f, 50.f);
 
-  rotate_cube = createCube();
+  gpPolyList *stair_list = createStairs();
 
-  gpRotatePolyList(rotate_cube, -0.4f, 0.4f, 0.2f);
+  static const int FLOOR_LEN = 4.f;
+  gpPoly *floor = gpCreatePoly(4);
+  gpSetPolyVertex(floor, 0, 0.f, 0.f, -FLOOR_LEN);
+  gpSetPolyVertex(floor, 1, FLOOR_LEN, 0.f, 0.f);
+  gpSetPolyVertex(floor, 2, 0.f, 0.f, FLOOR_LEN);
+  gpSetPolyVertex(floor, 3, -FLOOR_LEN, GP_INFER_COORD, 0.f);
+  gpSetPolyColor(floor, 0x40, 0x20, 0x20);
+  gpAddPolyToList(stair_list, floor);
 
-  gpPolyList *ref_cube_list = createCube();
-  gpPolyHierarchy *ref_cube = gpCreatePolyHierarchy();
-  gpSetPolyHierarchyList(ref_cube, ref_cube_list);
-  gpTranslatePolyHierarchy(ref_cube, 3.f, 0.f, 0.f);
+  gpPolyList *elevator_list = gpCreatePolyList();
 
-  translations = gpCreatePolyHierarchy();
-  gpSetPolyHierarchyChild(translations, ref_cube);
-  gpSetPolyHierarchyList(translations, rotate_cube);
-  gpTranslatePolyHierarchy(translations, 0.f, 0.f, INITIAL_Z);
+  gpPoly *elevator_back = gpCreatePoly(4);
+  gpSetPolyVertex(elevator_back, 0, -.5f, 0.f, .25f);
+  gpSetPolyVertex(elevator_back, 1, .5f, 0.f, .25f);
+  gpSetPolyVertex(elevator_back, 2, .5f, 2.f, .25f);
+  gpSetPolyVertex(elevator_back, 3, -.5f, 2.f, GP_INFER_COORD);
+  gpSetPolyColor(elevator_back, 0x60, 0x60, 0x60);
 
-  gpRenderAll(translations);
+  gpPoly *elevator_left = gpCreatePoly(4);
+  gpSetPolyVertex(elevator_left, 0, -.5f, 0.f, -.25f);
+  gpSetPolyVertex(elevator_left, 1, -.5f, 0.f, .25f);
+  gpSetPolyVertex(elevator_left, 2, -.5f, 2.f, .25f);
+  gpSetPolyVertex(elevator_left, 3, GP_INFER_COORD, 2.f, -.25f);
+  gpSetPolyColor(elevator_left, 0xc0, 0xc0, 0xc0);
+
+  gpPoly *elevator_right = gpCreatePoly(4);
+  gpSetPolyVertex(elevator_right, 0, .5f, 0.f, -.25f);
+  gpSetPolyVertex(elevator_right, 1, .5f, 0.f, .25f);
+  gpSetPolyVertex(elevator_right, 2, .5f, 2.f, .25f);
+  gpSetPolyVertex(elevator_right, 3, GP_INFER_COORD, 2.f, -.25f);
+  gpSetPolyColor(elevator_right, 0xc0, 0xc0, 0xc0);
+
+  gpPoly *elevator_top = gpCreatePoly(4);
+  gpSetPolyVertex(elevator_top, 0, -.5f, 2.f, -.25f);
+  gpSetPolyVertex(elevator_top, 1, .5f, 2.f, -.25f);
+  gpSetPolyVertex(elevator_top, 2, .5f, 2.f, .25f);
+  gpSetPolyVertex(elevator_top, 3, -.5f, GP_INFER_COORD, .25f);
+  gpSetPolyColor(elevator_top, 0x90, 0x90, 0x90);
+
+  gpPoly *elevator_bottom = gpCreatePoly(4);
+  gpSetPolyVertex(elevator_bottom, 0, -.5f, 0.f, -.25f);
+  gpSetPolyVertex(elevator_bottom, 1, .5f, 0.f, -.25f);
+  gpSetPolyVertex(elevator_bottom, 2, .5f, 0.f, .25f);
+  gpSetPolyVertex(elevator_bottom, 3, -.5f, GP_INFER_COORD, .25f);
+  gpSetPolyColor(elevator_bottom, 0x90, 0x90, 0x90);
+
+  gpAddPolyToList(elevator_list, elevator_back);
+  gpAddPolyToList(elevator_list, elevator_left);
+  gpAddPolyToList(elevator_list, elevator_right);
+  gpAddPolyToList(elevator_list, elevator_top);
+  gpAddPolyToList(elevator_list, elevator_bottom);
+
+  elevator = gpCreatePolyHierarchy();
+  gpSetPolyHierarchyList(elevator, elevator_list);
+  gpTranslatePolyHierarchy(elevator, -5.f, 0.f, 0.f);
+
+  h = gpCreatePolyHierarchy();
+  gpSetPolyHierarchyList(h, stair_list);
+  gpSetPolyHierarchyChild(h, elevator);
+  gpRotatePolyList(stair_list, 0.f, .7854f, 0.f);
+  gpTranslatePolyHierarchy(h, 0.f, -2.f, 10.f);
+
+  gpRenderAll(h);
 
   gpCallbacks(keyboard, idle);
 
-  gpDeletePolyHierarchy(translations);
+  gpDeletePolyHierarchy(h);
 
   return 0;
 }

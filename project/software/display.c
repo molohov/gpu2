@@ -156,7 +156,7 @@ void gpSetImageBackground(gpImg *img, unsigned char r, unsigned char g, unsigned
   volatile int * burst_write_addr = (volatile int *)XPAR_BURST_WRITE_0_BASEADDR;
 
   if (!initialized) {
-    burst_write_addr[64] = (1 << 1) | (1 << 3) | (1 << 8); // burst write and set done bit
+    burst_write_addr[64] = (1 << 1) | (1 << 3); // burst write
     burst_write_addr[66] = 0xffff; // byte enable
     initialized = true;
   }
