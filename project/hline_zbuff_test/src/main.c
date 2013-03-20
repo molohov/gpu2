@@ -13,17 +13,15 @@ int main ()
 	volatile unsigned int * fbuff = (volatile unsigned int *)0xAB000000;
 	volatile unsigned int * zbuff = fbuff + 1024;
 
-	printf("%x, %x\n\r", (int)fbuff, (int)zbuff);
-
 	int i = 0;
 	while (i < 256) {
-		fbuff[i] = i;
+		fbuff[i] = i + 123;
 		zbuff[i] = 0xffffffff-i;
 		i++;
 	}
 
 	hline_pcore[0] = (int)fbuff;
-	hline_pcore[1] = (int)zbuff;
+	hline_pcore[1] = (int)(zbuff);
 	hline_pcore[2] = 256; //dx
 	hline_pcore[3] = 0;  //z1
 	hline_pcore[4] = 0x00ffffff; //slope
@@ -34,15 +32,25 @@ int main ()
 
 	hline_pcore[11] = 1;
 
-	volatile char * debug = (char *)(hline_pcore + 9);
-	printf("fifo head: %x  | ", hline_pcore[8]);
+	// poll for completeness
+	// while (hline_pcore[7] == 0);
+	volatile int j = 0;
+	while (j < 2048)
+		j++;
+
+	//while (1) {
+	volatile char * debug = (char *)(hline_pcore + 10);
 	printf("curr_state: %x | ", debug[0]);
-	printf("zempty: %x | ", debug[1]);
-	printf("started: %x || ", debug[2]);
+	printf("mst_cmd_sm_rd_req: %x | ", debug[1]);
+	printf("mst_cmd_sm_wr_req: %x || ", debug[2]);
+	printf("mst_sm_state: %x | ", debug[3]);
 
 	printf("status reg: %x | ", hline_offset[1]);
-	printf("bus2ip_mstrd: %x | ", hline_pcore[0]);
-	printf("mst_fifo_valid: %x | ", hline_pcore[1]);
-	printf("ip2bus_mstwr: %x\n\r", hline_pcore[2]);
+	printf("z_fifo_in: %x | ", hline_pcore[8]);
+	printf("f_fifo_in: %d | ", hline_pcore[9]);
+	printf("ip2bus_mstwr_d: %x | ", hline_pcore[2]);
+	printf("addr: %x\n\r", hline_pcore[11]);
+	//}
 	return 0;
 }
+
