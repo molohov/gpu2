@@ -132,7 +132,7 @@ gpImg *gpCreateImage(int xres, int yres)
   img->yres = yres;
   img->imageData = render_addr;
 
-  img->zbuffer = (zbuffer_t)(XPAR_S6DDR_0_S0_AXI_BASEADDR + xres * yres * BYTES_PER_PIXEL * 2);
+  img->zbuffer = (zbuffer_t)(render_addr + xres * yres * BYTES_PER_PIXEL * 2);
 
   return img;
 }
