@@ -30,12 +30,17 @@ zbuff_dbg: $(ZBUFF) gp.h display.h gp.c display.c
 wasd: $(WASD) gp.h gp.o display.h display.c
 	$(CC) $(WASD) gp.o display.c -DGP_DISPLAY_TIMEOUT_IN_MS=500 $(CFLAG) -o $@
 
+wasd_prof: $(WASD) gp.h gp.o display.h display.c
+	$(CC) $(WASD) gp.c display.c $(PROFFLAG) -o $@
+	./$@
+	gprof $@ > gprof.out
+
 prof: $(PROF) gp.h display.h gp.c display.c
 	$(CC) $(PROF) gp.c display.c $(PROFFLAG) -o $@
 	./$@
 	gprof $@ > gprof.out
 
 clean:
-	rm -rf $(EXES) prof *.o gmon.out gprof.out
+	rm -rf $(EXES) prof wasd_prof *.o gmon.out gprof.out
 
 .PHONY: all clean
