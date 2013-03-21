@@ -143,14 +143,9 @@ input                                     FSL_M_Full;
    wire write_enable;
    wire toggle_ab;
 
-   reg valid_input;
-
    assign FSL_S_Read  = FSL_S_Exists; 
    assign FSL_M_Data = result;
    assign FSL_M_Write = write_enable;
-
-   always @(posedge FSL_Clk)
-      valid_input <= FSL_S_Read;
 
    //INSTANTIATE MATRIX MULTIPLIER MODULES//
    //note: expected to provide inputs in order of multiplication 
@@ -160,15 +155,15 @@ input                                     FSL_M_Full;
 		.reset(FSL_Rst),
 		.a(FSL_S_Data),
 		.b(FSL_S_Data),
-		.a_tvalid(valid_input & !toggle_ab), //??????????????
-		.b_tvalid(valid_input & toggle_ab), //??????????????
+		.a_tvalid(FSL_S_Read & !toggle_ab), //??????????????
+		.b_tvalid(FSL_S_Read & toggle_ab), //??????????????
 		.result_tdata(result),
 		.result_tvalid(write_enable)
 	);
 
     tff tff_ab(
 		.clk(clk),
-		.t(valid_input),
+		.t(FSL_S_Read),
 		.q(toggle_ab)
 	);
 
