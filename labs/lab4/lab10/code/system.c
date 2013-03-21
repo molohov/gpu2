@@ -49,7 +49,7 @@ int main(void)
     print("\n\r\n\r");
     print("Read transformed values back from FSL Channel bus\n\r");
     for (i=0;i<8;i++){
-      ngetfsl(data_back_local_link[r],0);
+      ngetfsl(data_back_local_link[r],1);
       xil_printf("%d; ",data_back_local_link[r]);
       r++;
     };
