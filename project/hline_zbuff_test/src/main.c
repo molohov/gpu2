@@ -5,20 +5,50 @@
 #include "xutil.h"
 
 #define printf xil_printf   /* a smaller footprint printf */
+#define BURST_TEST
 
 int main ()
 {
-	volatile int * hline_pcore = (int *)XPAR_HLINE_ZBUFF_0_BASEADDR;
-	char * hline_offset = (char *)(hline_pcore + 64);
 	volatile unsigned int * fbuff = (volatile unsigned int *)0xAB000000;
 	volatile unsigned int * zbuff = fbuff + 1024;
 
 	int i = 0;
 	while (i < 256) {
-		fbuff[i] = i + 123;
+		fbuff[i] = i;
 		zbuff[i] = 0xffffffff-i;
 		i++;
 	}
+
+#ifdef BURST_TEST
+	volatile unsigned int * burst_write_addr = (unsigned int *)XPAR_BURST_WRITE_0_BASEADDR;
+
+	// burst read
+	burst_write_addr[64] = 1 | (1 << 3); // burst read
+	burst_write_addr[65] = 0xab000000; //address
+	burst_write_addr[66] = 0xffff; // byte enable
+    burst_write_addr[67] = 0x0a000000 | 16 * 4; // go and length (16 words)
+    while (!(burst_write_addr[64] & 0x100)) {
+      }
+    burst_write_addr[64] &= ~0x100;
+    printf("read complete!\n\r");
+
+	// burst write
+	burst_write_addr[0] = 0xdeadbeef; //write value
+	burst_write_addr[64] = (1 << 1) | (1 << 3); // burst write
+	burst_write_addr[65] = 0xab000000; // address
+    burst_write_addr[66] = 0xffff; // byte enable
+    burst_write_addr[67] = 0x0a000000 | 16 * 4; // go and length (16 words)
+    while (!(burst_write_addr[64] & 0x100)) {
+      }
+    // clear done bit
+    burst_write_addr[64] &= ~0x100;
+    printf("write complete!\n\r");
+#endif
+
+#ifdef HLINE_TEST
+	volatile int * hline_pcore = (int *)XPAR_HLINE_ZBUFF_0_BASEADDR;
+	char * hline_offset = (char *)(hline_pcore + 64);
+
 
 	hline_pcore[0] = (int)fbuff;
 	hline_pcore[1] = (int)(zbuff);
@@ -51,6 +81,7 @@ int main ()
 	printf("ip2bus_mstwr_d: %x | ", hline_pcore[2]);
 	printf("addr: %x\n\r", hline_pcore[11]);
 	//}
+#endif
 	return 0;
 }
 
