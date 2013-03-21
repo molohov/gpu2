@@ -155,8 +155,8 @@ input                                     FSL_M_Full;
 		.reset(FSL_Rst),
 		.a(FSL_S_Data),
 		.b(FSL_S_Data),
-		.a_tvalid(FSL_S_Read & !toggle_ab), //??????????????
-		.b_tvalid(FSL_S_Read & toggle_ab), //??????????????
+		.a_tvalid(FSL_S_Read & ~toggle_ab),
+		.b_tvalid(FSL_S_Read & toggle_ab),
 		.result_tdata(result),
 		.result_tvalid(write_enable)
 	);
