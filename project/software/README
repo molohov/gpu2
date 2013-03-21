@@ -1,0 +1,39 @@
+GPU software documentation
+--------------------------
+
+The code in this directory implements the majority of a functioning GPU in software. The same code can be used for software simulation (requires OpenCV libraries and was tested on Ubuntu Linux) and for running on a Microblaze with the hardware project downloaded.
+
+Software simulation:
+
+  - Install OpenCV packages on Ubuntu (run 'aptitude search libcv' and 'sudo apt-get install <packages listed>').
+  - Type make and it will create many executables
+  - To profile the software try 'make prof' or 'make wasd_prof'
+
+Hardware compilation:
+
+  - Export the hardware project to SDK and create a new Xilinx C Project
+  - Copy the lscript.ld file and link (or copy) gp.c, gp.h, display.h, display.c and any C file containing main to the project
+  - Under Project -> Properties, navigate to C compiler options and add '-std=c99' to the project
+  - If you want to profile the hardware project, you may use the timer in the hardware project as the profiler timer (BSP settings)
+
+Overall flow:
+
+  - The basic approach of our GPU is outlined in http://en.wikipedia.org/wiki/Rasterisation
+  - The user specifies polygons in 3-d space with floating point coordinates and a set of transformations on the polygons
+  - We use matrix multiplication to perform the transformations, all done in 32-bit floating point
+  - The 32-bit floating point is then converted to fixed point, approximately mapping (-1.77, -1) and (1.77, 1) to (0, 719), (1279, 0) pixels
+  - Pixel (0, 0) is the top-left, so the y-axis is flipped so that positive y goes up on the screen. Positive x goes right on the screen.
+  - The fixed point polygons are then clipped to fit on the screen and rasterized line by line
+
+Files:
+
+  - gp.h is the header file that provides all of the user API (read this file for comments on how to use the API)
+  - gp.c contains the source code for the gp.h implementation
+  - display.h is the header file used by gp.c to display images. The same API is used for software simulation and hardware compilation so that it is easy for the software simulation to easily port to Microblaze.
+  - display.c implements display.h for software simulation and Microblaze
+
+  - main.c does a simple test of the gp.h API
+  - zbuff.c does a simple test of the z-buffer implementation, ensuring depth is accounted for correctly to occlude shapes
+  - line.c does a simple test with 2-vertex and 1-vertex polygons (lines and points)
+  - prof.c does a continuous rotating cube to provide profiling results
+  - wasd.c provides a more involved example that allows the user to climb up a spiral staircase, implemented with our API

@@ -52,6 +52,11 @@ void warn(bool cond, const char *msg)
 }
 #endif
 
+/* Forward declarations */
+
+void gpFillConvexPoly(gpImg *img, gpVertex2Fixed * vertices, int num_vertices, gpColor *color);
+void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertices, gpColor *color);
+
 gpPolyHierarchy * gpCreatePolyHierarchy()
 {
   gpPolyHierarchy *h = malloc(sizeof(gpPolyHierarchy));
