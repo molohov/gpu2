@@ -14,4 +14,4 @@ add wave -position insertpoint  \
 -radix hexadecimal sim:/matrixmult_tb/* \
 -radix hexadecimal sim:/matrixmult_tb/dut/* \
 -radix hexadecimal sim:/matrixmult_tb/dut/matrixmult/*
-run 6000 ns
+run 9000 ns

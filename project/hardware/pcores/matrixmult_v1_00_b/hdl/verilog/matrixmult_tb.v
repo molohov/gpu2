@@ -64,7 +64,7 @@ module matrixmult_tb();
 	initial
 		clk <= 0;
 	always @ (clk)
-		clk <= #10 ~clk;
+		clk <= #50 ~clk;
 
 	initial begin
 		reset <= 1'b1;
