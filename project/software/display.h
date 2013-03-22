@@ -35,7 +35,7 @@ void gpSetImagePixel(gpImg *img, int x, int y, unsigned char r, unsigned char g,
 
 void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigned char g, unsigned char b);
 
-void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, unsigned int z2, unsigned char r, unsigned char g, unsigned char b);
+void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, unsigned int z2, int x_slope, unsigned char r, unsigned char g, unsigned char b);
 
 void gpDisplayImage(gpImg *img);
 

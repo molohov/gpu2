@@ -34,6 +34,10 @@ typedef struct {
   } z;
 } gpVertex3Fixed;
 
+typedef struct {
+  long long x, y, z;
+} gpVertex3Fixed64;
+
 //  3-d coordinate
 typedef struct {
   float x, y, z;
