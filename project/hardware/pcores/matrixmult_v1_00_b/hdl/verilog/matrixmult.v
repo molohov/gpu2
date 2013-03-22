@@ -140,13 +140,33 @@ input                                     FSL_M_Full;
 // MODULE matrixmult to implement your coprocessor
 
    wire [31:0] result;	
+	reg [31:0] result_out;
    wire write_enable;
    wire toggle_ab;
 
    assign FSL_S_Read = FSL_S_Exists; 
-   assign FSL_M_Data = result;
+   assign FSL_M_Data = result_out;
    assign FSL_M_Write = write_enable;
    assign FSL_M_Control = 1'b0;
+
+	wire result_tvalid;
+	reg write_result;
+
+	assign write_enable = write_result & ~FSL_M_Full; 
+
+	//save result so that can write when FSL not full
+	always @ (posedge FSL_Clk)
+	begin
+		if (FSL_Rst)
+			write_result <= 1'b0;
+		else if (result_tvalid) begin
+			result_out <= result;
+		   write_result <= 1'b1;
+		end
+		else if (write_enable)
+			write_result <= 1'b0; 
+
+	end
 
    //INSTANTIATE MATRIX MULTIPLIER MODULES//
    //note: expected to provide inputs in order of multiplication 
@@ -159,7 +179,7 @@ input                                     FSL_M_Full;
 		.a_tvalid(FSL_S_Read & ~toggle_ab),
 		.b_tvalid(FSL_S_Read & toggle_ab),
 		.result_tdata(result),
-		.result_tvalid(write_enable)
+		.result_tvalid(result_tvalid)
 	);
 
     tff tff_ab(

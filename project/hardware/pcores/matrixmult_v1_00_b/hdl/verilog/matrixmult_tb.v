@@ -59,6 +59,7 @@ module matrixmult_tb();
 
 	reg clk, reset, inputs_ready; 
 	reg [31:0] in;
+	reg full;
 
 
 	initial
@@ -70,6 +71,7 @@ module matrixmult_tb();
 		reset <= 1'b1;
 		inputs_ready <= 1'b0;
 		in <= 32'd0;
+		full <= 1'b0;
 	@ (negedge clk);
 	@ (negedge clk);
 		reset <= 1'b0;
@@ -140,6 +142,21 @@ module matrixmult_tb();
 		in <= pixelinT_3;
 	@ (negedge clk);
 		inputs_ready <= 1'b0;
+	
+	@ (negedge clk);
+	@ (negedge clk);
+	@ (negedge clk);
+	@ (negedge clk);
+	@ (negedge clk);
+	@ (negedge clk);
+	@ (negedge clk);
+	@ (negedge clk);
+	@ (negedge clk);
+   	full <= 1'b1;
+	@ (negedge clk);
+	@ (negedge clk);
+		full <= 1'b0;
+	
 	end
 
 	matrixmult dut(
@@ -154,7 +171,7 @@ module matrixmult_tb();
 		.FSL_M_Write(pixelout_valid),
 		.FSL_M_Data(pixelout),
 		.FSL_M_Control(),
-		.FSL_M_Full(1'b0)
+		.FSL_M_Full(full)
 		);
 
 	always @ (posedge clk)
