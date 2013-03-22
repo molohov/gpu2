@@ -110,12 +110,12 @@ input                                     FSL_Clk;
 input                                     FSL_Rst;
 input                                     FSL_S_Clk;
 output                                    FSL_S_Read;
-input      [0 : 31]                       FSL_S_Data;
+input      [31 : 0]                       FSL_S_Data;
 input                                     FSL_S_Control;
 input                                     FSL_S_Exists;
 input                                     FSL_M_Clk;
 output                                    FSL_M_Write;
-output     [0 : 31]                       FSL_M_Data;
+output     [31 : 0]                       FSL_M_Data;
 output                                    FSL_M_Control;
 input                                     FSL_M_Full;
 
@@ -143,9 +143,10 @@ input                                     FSL_M_Full;
    wire write_enable;
    wire toggle_ab;
 
-   assign FSL_S_Read  = FSL_S_Exists; 
+   assign FSL_S_Read = FSL_S_Exists; 
    assign FSL_M_Data = result;
    assign FSL_M_Write = write_enable;
+   assign FSL_M_Control = 1'b0;
 
    //INSTANTIATE MATRIX MULTIPLIER MODULES//
    //note: expected to provide inputs in order of multiplication 
@@ -162,8 +163,9 @@ input                                     FSL_M_Full;
 	);
 
     tff tff_ab(
-		.clk(clk),
-		.t(FSL_S_Read),
+		.clk(FSL_Clk),
+		.reset(FSL_Rst),
+		.t(FSL_S_Exists),
 		.q(toggle_ab)
 	);
 
@@ -177,13 +179,16 @@ endmodule
 //toggle flip-flop
 module tff(
 		input clk,
+		input reset,
 		input t,
 		output q
 		);
 	reg tff;
 
 	always @ (posedge clk)
-		if (t)
+		if (reset)
+			tff <= 1'b0;
+		else if (t)
 			tff <= ~tff;
 		else
 			tff <= tff;
@@ -267,12 +272,14 @@ module matrixmultiplier (
 
 	tff tff_inner(
 		.clk(clk),
+		.reset(reset),
 		.t(product_tvalid),
 		.q(t_inner)
 	);
 
 	tff tff_outer(
 		.clk(clk),
+		.reset(reset),
 		.t(sum_inner_tvalid),
 		.q(t_outer)
 	);
