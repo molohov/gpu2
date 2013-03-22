@@ -153,6 +153,11 @@ gpVertex3 gpVertex3CrossProduct(gpVertex3 a, gpVertex3 b)
   return (gpVertex3){a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
 }
 
+gpVertex3Fixed64 gpVertex3Fixed64CrossProduct(gpVertex3Fixed64 a, gpVertex3Fixed64 b)
+{
+  return (gpVertex3Fixed64){a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
+}
+
 void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
 {
   assert(poly);
@@ -1309,17 +1314,26 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
     int left_sx = 0, right_sx = 0;
     int left_err = 0, right_err = 0;
 
-    // zbuffer bresenham's variables
-    unsigned z = vertices[start_index].z.u;
-    unsigned z_left_0 = z, z_right_0 = z;
-    unsigned z_left_1 = z, z_right_1 = z;
-    int left_dz = 0, right_dz = 0;
-    int left_sz = 0, right_sz = 0;
-    int left_slope = 0, right_slope = 0;
-    int left_rem = 0, right_rem = 0;
-    int left_zerr = 0, right_zerr = 0;
-    bool left_y_steep = false, left_x_steep = false;
-    bool right_y_steep = false, right_x_steep = false;
+    unsigned z_left = vertices[start_index].z.u;
+    unsigned z_right = vertices[start_index].z.u;
+
+    // find the normal of the polygon plane
+    int index1 = start_index - 1;
+    if (index1 < 0) index1 = num_vertices - 1;
+    int index2 = start_index + 1;
+    if (index2 == num_vertices) index2 = 0;
+
+    gpVertex3Fixed64 l1 = (gpVertex3Fixed64){vertices[index1].x - vertices[start_index].x, vertices[index1].y - vertices[start_index].y,
+                                            (long long)vertices[index1].z.u - (long long)vertices[start_index].z.u};
+    gpVertex3Fixed64 l2 = (gpVertex3Fixed64){vertices[index2].x - vertices[start_index].x, vertices[index2].y - vertices[start_index].y,
+                                            (long long)vertices[index2].z.u - (long long)vertices[start_index].z.u};
+    gpVertex3Fixed64 nl = gpVertex3Fixed64CrossProduct(l1, l2);
+
+    // Fix divide by zero hack for now...
+    if (nl.z == 0) nl.z = 1;
+
+    int x_slope = -nl.x / nl.z;
+    int y_slope = -nl.y / nl.z;
 
     do {
         if (vertices[left_index].y <= y) {
@@ -1327,7 +1341,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             if (left_index < 0) left_index = num_vertices - 1;
 
             if (left_index == right_index && vertices[right_index].y <= y) {
-                gpSetImageHLineZBuff(img, GP_YRES - 1 - y, x_left_1, x_right_1, z_left_1, z_right_1, r, g, b);
+                gpSetImageHLineZBuff(img, GP_YRES - 1 - y, x_left_1, x_right_1, z_left, z_right, x_slope, r, g, b);
                 break;
             }
 
@@ -1340,32 +1354,6 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             left_sx = (x_left_0 < x_left_1) ? 1 : -1;
             left_err = left_dx - left_dy;
             warn(y_left_1 >= y_left_0, "You are probably trying to render a concave polygon, which isn't supported");
-
-            // zbuffer additions
-            z_left_0 = z_left_1;
-            z_left_1 = vertices[left_index].z.u;
-            left_dz = z_left_1 - z_left_0;
-            left_y_steep = false;
-            left_x_steep = false;
-            //if (left_dx != 0) { // prevents most off-by-one glitches of adjacent lines
-            //if (abs(left_dx) > left_dy) { // prevents off-by-a lot glitches for steep y
-            if (abs(left_dx) > left_dy / 8) { // somewhere in between
-                left_x_steep = true;
-                left_slope = left_dz / left_dx;
-                left_rem = abs(left_dz - left_slope * left_dx);
-                left_zerr = (abs(left_dx) + 1) / 2;
-            } else if (left_dy != 0) {
-                left_y_steep = true;
-                left_slope = left_dz / left_dy;
-                left_rem = abs(left_dz - left_slope * left_dy);
-                left_zerr = (left_dy + 1) / 2;
-            } else {
-                // take the minimum
-                z_left_0 = (z_left_0 < z_left_1) ? z_left_0 : z_left_1;
-                left_slope = 0;
-                left_zerr = 0;
-            }
-            left_sz = (left_dz > 0) ? 1 : -1;
         }
         if (vertices[right_index].y <= y) {
             right_index = right_index + 1;
@@ -1380,32 +1368,6 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             right_sx = (x_right_0 < x_right_1) ? 1 : -1;
             right_err = right_dx - right_dy;
             warn(y_right_1 >= y_right_0, "You are probably trying to render a concave polygon, which isn't supported");
-
-            // zbuffer additions
-            z_right_0 = z_right_1;
-            z_right_1 = vertices[right_index].z.u;
-            right_dz = z_right_1 - z_right_0;
-            right_y_steep = false;
-            right_x_steep = false;
-            //if (right_dx != 0) { // prevents most off-by-one glitches of adjacent lines
-            //if (abs(right_dx) > right_dy) { // prevents off-by-a lot glitches for steep y
-            if (abs(right_dx) > right_dy / 8) { // somewhere in between
-                right_x_steep = true;
-                right_slope = right_dz / right_dx;
-                right_rem = abs(right_dz - right_slope * right_dx);
-                right_zerr = (right_dx + 1) / 2;
-            } else if (right_dy != 0) {
-                right_y_steep = true;
-                right_slope = right_dz / right_dy;
-                right_rem = abs(right_dz - right_slope * right_dy);
-                right_zerr = (right_dy + 1) / 2;
-            } else {
-                // take the minimum
-                z_right_0 = (z_right_0 < z_right_1) ? z_right_0 : z_right_1;
-                right_slope = 0;
-                right_zerr = 0;
-            }
-            right_sz = (right_dz > 0) ? 1 : -1;
         }
 
         do {
@@ -1416,14 +1378,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
                 if (e2 > -left_dy) {
                     left_err -= left_dy;
                     x_left_0 += left_sx;
-                    if (left_x_steep) {
-                        z_left_0 += left_slope;
-                        left_zerr += left_rem;
-                        if (left_zerr > abs(left_dx)) {
-                            z_left_0 += left_sz;
-                            left_zerr -= abs(left_dx);
-                        }
-                    }
+                    z_left += x_slope * left_sx;
                 }
                 if (e2 < left_dx) {
                     left_err += left_dx;
@@ -1437,41 +1392,19 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
                 if (e2 > -right_dy) {
                     right_err -= right_dy;
                     x_right_0 += right_sx;
-                    if (right_x_steep) {
-                        z_right_0 += right_slope;
-                        right_zerr += right_rem;
-                        if (right_zerr > abs(right_dx)) {
-                            z_right_0 += right_sz;
-                            right_zerr -= abs(right_dx);
-                        }
-                    }
+                    z_right += x_slope * right_sx;
                 }
                 if (e2 < right_dx) {
                     right_err += right_dx;
                     break;
                 }
             }
-            // x is about half a step before y, so do z interpolation first
-            if (left_y_steep) {
-                z_left_0 += left_slope;
-                left_zerr += left_rem;
-                if (left_zerr > left_dy) {
-                    z_left_0 += left_sz;
-                    left_zerr -= left_dy;
-                }
-            }
-            if (right_y_steep) {
-                z_right_0 += right_slope;
-                right_zerr += right_rem;
-                if (right_zerr > right_dy) {
-                    z_right_0 += right_sz;
-                    right_zerr -= right_dy;
-                }
-            }
             if (y >= 0) {
-            	gpSetImageHLineZBuff(img, GP_YRES - 1 - y, x_left_0, x_right_0, z_left_0, z_right_0, r, g, b);
+                gpSetImageHLineZBuff(img, GP_YRES - 1 - y, x_left_0, x_right_0, z_left, z_right, x_slope, r, g, b);
             }
             y++;
+            z_left += y_slope;
+            z_right += y_slope;
         } while (y < vertices[left_index].y && y < vertices[right_index].y && y < GP_YRES);
     } while (left_index != right_index && y < GP_YRES);
 }
