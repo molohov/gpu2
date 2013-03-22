@@ -8,7 +8,7 @@ vlog matrixmult_tb.v
 vlog matrixmult.v
 vlog floating_point_add_sub_v6_1.v
 vlog floating_point_v6_1.v
-vsim work.matrixmult_tb work.glbl
+vsim -novopt work.matrixmult_tb work.glbl
 
 add wave -position insertpoint  \
 -radix hexadecimal sim:/matrixmult_tb/* \
