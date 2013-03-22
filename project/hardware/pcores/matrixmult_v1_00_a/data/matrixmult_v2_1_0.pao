@@ -1,7 +1,0 @@
-##############################################################################
-## Filename:          C:\cygwin\home\Blair\gpu2\project\hardware\pcores/matrixmult_v1_00_a/data/matrixmult_v2_1_0.pao
-## Description:       Peripheral Analysis Order
-## Date:              Tue Mar 19 11:58:28 2013 (by Create and Import Peripheral Wizard)
-##############################################################################
-
-lib matrixmult_v1_00_a example verilog
