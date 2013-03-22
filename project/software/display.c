@@ -55,11 +55,13 @@ void gpDisplayImage(gpImg *img)
   cvNamedWindow("GP display", CV_WINDOW_AUTOSIZE);
 
 #ifdef DISPLAY_Z_BUFFER
-  for (int i = 0; i < img->yres; i++) {
-    for (int j = 0; j < img->xres; j++) {
-      img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL] = img->zbuffer[(i * img->xres + j)] >> 23;
-      img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL + 1] = img->zbuffer[(i * img->xres + j)] >> 23;
-      img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL + 2] = img->zbuffer[(i * img->xres + j)] >> 23;
+  if (GLOBAL_ZBUFFER) {
+    for (int i = 0; i < img->yres; i++) {
+      for (int j = 0; j < img->xres; j++) {
+        img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL] = img->zbuffer[(i * img->xres + j)] >> 23;
+        img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL + 1] = img->zbuffer[(i * img->xres + j)] >> 23;
+        img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL + 2] = img->zbuffer[(i * img->xres + j)] >> 23;
+      }
     }
   }
 #endif
