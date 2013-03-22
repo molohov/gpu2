@@ -219,6 +219,49 @@ void gpMatrixMult(float *x, float *y, float *result, int a, int b)
   }
 }
 
+#ifndef SW
+
+#include "mb_interface.h"
+
+// dst can be the same as either srca or srcb
+void gpApply4x4x4TMatrix(float dst[4][4], float srca[4][4], float srcb[4][4])
+{
+  // Note: srcb is a transposed matrix!
+
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      for (int k = 0; k < 4; k++) {
+        putfsl(srca[i][k], 0);
+        putfsl(srcb[j][k], 0);
+      }
+    }
+  }
+
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      getfsl(dst[i][j], 1);
+    }
+  }
+}
+
+// srcb is split into 2 parts, srcb is the first 3 elements and srcb4 is the 4th element
+void gpApply4x4x1TMatrix(float dst*, float srca[4][4], float srcb*, float srcb4)
+{
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 3; j++) {
+      putfsl(srca[i][j], 0);
+      putfsl(srcb[j], 0);
+    }
+    putfsl(srca[i][3], 0);
+    putfsl(srcb4, 0);
+  }
+
+  for (int i = 0; i < 4; i++) {
+    getfsl(dst[i], 1);
+  }
+}
+#endif
+
 // dst = dst * src
 void gpApplyTMatrix(gpTMatrix *dst, gpTMatrix *src)
 {
