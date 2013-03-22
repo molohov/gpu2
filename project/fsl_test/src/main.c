@@ -57,8 +57,8 @@ int main()
       }
 
       getfsl(sum, 1);
-      xil_printf("Result: %d\r\n", sum);
-      xil_printf("Expected: %d\r\n", expected_results[j]);
+      xil_printf("Result: %x\r\n", sum);
+      xil_printf("Expected: %x\r\n", expected_results[j]);
   }
 
   xil_printf("Done test\r\n");
