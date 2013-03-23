@@ -152,7 +152,7 @@ input                                     FSL_M_Full;
 	wire result_tvalid;
 	reg write_result;
 
-	assign write_enable = write_result & ~FSL_M_Full; 
+	assign write_enable = write_result & ~FSL_M_Full;  
 
 	//save result so that can write when FSL not full
 	always @ (posedge FSL_Clk)
@@ -241,6 +241,13 @@ module matrixmultiplier (
 
 	assign result_tdata = sum_outer_tdata;
 	assign result_tvalid = sum_outer_tvalid;
+
+	/*
+	//Could replace the above with the following to see if can get the product:
+	assign result_data = product_tdata;
+	assign result_tvalid = product_tvalid;
+	 */
+
 
 	floating_point_v6_1 fmul (
 	  .aclk(clk), // input aclk
