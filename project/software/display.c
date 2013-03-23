@@ -55,11 +55,13 @@ void gpDisplayImage(gpImg *img)
   cvNamedWindow("GP display", CV_WINDOW_AUTOSIZE);
 
 #ifdef DISPLAY_Z_BUFFER
-  for (int i = 0; i < img->yres; i++) {
-    for (int j = 0; j < img->xres; j++) {
-      img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL] = img->zbuffer[(i * img->xres + j)] >> 23;
-      img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL + 1] = img->zbuffer[(i * img->xres + j)] >> 23;
-      img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL + 2] = img->zbuffer[(i * img->xres + j)] >> 23;
+  if (GLOBAL_ZBUFFER) {
+    for (int i = 0; i < img->yres; i++) {
+      for (int j = 0; j < img->xres; j++) {
+        img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL] = img->zbuffer[(i * img->xres + j)] >> 23;
+        img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL + 1] = img->zbuffer[(i * img->xres + j)] >> 23;
+        img->img->imageData[(i * img->xres + j) * BYTES_PER_PIXEL + 2] = img->zbuffer[(i * img->xres + j)] >> 23;
+      }
     }
   }
 #endif
@@ -242,7 +244,7 @@ int gpWaitKey()
 }
 #endif
  
-void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, unsigned int z2, unsigned char r, unsigned char g, unsigned char b)
+void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, unsigned int z2, int x_slope, unsigned char r, unsigned char g, unsigned char b)
 {
 #ifdef SW
   assert(x1 >= 0 && x1 < img->xres);
@@ -250,31 +252,17 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   assert(y >= 0 && y < img->yres);
 #endif
 
+  unsigned z;
+
   if (x1 > x2) {
       int tmp = x1;
       x1 = x2;
       x2 = tmp;
       tmp = z1;
-      z1 = z2;
-      z2 = tmp;
-  }                
-
-  // interpolate depth values for this row
-  int dx = x2 - x1;
-  int dz = z2 - z1;
-
-  int slope = 0;
-  int rem = 0;
-  if (dx) {
-    slope = dz / dx;
-    rem = abs(dz - slope * dx);
+      z = z2;
   } else {
-    // take the minimum
-    z1 = (z1 < z2) ? z1 : z2;
+      z = z1;
   }
-
-  int error = (dx + 1) / 2;
-  int sz = (dz > 0) ? 1 : -1;
 
 #ifdef SW
   unsigned *ptr = (unsigned *)img->img->imageData;
@@ -284,8 +272,8 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   ptr += (y * img->xres + x1);
 
   for (;; x1++) {
-      if (img->zbuffer[y*img->xres + x1] > z1) {
-          img->zbuffer[y*img->xres + x1] = z1;
+      if (img->zbuffer[y*img->xres + x1] > z) {
+          img->zbuffer[y*img->xres + x1] = z;
 #ifdef SW
           *ptr++ = b | (g << 8) | (r << 16);
 #else
@@ -295,12 +283,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
           ptr++;
       }
       if (x1 == x2) break;
-      z1 += slope;
-      error += rem;
-      if (error > dx) {
-          z1 += sz;
-          error -= dx;
-      }
+      z += x_slope;
   }
 }
 

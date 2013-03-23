@@ -110,12 +110,12 @@ input                                     FSL_Clk;
 input                                     FSL_Rst;
 input                                     FSL_S_Clk;
 output                                    FSL_S_Read;
-input      [0 : 31]                       FSL_S_Data;
+input      [31 : 0]                       FSL_S_Data;
 input                                     FSL_S_Control;
 input                                     FSL_S_Exists;
 input                                     FSL_M_Clk;
 output                                    FSL_M_Write;
-output     [0 : 31]                       FSL_M_Data;
+output     [31 : 0]                       FSL_M_Data;
 output                                    FSL_M_Control;
 input                                     FSL_M_Full;
 
@@ -140,12 +140,33 @@ input                                     FSL_M_Full;
 // MODULE matrixmult to implement your coprocessor
 
    wire [31:0] result;	
+	reg [31:0] result_out;
    wire write_enable;
    wire toggle_ab;
 
-   assign FSL_S_Read  = FSL_S_Exists; 
-   assign FSL_M_Data = result;
+   assign FSL_S_Read = FSL_S_Exists; 
+   assign FSL_M_Data = result_out;
    assign FSL_M_Write = write_enable;
+   assign FSL_M_Control = 1'b0;
+
+	wire result_tvalid;
+	reg write_result;
+
+	assign write_enable = write_result & ~FSL_M_Full;  
+
+	//save result so that can write when FSL not full
+	always @ (posedge FSL_Clk)
+	begin
+		if (FSL_Rst)
+			write_result <= 1'b0;
+		else if (result_tvalid) begin
+			result_out <= result;
+		   write_result <= 1'b1;
+		end
+		else if (write_enable)
+			write_result <= 1'b0; 
+
+	end
 
    //INSTANTIATE MATRIX MULTIPLIER MODULES//
    //note: expected to provide inputs in order of multiplication 
@@ -158,12 +179,13 @@ input                                     FSL_M_Full;
 		.a_tvalid(FSL_S_Read & ~toggle_ab),
 		.b_tvalid(FSL_S_Read & toggle_ab),
 		.result_tdata(result),
-		.result_tvalid(write_enable)
+		.result_tvalid(result_tvalid)
 	);
 
     tff tff_ab(
-		.clk(clk),
-		.t(FSL_S_Read),
+		.clk(FSL_Clk),
+		.reset(FSL_Rst),
+		.t(FSL_S_Exists),
 		.q(toggle_ab)
 	);
 
@@ -177,13 +199,16 @@ endmodule
 //toggle flip-flop
 module tff(
 		input clk,
+		input reset,
 		input t,
 		output q
 		);
 	reg tff;
 
 	always @ (posedge clk)
-		if (t)
+		if (reset)
+			tff <= 1'b0;
+		else if (t)
 			tff <= ~tff;
 		else
 			tff <= tff;
@@ -216,6 +241,13 @@ module matrixmultiplier (
 
 	assign result_tdata = sum_outer_tdata;
 	assign result_tvalid = sum_outer_tvalid;
+
+	/*
+	//Could replace the above with the following to see if can get the product:
+	assign result_data = product_tdata;
+	assign result_tvalid = product_tvalid;
+	 */
+
 
 	floating_point_v6_1 fmul (
 	  .aclk(clk), // input aclk
@@ -267,12 +299,14 @@ module matrixmultiplier (
 
 	tff tff_inner(
 		.clk(clk),
+		.reset(reset),
 		.t(product_tvalid),
 		.q(t_inner)
 	);
 
 	tff tff_outer(
 		.clk(clk),
+		.reset(reset),
 		.t(sum_inner_tvalid),
 		.q(t_outer)
 	);
