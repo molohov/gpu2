@@ -31,12 +31,13 @@ typedef struct {
   union {
     float f;
     unsigned u;
+    signed s;
   } z;
 } gpVertex3Fixed;
 
 typedef struct {
-  long long x, y, z;
-} gpVertex3Fixed64;
+  int x, y, z;
+} gpVertex3Fixed32;
 
 //  3-d coordinate
 typedef struct {
