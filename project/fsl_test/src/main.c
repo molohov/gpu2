@@ -5,6 +5,7 @@
 int main()
 {
   int i, j, sum = 0;
+  printf("In main FSL test...\n");
 
   int data_to_local_link[] = {
   0x4124CCCD, //10.3
@@ -51,16 +52,31 @@ int main()
   0x4082161E //4.0652
   };
 
+
   for (j = 0; j < 4; j++) {
-      for (i = 0; i < 8; i++) {
+
+	  for (i = 0; i < 8; i++) {
         putfsl(data_to_local_link[j*8 + i], 0);
+        xil_printf("Finished putting %x!\r\n", data_to_local_link[j*8 + i]);
       }
 
+
+      getfsl(sum, 1);
+      xil_printf("Result: %x\r\n", sum);
+      xil_printf("Expected: %x\r\n", expected_results[j]);
+  }
+  /*
+  for (i = 0; i < 8; i ++){
+	  putfsl(i, 0);
+	  xil_printf("Finished putting %d!\r\n",i);
+
+  }
+  for (i = 0; i < 4; i++) {
       getfsl(sum, 1);
       xil_printf("Result: %d\r\n", sum);
-      xil_printf("Expected: %d\r\n", expected_results[j]);
+      xil_printf("Expected: %d\r\n", 28);
   }
-
+*/
   xil_printf("Done test\r\n");
 
   return 0;
