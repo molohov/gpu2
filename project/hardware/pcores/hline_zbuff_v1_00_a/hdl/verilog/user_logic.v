@@ -316,11 +316,10 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire       [C_SLV_DWIDTH-1 : 0]           f_out; 
   wire                                      axi_rd_req;
   wire                                      axi_wr_req;
-  wire                                      zread_empty;
   wire                                      start;
-  wire                                      clear_done;
   wire                                      axi_done;
   wire                                      read_z_out_fifo;
+  wire                                      read_f_out_fifo;
   wire       [3:0]                          curr_state;
   wire                                      read_in_fifos;
   wire                                      write_out_fifos;
@@ -475,6 +474,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
                   slv_reg10[bit_index] <= Bus2IP_Data[bit_index];
           12'b000000000001 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
+            begin
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg11[bit_index] <= Bus2IP_Data[bit_index];
@@ -482,6 +482,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
                 // Pulse start (ie set to 0 if not being written by master)
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg11[bit_index] <= 1'b0;
+            end       
           default : ;
         endcase
 
@@ -503,7 +504,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
         // DEBUG 
         12'b000000001000 : slv_ip2bus_data <= z_fifo_in; // should be head of FIFO
         12'b000000000100 : slv_ip2bus_data <= f_fifo_in; 
-        12'b000000000010 : slv_ip2bus_data <= {6'd0, mst_cmd_sm_state, 7'd0, mst_cmd_sm_wr_req, 7'd0, mst_cmd_sm_rd_req, 4'b0, curr_state};
+        12'b000000000010 : slv_ip2bus_data <= {6'd0, mst_cmd_sm_state, 7'd0, mst_cmd_sm_wr_req, 7'd0, start_out, 4'b0, curr_state};
         12'b000000000001 : slv_ip2bus_data <= addr;
         default : slv_ip2bus_data <= 0;
       endcase
@@ -609,7 +610,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
       end
     else 
       begin 
-          if ( mst_byte_we[0] == 1'b1 )
+          if ( mst_byte_we[0] == 1'b1)
             begin
               mst_reg[0][7:0] <= Bus2IP_Data[7 : 0];
             end
@@ -1080,7 +1081,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
      .Reset(bus2ip_Reset),
      .FIFO_Write(write_out_fifos),
      .Data_In(z_out),
-     .FIFO_Read(read_z_out_fifo & mst_fifo_valid_read_xfer),
+     .FIFO_Read(mst_fifo_valid_read_xfer & read_z_out_fifo),
      .Data_Out(zbuff_out),
      .FIFO_Full(),
      .FIFO_Empty(),
@@ -1110,7 +1111,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
      .Reset(bus2ip_Reset),
      .FIFO_Write(write_out_fifos),
      .Data_In(f_out),
-     .FIFO_Read(read_f_out_fifo & mst_fifo_valid_read_xfer),
+     .FIFO_Read(mst_fifo_valid_read_xfer & read_f_out_fifo),
      .Data_Out(fbuff_out),
      .FIFO_Full(),
      .FIFO_Empty(),
