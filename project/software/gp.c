@@ -29,7 +29,7 @@ float GLOBAL_FAR = 10.f;
 
 // global z-buffer
 int GLOBAL_ZBUFFER = 0;
-unsigned GLOBAL_ZBUFFER_MAX = 0x7fffffff; // maximum of signed int
+unsigned GLOBAL_ZBUFFER_MAX = 0x00ffffff; // maximum of signed int
 
 // global background color
 unsigned char GP_BG_COLOR[3] = {0xff, 0xff, 0xff};
@@ -153,9 +153,9 @@ gpVertex3 gpVertex3CrossProduct(gpVertex3 a, gpVertex3 b)
   return (gpVertex3){a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
 }
 
-gpVertex3Fixed64 gpVertex3Fixed64CrossProduct(gpVertex3Fixed64 a, gpVertex3Fixed64 b)
+gpVertex3Fixed32 gpVertex3Fixed32CrossProduct(gpVertex3Fixed32 a, gpVertex3Fixed32 b)
 {
-  return (gpVertex3Fixed64){a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
+  return (gpVertex3Fixed32){a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
 }
 
 void gpSetPolyVertex(gpPoly *poly, int num, float x, float y, float z)
@@ -1323,11 +1323,11 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
     int index2 = start_index + 1;
     if (index2 == num_vertices) index2 = 0;
 
-    gpVertex3Fixed64 l1 = (gpVertex3Fixed64){vertices[index1].x - vertices[start_index].x, vertices[index1].y - vertices[start_index].y,
-                                            (long long)vertices[index1].z.u - (long long)vertices[start_index].z.u};
-    gpVertex3Fixed64 l2 = (gpVertex3Fixed64){vertices[index2].x - vertices[start_index].x, vertices[index2].y - vertices[start_index].y,
-                                            (long long)vertices[index2].z.u - (long long)vertices[start_index].z.u};
-    gpVertex3Fixed64 nl = gpVertex3Fixed64CrossProduct(l1, l2);
+    gpVertex3Fixed32 l1 = (gpVertex3Fixed32){vertices[index1].x - vertices[start_index].x, vertices[index1].y - vertices[start_index].y,
+                                            vertices[index1].z.s - vertices[start_index].z.s};
+    gpVertex3Fixed32 l2 = (gpVertex3Fixed32){vertices[index2].x - vertices[start_index].x, vertices[index2].y - vertices[start_index].y,
+                                            vertices[index2].z.s - vertices[start_index].z.s};
+    gpVertex3Fixed32 nl = gpVertex3Fixed32CrossProduct(l1, l2);
 
     // Fix divide by zero hack for now...
     if (nl.z == 0) nl.z = 1;
