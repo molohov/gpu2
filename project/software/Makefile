@@ -28,7 +28,7 @@ zbuff_dbg: $(ZBUFF) gp.h display.h gp.c display.c
 	$(CC) $(ZBUFF) gp.c display.c $(CFLAG) -DDISPLAY_Z_BUFFER -o $@
 
 wasd: $(WASD) gp.h gp.o display.h display.c
-	$(CC) $(WASD) gp.o display.c -DGP_DISPLAY_TIMEOUT_IN_MS=500 $(CFLAG) -o $@
+	$(CC) $(WASD) gp.o display.c -DGP_DISPLAY_TIMEOUT_IN_MS=5 $(CFLAG) -o $@
 
 wasd_prof: $(WASD) gp.h gp.o display.h display.c
 	$(CC) $(WASD) gp.c display.c $(PROFFLAG) -o $@

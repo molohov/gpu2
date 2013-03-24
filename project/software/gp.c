@@ -29,7 +29,7 @@ float GLOBAL_FAR = 10.f;
 
 // global z-buffer
 int GLOBAL_ZBUFFER = 0;
-unsigned GLOBAL_ZBUFFER_MAX = 0x00ffffff; // maximum of 24-bit int
+unsigned GLOBAL_ZBUFFER_MAX = 0x000fffff; // maximum of 20-bit int
 
 // global background color
 unsigned char GP_BG_COLOR[3] = {0xff, 0xff, 0xff};
