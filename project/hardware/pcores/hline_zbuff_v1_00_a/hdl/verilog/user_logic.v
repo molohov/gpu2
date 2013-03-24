@@ -333,11 +333,17 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign    err        = slv_reg6;
   assign    rem        = slv_reg7;
   // can be whichever register
-  assign    start      = slv_reg11[0];
   assign    axi_done   = mst_cmd_sm_set_done; 
   assign    ip2bus_mstwr_d = read_z_out_fifo ? zbuff_out : fbuff_out;  
   
 
+  pulse_gen #(1) pulse_gen_inst(
+    .clk(Bus2IP_Clk),
+    .sig_I(slv_reg11[0]),
+    .toggle_O(),
+    .posedge_O(start),
+    .negedge_O()
+  );
 
   fsm fsm_inst (
     .clk (Bus2IP_Clk),
@@ -474,15 +480,9 @@ input                                     bus2ip_mstwr_dst_dsc_n;
                   slv_reg10[bit_index] <= Bus2IP_Data[bit_index];
           12'b000000000001 :
             for ( byte_index = 0; byte_index <= (C_SLV_DWIDTH/8)-1; byte_index = byte_index+1 )
-            begin
               if ( Bus2IP_BE[byte_index] == 1 )
                 for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
                   slv_reg11[bit_index] <= Bus2IP_Data[bit_index];
-              else
-                // Pulse start (ie set to 0 if not being written by master)
-                for ( bit_index = byte_index*8; bit_index <= byte_index*8+7; bit_index = bit_index+1 )
-                  slv_reg11[bit_index] <= 1'b0;
-            end       
           default : ;
         endcase
 

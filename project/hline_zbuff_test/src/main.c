@@ -49,8 +49,6 @@ int main ()
 	getchar();
 	// start the pcore
 	hline_pcore[11] = 1;
-	// turn the start signal off (for some reason the pulsing isn't working in the user_logic)
-	hline_pcore[11] = 0;
 
 	// poll for completeness
 	while (hline_pcore[7] == 0);

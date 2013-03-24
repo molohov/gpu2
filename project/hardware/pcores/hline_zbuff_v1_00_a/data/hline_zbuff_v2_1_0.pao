@@ -10,3 +10,4 @@ lib axi_master_burst_v1_00_a  all
 lib hline_zbuff_v1_00_a user_logic verilog
 lib hline_zbuff_v1_00_a hline_zbuff vhdl
 lib hline_zbuff_v1_00_a fsm verilog
+lib hline_zbuff_v1_00_a pulse_gen verilog
