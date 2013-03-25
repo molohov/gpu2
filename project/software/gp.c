@@ -940,11 +940,19 @@ void gpRender(gpPolyList *list)
 
     // apply transformations
     gpTMatrix temp;
+#ifndef SW
+    if (GLOBAL_PERSPECTIVE) {
+      gpApply4x4x4TMatrix(&temp, &poly->trans, &last);
+    } else {
+      gpApply4x4x4TMatrix(&temp, &poly->trans, &list->trans);
+    }
+#else
     if (GLOBAL_PERSPECTIVE) {
       gpMatrixMult((float *)poly->trans.m, (float *)last.m, (float *)temp.m, 4, 4);
     } else {
       gpMatrixMult((float *)poly->trans.m, (float *)list->trans.m, (float *)temp.m, 4, 4);
     }
+#endif
     bool render = gpApplyTMatrixToCoord(poly, &temp);
     if (!render) {
       continue;
@@ -991,12 +999,20 @@ void gpRenderAll(gpPolyHierarchy *hierarchy)
 
     if (hierarchy->list) {
       gpTMatrix list_trans;
+#ifndef SW
+      gpApply4x4x4TMatrix(&list_trans, &hierarchy->list->trans, &trans);
+#else
       gpMatrixMult((float *)hierarchy->list->trans.m, (float *)trans.m, (float *)list_trans.m, 4, 4);
+#endif
       for (int i = 0; i < hierarchy->list->num_polys; i++) {
         gpPoly *poly = hierarchy->list->polys[i];
         gpAddPolyToList(list, poly);
         gpTMatrix temp;
+#ifndef SW
+        gpApply4x4x4TMatrix(&temp, &poly->trans, &list_trans);
+#else
         gpMatrixMult((float *)poly->trans.m, (float *)list_trans.m, (float *)temp.m, 4, 4);
+#endif
         bool render = gpApplyTMatrixToCoord(poly, &temp);
 
         if (!render) {
