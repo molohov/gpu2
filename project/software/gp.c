@@ -240,7 +240,7 @@ void gpApply4x4x4TMatrix(gpTMatrix *dst, gpTMatrix *srca, gpTMatrix *srcb)
     for (int j = 0; j < 4; j++) {
       for (int k = 0; k < 4; k++) {
         putfsl(srca->m[i][k], 0);
-        putfsl(srcb->m[j][k], 0);
+        putfsl(srcb->m[k][j], 0);
       }
     }
   }
@@ -257,10 +257,10 @@ void gpApply4x4x1TMatrix(float *dst, gpTMatrix *srca, float *srcb, float srcb4)
 {
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 3; j++) {
-      putfsl(srca->m[i][j], 0);
+      putfsl(srca->m[j][i], 0);
       putfsl(srcb[j], 0);
     }
-    putfsl(srca->m[i][3], 0);
+    putfsl(srca->m[3][i], 0);
     putfsl(srcb4, 0);
   }
 
@@ -273,40 +273,40 @@ void gpApply4x4x1TMatrix(float *dst, gpTMatrix *srca, float *srcb, float srcb4)
 // dst = dst * src
 void gpApplyTMatrix(gpTMatrix *dst, gpTMatrix *src)
 {
-//#ifndef SW
-//  gpApply4x4x4TMatrix(dst, src, dst);
-//#else
+#ifndef SW
+  gpApply4x4x4TMatrix(dst, dst, src);
+#else
   float temp[4][4];
   memcpy(temp, dst->m, sizeof(dst->m));
 
   gpMatrixMult((float *)temp, (float *)src->m, (float *)dst->m, 4, 4);
-//#endif
+#endif
 }
 
 // dst = src * dst
 void gpAppliedTMatrix(gpTMatrix *dst, gpTMatrix *src)
 {
-//#ifndef SW
-//  gpApply4x4x4TMatrix(dst, dst, src);
-//#else
+#ifndef SW
+  gpApply4x4x4TMatrix(dst, src, dst);
+#else
   float temp[4][4];
   memcpy(temp, dst->m, sizeof(dst->m));
 
   gpMatrixMult((float *)src->m, (float *)temp, (float *)dst->m, 4, 4);
-//#endif
+#endif
 }
 
 // return if going to be rendered
 bool gpApplyTMatrixToCoord(gpPoly *poly, gpTMatrix *trans)
 {
   for (int i = 0; i < poly->num_vertices; i++) {
-//#ifndef SW
-//	  gpApply4x4x1TMatrix((float *)&poly->t_vertices[i], trans, (float *)&poly->vertices[i], 1.f);
-//#else
+#ifndef SW
+	  gpApply4x4x1TMatrix((float *)&poly->t_vertices[i], trans, (float *)&poly->vertices[i], 1.f);
+#else
     float temp[1][4] = {{poly->vertices[i].x, poly->vertices[i].y, poly->vertices[i].z, 1.f}};
 
     gpMatrixMult((float *)temp, (float *)trans->m, (float *)&poly->t_vertices[i], 1, 4);
-//#endif
+#endif
 
     // won't get rendered anyway, exit here
     if (poly->t_vertices[i].w < 0.f) {
