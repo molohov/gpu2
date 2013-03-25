@@ -1,6 +1,6 @@
 #include "gp.h"
-#define PERSPECTIVE_TEST
-//#define ZBUFFER_TEST
+//#define PERSPECTIVE_TEST
+#define ZBUFFER_TEST
 
 /* User program */
 int main()
