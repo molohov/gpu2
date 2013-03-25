@@ -51,6 +51,7 @@ module fsm (
     // guessing how many states there might be
     reg [3:0] state, nextstate; 
     reg [31:0] addr_offset, nextaddr_offset;
+    // readcnt is reused in INTERP_Z as the counter for end of non-256 word aligned math
     reg [15:0] xsum, nextxsum, xcnt, nextxcnt, readcnt, nextreadcnt;
     reg [31:0] zsum, nextzsum;
     reg [31:0] error, nexterror;
@@ -76,8 +77,8 @@ module fsm (
     assign wr_req = (state == WR_ZBUFF || state == WR_FBUFF) & !axi_done;
     assign read_in_fifos = (state == INTERP_Z) && (xcnt != 0);
     assign write_out_fifos = read_in_fifos;
-    assign z_out = (zsum < z_fifo_in) ? zsum : z_fifo_in;
-    assign f_out = (zsum < z_fifo_in) ? rgbx : f_fifo_in;
+    assign z_out = (zsum < z_fifo_in) & (readcnt > 0) ? zsum : z_fifo_in;
+    assign f_out = (zsum < z_fifo_in) & (readcnt > 0) ? rgbx : f_fifo_in;
     assign read_z_out_fifo = (state == WR_ZBUFF);
     assign read_f_out_fifo = (state == WR_FBUFF);
     assign axi_bus_to_z_fifo = (state == LOAD_ZBUFF);
@@ -168,7 +169,8 @@ module fsm (
                     nextreadcnt = readcnt + 1;
                     if (nextreadcnt == 256)
                     begin
-                        nextreadcnt = 16'd0;
+                        if (xsum < 0)
+                            nextreadcnt = 16'd256 + xsum;
                         nextstate = INTERP_Z;
                     end
                 end
@@ -181,6 +183,7 @@ module fsm (
                 else
                 begin
                     nextxcnt = xcnt - 1;
+                    nextreadcnt = readcnt - 1;
                     nexterror = error + rem;
                     if (error > dx)
                     begin
