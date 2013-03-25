@@ -1337,6 +1337,12 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
 
     do {
         if (vertices[left_index].y <= y) {
+
+            while (x_left_0 != x_left_1) {
+                z_left += x_slope * left_sx;
+                x_left_0 += left_sx;
+            }
+
             left_index = left_index - 1;
             if (left_index < 0) left_index = num_vertices - 1;
 
@@ -1356,6 +1362,12 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
             warn(y_left_1 >= y_left_0, "You are probably trying to render a concave polygon, which isn't supported");
         }
         if (vertices[right_index].y <= y) {
+
+            while (x_right_0 != x_right_1) {
+                z_right += x_slope * right_sx;
+                x_right_0 += right_sx;
+            }
+
             right_index = right_index + 1;
             if (right_index == num_vertices) right_index = 0;
 
