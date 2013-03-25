@@ -51,7 +51,7 @@ module fsm (
     // guessing how many states there might be
     reg [3:0] state, nextstate; 
     reg [31:0] addr_offset, nextaddr_offset;
-    reg [15:0] xsum, nextxsum, xcnt, nextxcnt;
+    reg [15:0] xsum, nextxsum, xcnt, nextxcnt, readcnt, nextreadcnt;
     reg [31:0] zsum, nextzsum;
     reg [31:0] error, nexterror;
 
@@ -97,6 +97,7 @@ module fsm (
             zsum        <= 32'd0;
             xcnt        <= 16'd0;
             error       <= 32'd0;
+            readcnt     <= 16'd0;
         end
         else
         begin
@@ -106,6 +107,7 @@ module fsm (
             zsum        <= nextzsum;
             xcnt        <= nextxcnt;
             error       <= nexterror;
+            readcnt     <= nextreadcnt;
         end
     end
 
@@ -117,6 +119,7 @@ module fsm (
         nextzsum = zsum;
         nextxcnt = xcnt;
         nexterror = error;
+        nextreadcnt = readcnt;
 
         case (state)
             RELAX_AND_CHILL:
@@ -139,6 +142,7 @@ module fsm (
                     nextxcnt = 256; 
                     nexterror = err + rem;
                     nextstate = LOAD_ZBUFF; 
+                    nextreadcnt = 16'd0;
                 end
                 else
                     nextstate = DONE;
@@ -147,13 +151,27 @@ module fsm (
             begin
                 // wait for AXI completion
                 if (axi_done)
-                    nextstate = LOAD_FBUFF;
+                begin
+                    nextreadcnt = readcnt + 1;
+                    if (nextreadcnt == 256)
+                    begin
+                        nextreadcnt = 16'd0;
+                        nextstate = LOAD_FBUFF;
+                    end
+                end
             end
             LOAD_FBUFF:
             begin
                 // wait for AXI completion
                 if (axi_done)
-                    nextstate = INTERP_Z;
+                begin
+                    nextreadcnt = readcnt + 1;
+                    if (nextreadcnt == 256)
+                    begin
+                        nextreadcnt = 16'd0;
+                        nextstate = INTERP_Z;
+                    end
+                end
             end
             INTERP_Z:
             // write a new z value every cycle (for 256 cycles)
