@@ -587,7 +587,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_cntl_rd_req   = axi_rd_req;
   assign mst_cntl_wr_req   = axi_wr_req;
   assign mst_cntl_bus_lock = 1'b0;
-  assign mst_cntl_burst    = 1'b1;
+  assign mst_cntl_burst    = axi_wr_req; // only burst write, not read
   assign mst_ip2bus_addr   = addr;
   assign mst_ip2bus_be     = 16'hffff;
   assign mst_xfer_reg_len  = 20'd1024;// changed to 20 bits 

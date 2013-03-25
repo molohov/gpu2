@@ -103,6 +103,49 @@ void gpSetImageHLine(gpImg *img, int y, int x1, int x2, unsigned char r, unsigne
   }
 }
 
+void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, unsigned int z2, int x_slope, unsigned char r, unsigned char g, unsigned char b)
+{
+#ifdef SW
+  assert(x1 >= 0 && x1 < img->xres);
+  assert(x2 >= 0 && x2 < img->xres);
+  assert(y >= 0 && y < img->yres);
+#endif
+
+  unsigned z;
+
+  if (x1 > x2) {
+      int tmp = x1;
+      x1 = x2;
+      x2 = tmp;
+      tmp = z1;
+      z = z2;
+  } else {
+      z = z1;
+  }
+
+#ifdef SW
+  unsigned *ptr = (unsigned *)img->img->imageData;
+#else
+  volatile unsigned *ptr = (volatile unsigned *)img->imageData;
+#endif
+  ptr += (y * img->xres + x1);
+
+  for (;; x1++) {
+      if (img->zbuffer[y*img->xres + x1] > z) {
+          img->zbuffer[y*img->xres + x1] = z;
+#ifdef SW
+          *ptr++ = b | (g << 8) | (r << 16);
+#else
+          *ptr++ = (r << 24) | (g << 16) | (b << 8);
+#endif
+      } else {
+          ptr++;
+      }
+      if (x1 == x2) break;
+      z += x_slope;
+  }
+}
+
 int gpWaitKey()
 {
   int c = cvWaitKey(GP_DISPLAY_TIMEOUT_IN_MS);
@@ -242,17 +285,12 @@ int gpWaitKey()
   }
   return 0;
 }
-#endif
- 
+
 void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, unsigned int z2, int x_slope, unsigned char r, unsigned char g, unsigned char b)
 {
-#ifdef SW
-  assert(x1 >= 0 && x1 < img->xres);
-  assert(x2 >= 0 && x2 < img->xres);
-  assert(y >= 0 && y < img->yres);
-#endif
-
   unsigned z;
+
+  static const int ROUND_VAL = 256;
 
   if (x1 > x2) {
       int tmp = x1;
@@ -264,28 +302,70 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
       z = z1;
   }
 
-#ifdef SW
-  unsigned *ptr = (unsigned *)img->img->imageData;
-#else
+  volatile int * hline_pcore = (int *)XPAR_HLINE_ZBUFF_0_BASEADDR;
+
   volatile unsigned *ptr = (volatile unsigned *)img->imageData;
-#endif
+  volatile unsigned *z_ptr = (volatile unsigned *)img->zbuffer;
+
   ptr += (y * img->xres + x1);
+  z_ptr += (y * img->xres + x1);
+
+  int x_soft_lim = (x1 + (ROUND_VAL - 1)) & ~(ROUND_VAL - 1);
+  if (x_soft_lim > x2) x_soft_lim = x2;
+
+  int x_hard_lim = ((x2 + 1) & ~(ROUND_VAL - 1)) - 1;
 
   for (;; x1++) {
-      if (img->zbuffer[y*img->xres + x1] > z) {
-          img->zbuffer[y*img->xres + x1] = z;
-#ifdef SW
-          *ptr++ = b | (g << 8) | (r << 16);
-#else
+      if (x1 == x_soft_lim) break;
+      if (*z_ptr > z) {
+          *z_ptr = z;
           *ptr++ = (r << 24) | (g << 16) | (b << 8);
-#endif
       } else {
           ptr++;
       }
+      z_ptr++;
+
+      z += x_slope;
+  }
+
+  if (x_soft_lim < x_hard_lim) {
+
+	hline_pcore[0] = (int)ptr;
+	hline_pcore[1] = (int)z_ptr;
+	hline_pcore[2] = x_hard_lim - x_soft_lim + 1; //dx
+	hline_pcore[3] = z1;  //z1
+	hline_pcore[4] = x_slope; //slope
+	hline_pcore[5] = (r << 24) | (g << 16) | (b << 8); //rgbx
+	hline_pcore[6] = 0; //error
+	hline_pcore[7] = 0; //remainder
+
+	// start the pcore
+	hline_pcore[11] = 0;
+	hline_pcore[11] = 1;
+
+	// poll for completeness
+	while (hline_pcore[7] == 0);
+
+	x1 = x_hard_lim;
+	ptr += (x_hard_lim - x_soft_lim);
+	z_ptr += (x_hard_lim - x_soft_lim);
+  }
+
+  for (;; x1++) {
+    if (*z_ptr > z) {
+          *z_ptr = z;
+          *ptr++ = (r << 24) | (g << 16) | (b << 8);
+      } else {
+          ptr++;
+      }
+      z_ptr++;
+
       if (x1 == x2) break;
       z += x_slope;
   }
 }
+
+#endif
 
 void gpSetTimeout(bool val)
 {
