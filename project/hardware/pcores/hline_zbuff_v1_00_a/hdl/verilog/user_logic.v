@@ -495,7 +495,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
       case ( slv_reg_read_sel )
         12'b100000000000 : slv_ip2bus_data <= bus2ip_mstrd_d;
         12'b010000000000 : slv_ip2bus_data <= mst_fifo_valid_write_xfer;
-        12'b001000000000 : slv_ip2bus_data <= ip2bus_mstwr_d;
+        12'b001000000000 : slv_ip2bus_data <= z_out;
         12'b000100000000 : slv_ip2bus_data <= slv_reg3;
         12'b000010000000 : slv_ip2bus_data <= slv_reg4;
         12'b000001000000 : slv_ip2bus_data <= slv_reg5;
