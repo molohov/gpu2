@@ -32,14 +32,14 @@ begin
     @ (posedge rd_req)
     // fake an axi signal 
     axi_done = 1;
-    @ (negedge clk)
+    # 5120;
     @ (negedge clk)
     axi_done = 0;
     @ (negedge clk)
     // second read request (fbuff)
     @ (negedge clk)
     axi_done = 1;
-    @ (negedge clk)
+    # 5120;
     @ (negedge clk)
     axi_done = 0;
     // first write request (zbuff) 
@@ -75,14 +75,14 @@ begin
     @ (posedge rd_req)
     // fake an axi signal 
     axi_done = 1;
-    @ (negedge clk)
+    # 5120;
     @ (negedge clk)
     axi_done = 0;
     @ (negedge clk)
     // second read request (fbuff)
     @ (negedge clk)
     axi_done = 1;
-    @ (negedge clk)
+    # 5120;
     @ (negedge clk)
     axi_done = 0;
     // first write request (zbuff) 
@@ -101,14 +101,14 @@ begin
     @ (posedge rd_req)
     // fake an axi signal 
     axi_done = 1;
-    @ (negedge clk)
+    # 5120;
     @ (negedge clk)
     axi_done = 0;
     @ (negedge clk)
     // second read request (fbuff)
     @ (negedge clk)
     axi_done = 1;
-    @ (negedge clk)
+    # 5120;
     @ (negedge clk)
     axi_done = 0;
     // first write request (zbuff) 
