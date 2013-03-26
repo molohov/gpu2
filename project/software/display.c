@@ -244,7 +244,7 @@ void gpDisplayImage(gpImg *img)
       XUartLite_RecvByte(XPAR_RS232_UART_1_BASEADDR);
     }
 
-    hdmi_addr[1] = (int)img->imageData; // set frame base address
+    hdmi_addr[1] = (int)img->zbuffer; // set frame base address
   }
 }
 
@@ -325,9 +325,9 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
     hline_pcore[0] = (int)ptr;
     hline_pcore[1] = (int)z_ptr;
     hline_pcore[2] = x_hard_lim - x_soft_lim + 1; //dx
-    hline_pcore[3] = z1;  //z1
+    hline_pcore[3] = z;  //z1
     hline_pcore[4] = x_slope; //slope
-    hline_pcore[5] = (r << 24) | (g << 16) | (b << 8); //rgbx
+    hline_pcore[5] = (r / 2 << 24) | (g / 2 << 16) | (b / 2 << 8); //rgbx
 
     // start the pcore
     hline_pcore[11] = 0;
@@ -337,7 +337,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
     while (hline_pcore[7] == 0);
 
     // update z value
-    z = hline_pcore[3] + x_slope;
+    z = hline_pcore[3];
 
     x1 = x_hard_lim + 1;
     ptr += x_hard_lim - x_soft_lim + 1;

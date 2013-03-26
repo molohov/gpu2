@@ -32,7 +32,8 @@ module fsm (
     output          read_z_out_fifo,
     output          read_f_out_fifo,
     output [31:0]   z_out,
-    output [31:0]   f_out
+    output [31:0]   f_out,
+    output [31:0]   z_sum_out
 );
 
     // ENGLISH LANGUAGE CODE:
@@ -84,6 +85,8 @@ module fsm (
     assign axi_bus_to_z_fifo = (state == LOAD_ZBUFF);
     assign axi_bus_to_f_fifo = (state == LOAD_FBUFF);
     assign done = (state == DONE);
+    //only valid when in DONE
+    assign z_sum_out = zsum;
 
     assign curr_state = state;
     assign start_out = start;

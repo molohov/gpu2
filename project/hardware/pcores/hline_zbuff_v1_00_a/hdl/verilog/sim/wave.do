@@ -17,6 +17,7 @@ add wave -noupdate -radix hexadecimal /fsm_tb/rgbx
 add wave -noupdate -radix hexadecimal /fsm_tb/addr
 add wave -noupdate -radix hexadecimal /fsm_tb/z_out
 add wave -noupdate -radix hexadecimal /fsm_tb/f_out
+add wave -noupdate -radix hexadecimal /fsm_tb/z_sum_out
 add wave -noupdate /fsm_tb/rd_req
 add wave -noupdate /fsm_tb/wr_req
 add wave -noupdate /fsm_tb/done

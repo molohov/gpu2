@@ -4,7 +4,7 @@ reg clk, start, reset;
 reg axi_done; 
 reg [31:0] fb_addr, zbuff_addr, z1, z_fifo_in, f_fifo_in, slope, err, rem, dx, rgbx;
 
-wire [31:0] addr, z_out, f_out;
+wire [31:0] addr, z_out, f_out, z_sum_out;
 wire rd_req, wr_req, done, axi_bus_to_z_fifo, axi_bus_to_f_fifo, read_in_fifos, write_out_fifos, read_z_out_fifo, read_f_out_fifo; 
 wire [3:0] curr_state;
 
@@ -156,7 +156,8 @@ fsm fsm_dut (
     .read_z_out_fifo (read_z_out_fifo),
     .read_f_out_fifo (read_f_out_fifo),
     .z_out (z_out),
-    .f_out (f_out)
+    .f_out (f_out),
+    .z_sum_out (z_sum_out)
     );
 
 endmodule
