@@ -51,7 +51,7 @@ module fsm (
 
     // guessing how many states there might be
     reg [3:0] state, nextstate; 
-    reg [31:0] addr_offset, nextaddr_offset;
+    reg [31:0] addr_offset, nextaddr_offset, offset_tmp, nextoffset_tmp;
     // readcnt is reused in INTERP_Z as the counter for end of non-256 word aligned math
     reg [15:0] xsum, nextxsum, xcnt, nextxcnt, readcnt, nextreadcnt;
     reg [31:0] zsum, nextzsum;
@@ -102,6 +102,7 @@ module fsm (
             xcnt        <= 16'd0;
             error       <= 32'd0;
             readcnt     <= 16'd0;
+            offset_tmp  <= 32'd0;
         end
         else
         begin
@@ -112,6 +113,7 @@ module fsm (
             xcnt        <= nextxcnt;
             error       <= nexterror;
             readcnt     <= nextreadcnt;
+            offset_tmp  <= nextoffset_tmp;
         end
     end
 
@@ -124,6 +126,7 @@ module fsm (
         nextxcnt = xcnt;
         nexterror = error;
         nextreadcnt = readcnt;
+        nextoffset_tmp = offset_tmp;
 
         case (state)
             RELAX_AND_CHILL:
@@ -147,6 +150,7 @@ module fsm (
                     nexterror = err + rem;
                     nextstate = LOAD_ZBUFF; 
                     nextreadcnt = 16'd0;
+                    nextoffset_tmp = addr_offset;
                 end
                 else
                     nextstate = DONE;
@@ -157,9 +161,11 @@ module fsm (
                 if (axi_done)
                 begin
                     nextreadcnt = readcnt + 1;
-                    if (nextreadcnt == 256)
+                    nextaddr_offset = addr_offset + 16;
+                    if (nextreadcnt == 64)
                     begin
                         nextreadcnt = 16'd0;
+                        nextaddr_offset = offset_tmp;
                         nextstate = LOAD_FBUFF;
                     end
                 end
@@ -170,10 +176,12 @@ module fsm (
                 if (axi_done)
                 begin
                     nextreadcnt = readcnt + 1;
-                    if (nextreadcnt == 256)
+                    nextaddr_offset = addr_offset + 16;
+                    if (nextreadcnt == 64)
                     begin
                         if (xsum < 0)
                             nextreadcnt = 16'd256 + xsum;
+                        nextaddr_offset = offset_tmp;
                         nextstate = INTERP_Z;
                     end
                 end
