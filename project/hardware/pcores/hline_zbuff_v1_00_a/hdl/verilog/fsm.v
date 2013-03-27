@@ -181,6 +181,8 @@ module fsm (
                     begin
                         if (xsum < 0)
                             nextreadcnt = 16'd256 + xsum;
+                        else
+                            nextreadcnt = 16'd256;
                         nextaddr_offset = offset_tmp;
                         nextstate = INTERP_Z;
                     end
