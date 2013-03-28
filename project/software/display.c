@@ -304,56 +304,39 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   ptr += (y * img->xres + x1);
   z_ptr += (y * img->xres + x1);
 
-  int x_soft_lim = (x1 + (ROUND_VAL - 1)) & ~(ROUND_VAL - 1);
-  if (x_soft_lim > x2) x_soft_lim = x2;
-
-  int x_hard_lim = ((x2 + 1) & ~(ROUND_VAL - 1)) - 1;
+  int x_soft_lim = (x2 - x1) % ROUND_VAL + x1;
 
   for (;; x1++) {
+    if (*z_ptr > z) {
+      *z_ptr = z;
+      *ptr = (r << 24) | (g << 16) | (b << 8);
+    }
+    ptr++;
+    z_ptr++;
+
+    z += x_slope;
+
     if (x1 == x_soft_lim) break;
-    if (*z_ptr > z) {
-      *z_ptr = z;
-      *ptr = (r << 24) | (g << 16) | (b << 8);
-    }
-    ptr++;
-    z_ptr++;
-
-    z += x_slope;
   }
 
-  if (x_soft_lim < x_hard_lim) {
-    hline_pcore[0] = (int)ptr;
-    hline_pcore[1] = (int)z_ptr;
-    hline_pcore[2] = x_hard_lim - x_soft_lim + 1; //dx
-    hline_pcore[3] = z;  //z1
-    hline_pcore[4] = x_slope; //slope
-    hline_pcore[5] = (r / 2 << 24) | (g / 2 << 16) | (b / 2 << 8); //rgbx
-
-    // start the pcore
-    hline_pcore[11] = 0;
-    hline_pcore[11] = 1;
-
-    // poll for completeness
-    while (hline_pcore[7] == 0);
-
-    // update z value
-    z = hline_pcore[2];
-
-    x1 = x_hard_lim + 1;
-    ptr += x_hard_lim - x_soft_lim + 1;
-    z_ptr += x_hard_lim - x_soft_lim + 1;
+  if (x_soft_lim == x2) {
+    return;
   }
 
-  for (; x1 <= x2; x1++) {
-    if (*z_ptr > z) {
-      *z_ptr = z;
-      *ptr = (r << 24) | (g << 16) | (b << 8);
-    }
-    ptr++;
-    z_ptr++;
+  // hardware accelerate the rest of the line
+  hline_pcore[0] = (int)ptr;
+  hline_pcore[1] = (int)z_ptr;
+  hline_pcore[2] = x2 - x1; //dx
+  hline_pcore[3] = z;  //z1
+  hline_pcore[4] = x_slope; //slope
+  hline_pcore[5] = (r / 2 << 24) | (g / 2 << 16) | (b / 2 << 8); //rgbx
 
-    z += x_slope;
-  }
+  // start the pcore
+  hline_pcore[11] = 0;
+  hline_pcore[11] = 1;
+
+  // poll for completeness
+  while (hline_pcore[7] == 0);
 }
 
 #endif
