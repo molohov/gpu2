@@ -198,13 +198,16 @@ module fsm (
                     nextxcnt = xcnt - 1;
                     nextreadcnt = readcnt - 1;
                     nexterror = error + rem;
-                    if (error > dx && readcnt > 0)
+                    if (readcnt > 0)
                     begin
-                         nextzsum = zsum + slope + ((slope > 0) ? 1 : -1);
-                         nexterror = error + rem - dx;
+                        if (error > dx)
+                        begin
+                             nextzsum = zsum + slope + ((slope > 0) ? 1 : -1);
+                             nexterror = error + rem - dx;
+                        end
+                        else
+                             nextzsum = zsum + slope;
                     end
-                    else
-                         nextzsum = zsum + slope;
                 end
             end
             WR_ZBUFF:
