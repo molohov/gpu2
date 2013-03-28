@@ -284,7 +284,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
 {
   unsigned z;
 
-  static const int ROUND_VAL = 256;
+  static const int ROUND_VAL = 4;
 
   if (x1 > x2) {
     int tmp = x1;

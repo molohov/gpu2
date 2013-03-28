@@ -53,7 +53,7 @@ module fsm (
     reg [3:0] state, nextstate; 
     reg [31:0] addr_offset, nextaddr_offset, offset_tmp, nextoffset_tmp;
     // readcnt is reused in INTERP_Z as the counter for end of non-256 word aligned math
-    reg [15:0] xsum, nextxsum, xcnt, nextxcnt, readcnt, nextreadcnt;
+    reg signed [15:0] xsum, nextxsum, xcnt, nextxcnt, readcnt, nextreadcnt;
     reg [31:0] zsum, nextzsum;
     reg [31:0] error, nexterror;
 
@@ -198,7 +198,7 @@ module fsm (
                     nextxcnt = xcnt - 1;
                     nextreadcnt = readcnt - 1;
                     nexterror = error + rem;
-                    if (error > dx)
+                    if (error > dx && readcnt > 0)
                     begin
                          nextzsum = zsum + slope + ((slope > 0) ? 1 : -1);
                          nexterror = error + rem - dx;
@@ -219,7 +219,7 @@ module fsm (
                 if (axi_done)
                 begin
                     nextstate = LOOP_START;
-                    nextaddr_offset = addr_offset + 32'd256;
+                    nextaddr_offset = addr_offset + 32'd1024;
                 end
             end
             DONE: 
