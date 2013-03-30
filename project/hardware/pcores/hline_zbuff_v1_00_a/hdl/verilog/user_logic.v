@@ -592,7 +592,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_cntl_burst    = 1'b1;
   assign mst_ip2bus_addr   = addr;
   assign mst_ip2bus_be     = 16'hffff;
-  assign mst_xfer_reg_len  = axi_rd_req ? 20'd16 : 20'd1024; //burst length 4 when doing reads, otherwise 256 burst writes
+  assign mst_xfer_reg_len  = 20'd1024; //burst length 256 for reads and writes
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
 
   // implement byte write enable for each byte slice of the master model registers
