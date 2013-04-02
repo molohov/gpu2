@@ -21,6 +21,8 @@ add wave -noupdate -radix hexadecimal /fsm_tb/z_sum_out
 add wave -noupdate /fsm_tb/rd_req
 add wave -noupdate /fsm_tb/wr_req
 add wave -noupdate /fsm_tb/done
+add wave -noupdate /fsm_tb/fsm_dut/xcnt
+add wave -noupdate -radix unsigned /fsm_tb/burst_length
 add wave -noupdate /fsm_tb/axi_bus_to_z_fifo
 add wave -noupdate /fsm_tb/axi_bus_to_f_fifo
 add wave -noupdate /fsm_tb/read_in_fifos
@@ -30,8 +32,8 @@ add wave -noupdate /fsm_tb/read_f_out_fifo
 add wave -noupdate -radix unsigned /fsm_tb/curr_state
 add wave -noupdate /fsm_tb/start_out
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {0 ns} 0}
-quietly wave cursor active 0
+WaveRestoreCursors {{Cursor 1} {2446 ns} 0}
+quietly wave cursor active 1
 configure wave -namecolwidth 249
 configure wave -valuecolwidth 218
 configure wave -justifyvalue left
@@ -46,4 +48,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {0 ns} {28180 ns}
+WaveRestoreZoom {0 ns} {6564 ns}

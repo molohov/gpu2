@@ -24,6 +24,7 @@ module fsm (
     output          wr_req,
     output [31:0]   addr,
     output          done,
+    output [11:0]   burst_length,
     // signals to pcore FIFOs
     output          axi_bus_to_z_fifo,
     output          axi_bus_to_f_fifo,
@@ -51,11 +52,12 @@ module fsm (
 
     // guessing how many states there might be
     reg [3:0] state, nextstate; 
-    reg [31:0] addr_offset, nextaddr_offset, offset_tmp, nextoffset_tmp;
+    reg [31:0] addr_offset, nextaddr_offset;
     // readcnt is reused in INTERP_Z as the counter for end of non-256 word aligned math
     reg signed [15:0] xsum, nextxsum, xcnt, nextxcnt, readcnt, nextreadcnt;
     reg [31:0] zsum, nextzsum;
     reg [31:0] error, nexterror;
+    reg [11:0] len, nextlen;
 
     // define states
     localparam  RELAX_AND_CHILL = 4'd0,
@@ -78,8 +80,8 @@ module fsm (
     assign wr_req = (state == WR_ZBUFF || state == WR_FBUFF) & !axi_done;
     assign read_in_fifos = (state == INTERP_Z) && (xcnt != 0);
     assign write_out_fifos = read_in_fifos;
-    assign z_out = (zsum < z_fifo_in) & (readcnt > 0) ? zsum : z_fifo_in;
-    assign f_out = (zsum < z_fifo_in) & (readcnt > 0) ? rgbx : f_fifo_in;
+    assign z_out = (zsum < z_fifo_in) ? zsum : z_fifo_in;
+    assign f_out = (zsum < z_fifo_in) ? rgbx : f_fifo_in;
     assign read_z_out_fifo = (state == WR_ZBUFF);
     assign read_f_out_fifo = (state == WR_FBUFF);
     assign axi_bus_to_z_fifo = (state == LOAD_ZBUFF);
@@ -87,6 +89,8 @@ module fsm (
     assign done = (state == DONE);
     //only valid when in DONE
     assign z_sum_out = zsum;
+    // assign burst length
+    assign burst_length = len;
 
     assign curr_state = state;
     assign start_out = start;
@@ -101,8 +105,7 @@ module fsm (
             zsum        <= 32'd0;
             xcnt        <= 16'd0;
             error       <= 32'd0;
-            readcnt     <= 16'd0;
-            offset_tmp  <= 32'd0;
+            len         <= 12'd0;
         end
         else
         begin
@@ -112,8 +115,7 @@ module fsm (
             zsum        <= nextzsum;
             xcnt        <= nextxcnt;
             error       <= nexterror;
-            readcnt     <= nextreadcnt;
-            offset_tmp  <= nextoffset_tmp;
+            len         <= nextlen;
         end
     end
 
@@ -125,8 +127,7 @@ module fsm (
         nextzsum = zsum;
         nextxcnt = xcnt;
         nexterror = error;
-        nextreadcnt = readcnt;
-        nextoffset_tmp = offset_tmp;
+        nextlen = len;
 
         case (state)
             RELAX_AND_CHILL:
@@ -145,12 +146,20 @@ module fsm (
             begin
                 if (xsum > 0)
                 begin
+                    if (xsum < 256)
+                    begin    
+                        nextxcnt = xsum;
+                        nextlen = {xsum [9:0], 2'b00};
+                    end    
+                    else
+                    begin    
+                        nextxcnt = 256; 
+                        nextlen = {10'd256, 2'b00};
+                    end    
+
                     nextxsum = xsum - 256;
-                    nextxcnt = 256; 
                     nexterror = err + rem;
                     nextstate = LOAD_ZBUFF; 
-                    nextreadcnt = 16'd0;
-                    nextoffset_tmp = addr_offset;
                 end
                 else
                     nextstate = DONE;
@@ -159,19 +168,13 @@ module fsm (
             begin
                 // wait for AXI completion
                 if (axi_done)
-		nextstate = LOAD_FBUFF;
+            		nextstate = LOAD_FBUFF;
             end
             LOAD_FBUFF:
             begin
                 // wait for AXI completion
                 if (axi_done)
-	        begin
-		    if (xsum < 0)
-		        nextreadcnt = 16'd256 + xsum;
-                    else
-	                nextreadcnt = 16'd256;
-		nextstate = INTERP_Z;
-                end
+                    nextstate = INTERP_Z;
             end
             INTERP_Z:
             // write a new z value every cycle (for 256 cycles)
@@ -181,18 +184,14 @@ module fsm (
                 else
                 begin
                     nextxcnt = xcnt - 1;
-                    nextreadcnt = readcnt - 1;
                     nexterror = error + rem;
-                    if (readcnt > 0)
+                    if (error > dx)
                     begin
-                        if (error > dx)
-                        begin
-                             nextzsum = zsum + slope + ((slope > 0) ? 1 : -1);
-                             nexterror = error + rem - dx;
-                        end
-                        else
-                             nextzsum = zsum + slope;
+                         nextzsum = zsum + slope + ((slope > 0) ? 1 : -1);
+                         nexterror = error + rem - dx;
                     end
+                    else
+                         nextzsum = zsum + slope;
                 end
             end
             WR_ZBUFF:

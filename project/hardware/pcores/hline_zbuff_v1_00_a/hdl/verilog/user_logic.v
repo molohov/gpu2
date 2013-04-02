@@ -324,6 +324,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   wire       [3:0]                          curr_state;
   wire                                      read_in_fifos;
   wire                                      write_out_fifos;
+  wire       [11:0]                         burst_length;
 
   assign    fb_addr    = slv_reg0;
   assign    zbuff_addr = slv_reg1;
@@ -368,6 +369,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
     .wr_req (axi_wr_req),
     .addr (addr),
     .done (done),
+    .burst_length (burst_length),
     .axi_bus_to_z_fifo (axi_bus_to_z_fifo),
     .axi_bus_to_f_fifo (axi_bus_to_f_fifo),
     .read_in_fifos (read_in_fifos),
@@ -592,7 +594,7 @@ input                                     bus2ip_mstwr_dst_dsc_n;
   assign mst_cntl_burst    = 1'b1;
   assign mst_ip2bus_addr   = addr;
   assign mst_ip2bus_be     = 16'hffff;
-  assign mst_xfer_reg_len  = 20'd1024; //burst length 256 for reads and writes
+  assign mst_xfer_reg_len  = {8'd0, burst_length}; // variable burst length from the fsm
   assign mst_xfer_length   = mst_xfer_reg_len[C_LENGTH_WIDTH-1 : 0];
 
   // implement byte write enable for each byte slice of the master model registers
