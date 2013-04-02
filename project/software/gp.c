@@ -1346,7 +1346,7 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
     gpVertex3Fixed32 nl = gpVertex3Fixed32CrossProduct(l1, l2);
 
     // Fix divide by zero hack for now...
-    if (nl.z == 0) nl.z = 1;
+    if (nl.z == 0) nl.z = 0x7fffffff;
 
     int x_slope = -nl.x / nl.z;
     int y_slope = -nl.y / nl.z;

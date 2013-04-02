@@ -159,33 +159,18 @@ module fsm (
             begin
                 // wait for AXI completion
                 if (axi_done)
-                begin
-                    nextreadcnt = readcnt + 1;
-                    nextaddr_offset = addr_offset + 16;
-                    if (nextreadcnt == 64)
-                    begin
-                        nextreadcnt = 16'd0;
-                        nextaddr_offset = offset_tmp;
-                        nextstate = LOAD_FBUFF;
-                    end
-                end
+		nextstate = LOAD_FBUFF;
             end
             LOAD_FBUFF:
             begin
                 // wait for AXI completion
                 if (axi_done)
-                begin
-                    nextreadcnt = readcnt + 1;
-                    nextaddr_offset = addr_offset + 16;
-                    if (nextreadcnt == 64)
-                    begin
-                        if (xsum < 0)
-                            nextreadcnt = 16'd256 + xsum;
-                        else
-                            nextreadcnt = 16'd256;
-                        nextaddr_offset = offset_tmp;
-                        nextstate = INTERP_Z;
-                    end
+	        begin
+		    if (xsum < 0)
+		        nextreadcnt = 16'd256 + xsum;
+                    else
+	                nextreadcnt = 16'd256;
+		nextstate = INTERP_Z;
                 end
             end
             INTERP_Z:
