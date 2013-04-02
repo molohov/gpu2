@@ -24,14 +24,14 @@ int main ()
 	volatile int * hline_pcore = (int *)XPAR_HLINE_ZBUFF_0_BASEADDR;
 	char * hline_offset = (char *)(hline_pcore + 64);
 
-	hline_pcore[0] = (int)fbuff;
+	hline_pcore[0] = (int)(fbuff + 3);
 	hline_pcore[1] = (int)(zbuff);
-	hline_pcore[2] = LENGTH; //dx
+	hline_pcore[2] = 500; //dx
 	hline_pcore[3] = 0;  //z1
-	hline_pcore[4] = 0xFFFFFFFF/LENGTH; //slope
+	hline_pcore[4] = 1; //slope
 	hline_pcore[5] = 0xbeefbeef; //rgbx
-	hline_pcore[6] = LENGTH/2; //error
-	hline_pcore[7] = LENGTH-1; //remainder
+	hline_pcore[6] = 0; //error
+	hline_pcore[7] = 0; //remainder
 
 
 	volatile char * debug = (char *)(hline_pcore + 10);
