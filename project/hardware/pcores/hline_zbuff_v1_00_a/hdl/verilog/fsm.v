@@ -86,7 +86,8 @@ module fsm (
     assign read_f_out_fifo = (state == WR_FBUFF);
     assign axi_bus_to_z_fifo = (state == LOAD_ZBUFF);
     assign axi_bus_to_f_fifo = (state == LOAD_FBUFF);
-    assign done = (state == DONE);
+    // essentially a ready signal
+    assign done = (state == DONE || state == RELAX_AND_CHILL);
     //only valid when in DONE
     assign z_sum_out = zsum;
     // assign burst length
