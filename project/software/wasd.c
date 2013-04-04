@@ -189,7 +189,9 @@ int main()
 
   elevator = gpCreatePolyHierarchy();
   gpSetPolyHierarchyList(elevator, elevator_list);
+  gpScalePolyHierarchy(elevator, 3.0f, 2.0f, 1.0f);
   gpTranslatePolyHierarchy(elevator, -5.f, 0.f, 0.f);
+
 
   h = gpCreatePolyHierarchy();
   gpSetPolyHierarchyList(h, stair_list);

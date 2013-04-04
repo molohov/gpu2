@@ -43,7 +43,7 @@ int main()
 
   gpEnable(GP_ZBUFFER);
   gpEnable(GP_PERSPECTIVE);
-  gpSetFrustrum(1.0, 5.0);
+  gpSetFrustrum(2.0, 10.0);
 
   gpRender(list);
 
