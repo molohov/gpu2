@@ -156,6 +156,7 @@ int gpWaitKey()
 #define BYTES_PER_PIXEL 4
 
 #define NUM_PCORES 2
+#define MAX_NUM_POLLS 512
 
 volatile int *hline_pcores[NUM_PCORES] = {(volatile int *)XPAR_HLINE_ZBUFF_0_BASEADDR, (volatile int *)XPAR_HLINE_ZBUFF_1_BASEADDR};
 
@@ -185,7 +186,9 @@ void gpPollImageWriteReady()
   volatile int * burst_write_addr = (volatile int *)XPAR_BURST_WRITE_0_BASEADDR;
 
   // poll done bit
-  while (!(burst_write_addr[64] & 0x100)) {
+  int polls = 0;
+  while (polls < MAX_NUM_POLLS && !(burst_write_addr[64] & 0x100)) {
+    polls++;
   }
 
   // clear done bit
@@ -239,7 +242,11 @@ void gpDisplayImage(gpImg *img)
 
   for (int i = 0; i < NUM_PCORES; i++) {
     volatile int *hline_pcore = hline_pcores[i];
-    while (hline_pcore[7] == 0); // poll until ready
+    // poll until ready
+    int polls = 0;
+    while (polls < MAX_NUM_POLLS && hline_pcore[7] == 0) {
+      polls++;
+    }
   }
 
   if (!initialized) {
@@ -329,8 +336,13 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   int pcore_index = y % NUM_PCORES;
   volatile int * hline_pcore = hline_pcores[pcore_index];
 
-  // poll for completeness
-  while (hline_pcore[7] == 0);
+  // poll until ready
+  int polls = 0;
+  while (polls < MAX_NUM_POLLS && hline_pcore[7] == 0){
+    polls++;
+  }
+
+  if (polls == MAX_NUM_POLLS) ; // TODO: reset hline_pcore
 
   // hardware accelerate the rest of the line
   hline_pcore[0] = (int)ptr;
