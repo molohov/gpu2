@@ -311,7 +311,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   ptr += (y * img->xres + x1);
   z_ptr += (y * img->xres + x1);
 
-  if (x2 - x1 + 1 < MIN_VAL) {
+  if ((x2 - x1 + 1) % 256 < MIN_VAL) {
     for (;; x1++) {
       if (*z_ptr > z) {
         *z_ptr = z;
@@ -323,6 +323,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
       z += x_slope;
 
       if (x1 == x2) return;
+      if ((x2 - x1 + 1) % 256 == 0) break;
     }
   }
 
