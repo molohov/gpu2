@@ -155,6 +155,10 @@ int gpWaitKey()
 
 #define BYTES_PER_PIXEL 4
 
+#define NUM_PCORES 2
+
+volatile int *hline_pcores[NUM_PCORES] = {(volatile int *)XPAR_HLINE_ZBUFF_0_BASEADDR, (volatile int *)XPAR_HLINE_ZBUFF_1_BASEADDR};
+
 gpImg *gpCreateImage(int xres, int yres)
 {
   volatile unsigned char *ddr_addr1 = (volatile unsigned char *)XPAR_S6DDR_0_S0_AXI_BASEADDR;
@@ -233,6 +237,11 @@ void gpDisplayImage(gpImg *img)
 
   volatile int *hdmi_addr = (volatile int *) XPAR_HDMI_OUT_0_BASEADDR;
 
+  for (int i = 0; i < NUM_PCORES; i++) {
+    volatile int *hline_pcore = hline_pcores[i];
+    while (hline_pcore[7] == 0); // poll until ready
+  }
+
   if (!initialized) {
     hdmi_addr[0] = img->xres; // stride length in pixels
     hdmi_addr[1] = (int)img->imageData; // set frame base address
@@ -296,8 +305,6 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
     z = z1;
   }
 
-  volatile int * hline_pcore = (int *)XPAR_HLINE_ZBUFF_0_BASEADDR;
-
   volatile unsigned *ptr = (volatile unsigned *)img->imageData;
   zbuffer_t z_ptr = img->zbuffer;
 
@@ -319,6 +326,12 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
     }
   }
 
+  int pcore_index = y % NUM_PCORES;
+  volatile int * hline_pcore = hline_pcores[pcore_index];
+
+  // poll for completeness
+  while (hline_pcore[7] == 0);
+
   // hardware accelerate the rest of the line
   hline_pcore[0] = (int)ptr;
   hline_pcore[1] = (int)z_ptr;
@@ -330,9 +343,6 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
   // start the pcore
   hline_pcore[11] = 0;
   hline_pcore[11] = 1;
-
-  // poll for completeness
-  while (hline_pcore[7] == 0);
 }
 
 #endif
