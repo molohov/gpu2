@@ -1,6 +1,55 @@
 digraph fsm {
-    RESET [shape=box];
-    RESET -> INIT -> LOAD_ZBUFF -> LOAD_FBUFF -> INTERP_Z -> WRITE_FBUFF -> WRITE_ZBUFF -> DONE;
-    WRITE_ZBUFF -> INIT;
-    INIT -> DONE;
+    fontname="Arial";
+    node [fontname="Arial"];
+    edge [fontname="Arial"];
+    graph [overlap = false];
+    RESET [shape=box, label="RESET\nready=1"];
+    DONE [shape=box, label="DONE\nready=1"];
+    RESET  -> INIT [label="if (START)"];
+    INIT -> LOOP_START;
+    LOOP_START->LOAD_ZBUFF [label="dx -= 256"];
+    LOOP_START->DONE [label="dx < 0"];
+    LOAD_ZBUFF -> LOAD_FBUFF [label="if (axi_done)"];
+    LOAD_FBUFF -> INTERP_Z [label="if (axi_done)"];
+    INTERP_Z -> INTERP_Z [label="for i = 0...chunk length"];
+    INTERP_Z -> WRITE_ZBUFF;
+    WRITE_ZBUFF -> WRITE_FBUFF [label="if (axi_done)"];
+    WRITE_FBUFF -> LOOP_START [label="if (axi_done && dx > 0)\naddr += 256"];
+    DONE -> INIT [label="if (START)"];
+    
+
+    SW -> RESET [label="start"];
+    SW -> DONE [label="start"];
+    SW -> INIT [label="dx, dz, slope, err, rem"];
+    WRITE_ZBUFF -> ZWR;
+    WRITE_FBUFF -> FWR;
+    LOAD_ZBUFF -> ZRD;
+    LOAD_FBUFF -> FRD;
+    subgraph cluster_ul {
+        color=black;
+        label = "User Logic";
+        SW [shape=box, label="SW regs"];
+        ZRD [shape=box, label="z-read FIFO"];
+        FRD [shape=box, label="pixel-read FIFO"];
+        ZWR [shape=box, label="z-write FIFO"];
+        FWR [shape=box, label="pixel-write FIFO"];
+    }
+    subgraph cluster_fsm {
+        color=black;
+        label = "FSM";
+        RESET;
+        DONE;
+        INIT;
+        LOOP_START;
+        LOAD_ZBUFF;
+        LOAD_FBUFF;
+        INTERP_Z;
+        WRITE_ZBUFF;
+        WRITE_FBUFF;
+    }
+    AXI -> ZRD;
+    AXI -> FRD;
+    ZWR -> AXI;
+    FWR -> AXI;
+    AXI [label="AXI4 Bus", shape=box];
 }
