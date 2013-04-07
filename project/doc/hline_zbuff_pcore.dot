@@ -1,0 +1,6 @@
+digraph fsm {
+    RESET [shape=box];
+    RESET -> INIT -> LOAD_ZBUFF -> LOAD_FBUFF -> INTERP_Z -> WRITE_FBUFF -> WRITE_ZBUFF -> DONE;
+    WRITE_ZBUFF -> INIT;
+    INIT -> DONE;
+}
