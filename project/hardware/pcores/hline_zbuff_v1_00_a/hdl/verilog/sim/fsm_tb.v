@@ -7,6 +7,7 @@ reg [31:0] fb_addr, zbuff_addr, z1, z_fifo_in, f_fifo_in, slope, err, rem, dx, r
 wire [31:0] addr, z_out, f_out, z_sum_out;
 wire rd_req, wr_req, done, axi_bus_to_z_fifo, axi_bus_to_f_fifo, read_in_fifos, write_out_fifos, read_z_out_fifo, read_f_out_fifo; 
 wire [3:0] curr_state;
+wire [11:0] burst_length;
 
 initial clk = 0;
 always #10 clk = ~clk;
@@ -15,12 +16,13 @@ initial
 begin
     @ (negedge clk)
     reset = 1;
+    axi_done = 0;
     @ (negedge clk)
     reset = 0;
     start = 1;
-    dx = 256;
+    dx = 200; 
     z1 = 0;
-    slope = 32'h00ffffff; //ffffffff / 256
+    slope = 32'd1;
     fb_addr = 32'h00000000;
     zbuff_addr = 32'h10000000;
     rem = 32'd255;
@@ -31,15 +33,14 @@ begin
     // first read request (zbuff)
     @ (posedge rd_req)
     // fake an axi signal 
+    @ (negedge clk)
     axi_done = 1;
-    # 1280;
-    @ (negedge clk)
+    @ (posedge clk)
     axi_done = 0;
-    @ (negedge clk)
+    #20
     // second read request (fbuff)
     @ (negedge clk)
     axi_done = 1;
-    # 1280;
     @ (negedge clk)
     axi_done = 0;
     // first write request (zbuff) 
@@ -149,6 +150,7 @@ fsm fsm_dut (
     .wr_req (wr_req),
     .addr (addr),
     .done (done),
+    .burst_length (burst_length),
     .axi_bus_to_z_fifo (axi_bus_to_z_fifo),
     .axi_bus_to_f_fifo (axi_bus_to_f_fifo),
     .read_in_fifos (read_in_fifos),

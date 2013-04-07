@@ -54,6 +54,12 @@ bool keyboard(int c)
     case 'f':
       gpRotatePolyHierarchy(h, -.05f, 0.f, 0.f);
       break;
+    case 't':
+      gpRotatePolyHierarchy(h, 0.f, 0.f, .05f);
+      break;
+    case 'g':
+      gpRotatePolyHierarchy(h, 0.f, 0.f, -.05f);
+      break;
     case 'h':
       gpTranslatePolyHierarchy(h, .2f, 0.f, 0.f);
       break;
@@ -189,7 +195,9 @@ int main()
 
   elevator = gpCreatePolyHierarchy();
   gpSetPolyHierarchyList(elevator, elevator_list);
+  gpScalePolyHierarchy(elevator, 3.0f, 2.0f, 1.0f);
   gpTranslatePolyHierarchy(elevator, -5.f, 0.f, 0.f);
+
 
   h = gpCreatePolyHierarchy();
   gpSetPolyHierarchyList(h, stair_list);

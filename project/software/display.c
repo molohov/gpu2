@@ -155,6 +155,10 @@ int gpWaitKey()
 
 #define BYTES_PER_PIXEL 4
 
+#define NUM_PCORES 2
+
+volatile int *hline_pcores[NUM_PCORES] = {(volatile int *)XPAR_HLINE_ZBUFF_0_BASEADDR, (volatile int *)XPAR_HLINE_ZBUFF_1_BASEADDR};
+
 gpImg *gpCreateImage(int xres, int yres)
 {
   volatile unsigned char *ddr_addr1 = (volatile unsigned char *)XPAR_S6DDR_0_S0_AXI_BASEADDR;
@@ -233,6 +237,11 @@ void gpDisplayImage(gpImg *img)
 
   volatile int *hdmi_addr = (volatile int *) XPAR_HDMI_OUT_0_BASEADDR;
 
+  for (int i = 0; i < NUM_PCORES; i++) {
+    volatile int *hline_pcore = hline_pcores[i];
+    while (hline_pcore[7] == 0); // poll until ready
+  }
+
   if (!initialized) {
     hdmi_addr[0] = img->xres; // stride length in pixels
     hdmi_addr[1] = (int)img->imageData; // set frame base address
@@ -284,7 +293,7 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
 {
   unsigned z;
 
-  static const int ROUND_VAL = 256;
+  static const int MIN_VAL = 4;
 
   if (x1 > x2) {
     int tmp = x1;
@@ -296,64 +305,44 @@ void gpSetImageHLineZBuff(gpImg *img, int y, int x1, int x2, unsigned int z1, un
     z = z1;
   }
 
-  volatile int * hline_pcore = (int *)XPAR_HLINE_ZBUFF_0_BASEADDR;
-
   volatile unsigned *ptr = (volatile unsigned *)img->imageData;
   zbuffer_t z_ptr = img->zbuffer;
 
   ptr += (y * img->xres + x1);
   z_ptr += (y * img->xres + x1);
 
-  int x_soft_lim = (x1 + (ROUND_VAL - 1)) & ~(ROUND_VAL - 1);
-  if (x_soft_lim > x2) x_soft_lim = x2;
+  if (x2 - x1 + 1 < MIN_VAL) {
+    for (;; x1++) {
+      if (*z_ptr > z) {
+        *z_ptr = z;
+        *ptr = (r << 24) | (g << 16) | (b << 8);
+      }
+      ptr++;
+      z_ptr++;
 
-  int x_hard_lim = ((x2 + 1) & ~(ROUND_VAL - 1)) - 1;
+      z += x_slope;
 
-  for (;; x1++) {
-    if (x1 == x_soft_lim) break;
-    if (*z_ptr > z) {
-      *z_ptr = z;
-      *ptr = (r << 24) | (g << 16) | (b << 8);
+      if (x1 == x2) return;
     }
-    ptr++;
-    z_ptr++;
-
-    z += x_slope;
   }
 
-  if (x_soft_lim < x_hard_lim) {
-    hline_pcore[0] = (int)ptr;
-    hline_pcore[1] = (int)z_ptr;
-    hline_pcore[2] = x_hard_lim - x_soft_lim + 1; //dx
-    hline_pcore[3] = z;  //z1
-    hline_pcore[4] = x_slope; //slope
-    hline_pcore[5] = (r / 2 << 24) | (g / 2 << 16) | (b / 2 << 8); //rgbx
+  int pcore_index = y % NUM_PCORES;
+  volatile int * hline_pcore = hline_pcores[pcore_index];
 
-    // start the pcore
-    hline_pcore[11] = 0;
-    hline_pcore[11] = 1;
+  // poll for completeness
+  while (hline_pcore[7] == 0);
 
-    // poll for completeness
-    while (hline_pcore[7] == 0);
+  // hardware accelerate the rest of the line
+  hline_pcore[0] = (int)ptr;
+  hline_pcore[1] = (int)z_ptr;
+  hline_pcore[2] = x2 - x1 + 1; //dx
+  hline_pcore[3] = z;  //z1
+  hline_pcore[4] = x_slope; //slope
+  hline_pcore[5] = (r << 24) | (g << 16) | (b << 8); //rgbx
 
-    // update z value
-    z = hline_pcore[2];
-
-    x1 = x_hard_lim + 1;
-    ptr += x_hard_lim - x_soft_lim + 1;
-    z_ptr += x_hard_lim - x_soft_lim + 1;
-  }
-
-  for (; x1 <= x2; x1++) {
-    if (*z_ptr > z) {
-      *z_ptr = z;
-      *ptr = (r << 24) | (g << 16) | (b << 8);
-    }
-    ptr++;
-    z_ptr++;
-
-    z += x_slope;
-  }
+  // start the pcore
+  hline_pcore[11] = 0;
+  hline_pcore[11] = 1;
 }
 
 #endif
