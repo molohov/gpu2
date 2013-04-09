@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 gpPolyList *last = NULL;
+gpPolyHierarchy *desc = NULL;
 gpPolyHierarchy *objs = NULL;
 
 gpPolyList *createCube();
@@ -21,8 +22,8 @@ bool keyboard(int c)
       last = createCube();
       temp = gpCreatePolyHierarchy();
       gpSetPolyHierarchyList(temp, last);
-      gpSetPolyHierarchyChild(temp, objs);
-      objs = temp;
+      gpSetPolyHierarchyChild(desc, temp);
+      desc = temp;
       break;
     case 'w':
       gpTranslatePolyHierarchy(objs, 0.f, .2f, 0.f);
@@ -41,6 +42,12 @@ bool keyboard(int c)
       break;
     case 'f':
       gpRotatePolyHierarchy(objs, 0.f, -.05f, 0.f);
+      break;
+    case 't':
+      gpRotatePolyHierarchy(objs, .05f, 0.f, 0.f);
+      break;
+    case 'g':
+      gpRotatePolyHierarchy(objs, -.05f, 0.f, 0.f);
       break;
     case 'x':
       gpScalePolyHierarchy(objs, .75f, .75f, .75f);
@@ -65,6 +72,12 @@ bool keyboard(int c)
       break;
     case ';':
       gpRotatePolyList(last, 0.f, -.05f, 0.f);
+      break;
+    case '[':
+      gpRotatePolyList(last, .05f, 0.f, 0.f);
+      break;
+    case '\'':
+      gpRotatePolyList(last, -.05f, 0.f, 0.f);
       break;
     case 'm':
       gpScalePolyList(last, .75f, .75f, .75f);
@@ -156,8 +169,32 @@ int main()
   gpSetFrustrum(2.f, 50.f);
 
   last = createCube();
+  desc = gpCreatePolyHierarchy();
+  gpSetPolyHierarchyList(desc, last);
   objs = gpCreatePolyHierarchy();
-  gpSetPolyHierarchyList(objs, last);
+  gpSetPolyHierarchyChild(objs, desc);
+
+  gpPolyList *unit_vecs = gpCreatePolyList();
+
+  gpPoly *x = gpCreatePoly(2);
+  gpSetPolyVertex(x, 0, 0.f, 0.f, 0.f);
+  gpSetPolyVertex(x, 1, .25f, 0.f, 0.f);
+  gpSetPolyColor(x, 0xff, 0x0, 0x0);
+  gpAddPolyToList(unit_vecs, x);
+
+  gpPoly *y = gpCreatePoly(2);
+  gpSetPolyVertex(y, 0, 0.f, 0.f, 0.f);
+  gpSetPolyVertex(y, 1, 0.f, .25f, 0.f);
+  gpSetPolyColor(y, 0x0, 0xff, 0x0);
+  gpAddPolyToList(unit_vecs, y);
+
+  gpPoly *z = gpCreatePoly(2);
+  gpSetPolyVertex(z, 0, 0.f, 0.f, 0.f);
+  gpSetPolyVertex(z, 1, 0.f, 0.f, 0.25f);
+  gpSetPolyColor(z, 0x0, 0x0, 0xff);
+  gpAddPolyToList(unit_vecs, z);
+
+  gpSetPolyHierarchyList(objs, unit_vecs);
 
   gpTranslatePolyHierarchy(objs, 0.f, 0.f, 4.f);
   gpRenderAll(objs);
