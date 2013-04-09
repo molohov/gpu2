@@ -54,6 +54,12 @@ bool keyboard(int c)
     case 'f':
       gpRotatePolyHierarchy(h, -.05f, 0.f, 0.f);
       break;
+    case 't':
+      gpRotatePolyHierarchy(h, 0.f, 0.f, .05f);
+      break;
+    case 'g':
+      gpRotatePolyHierarchy(h, 0.f, 0.f, -.05f);
+      break;
     case 'h':
       gpTranslatePolyHierarchy(h, .2f, 0.f, 0.f);
       break;
