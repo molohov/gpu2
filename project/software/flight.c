@@ -142,26 +142,21 @@ int main () {
 
     gpPolyList *ground_list = gpCreatePolyList();
 
-    double x = 0.f;
-    double y = 0.f;
+    double x = -2.f * GROUND_DIV/2;
 
     for (int i = 0; i < GROUND_DIV; i++, x+= 2.0f) {
-        y = 0.f;
+        double y = -2.f * GROUND_DIV/2;
         for (int j = 0; j < GROUND_DIV; j++, y+= 2.0f) {
             gpPoly *ground = gpCreatePoly(4);
-            gpSetPolyVertex(ground, 0, 1.f, 1.f, 0.f);
-            gpSetPolyVertex(ground, 1, 1.f, -1.f, 0.f);
-            gpSetPolyVertex(ground, 2, -1.f, -1.f, 0.f);
-            gpSetPolyVertex(ground, 3, -1.f, 1.f, GP_INFER_COORD);
+            gpSetPolyVertex(ground, 0, 1.1f, 1.1f, 0.f);
+            gpSetPolyVertex(ground, 1, 1.1f, -1.1f, 0.f);
+            gpSetPolyVertex(ground, 2, -1.1f, -1.1f, 0.f);
+            gpSetPolyVertex(ground, 3, -1.1f, 1.1f, GP_INFER_COORD);
             gpTranslatePoly(ground, x, y, 0.f);
             gpSetPolyColor(ground, GROUND_R, GROUND_G, GROUND_B);
             gpAddPolyToList(ground_list, ground);
         }
     }
-    // This code doesn't seem to work, it hangs the program
-    //double translate = 2.f * -(double)(GROUND_DIV)/2;
-    //gpTranslatePolyList(ground_list, translate, translate, 0.f);
-
 
     // Define the scene from a TOP DOWN point of view
     gpPolyList *b1 = createCube(1.0f, 1.0f, 4.0f);
