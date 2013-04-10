@@ -13,6 +13,8 @@ int GROUND_B = 0x10;
 int BUILDING_R = 0x10;
 int BUILDING_G = 0x10;
 int BUILDING_B = 0x10;
+// Int constants for the ground
+int GROUND_DIV = 10;
 // Floating point constants for traversal and math
 double pi = 3.14159;
 double ROT_SPEED = 0.05f;
@@ -28,30 +30,35 @@ void idle()
 bool keyboard(int c)
 {
     switch (c) {
+        // control roll
         case 'j':
             gpRotatePolyHierarchy(scene, 0.0f, 0.0f, 0.1f);
             break;
         case 'k':
             gpRotatePolyHierarchy(scene, 0.0f, 0.0f, -0.1f);
             break;
+        // control forward or backward (-1 is forwards)
         case 'r':
             dir = -1;
             break;
         case 'e':
             dir = 1;
             break;
+        // control pitch
         case 'w':
             gpRotatePolyHierarchy(scene, ROT_SPEED, 0.f, 0.f);
             break;
         case 's':
             gpRotatePolyHierarchy(scene, -ROT_SPEED, 0.f, 0.f);
             break;
+        // control yaw
         case 'a':
             gpRotatePolyHierarchy(scene, 0.f, ROT_SPEED, 0.f);
             break;
         case 'd':
             gpRotatePolyHierarchy(scene, 0.f, -ROT_SPEED, 0.f);
             break;
+        // quit
         case 'q':
             return true;
         default:
@@ -133,20 +140,34 @@ int main () {
     scene = gpCreatePolyHierarchy();
     scene_1 = gpCreatePolyHierarchy();
 
-    gpPoly *ground = gpCreatePoly(4);
-    gpSetPolyVertex(ground, 0, 4.f, 4.f, 0.f);
-    gpSetPolyVertex(ground, 1, 4.f, -4.f, 0.f);
-    gpSetPolyVertex(ground, 2, -4.f, -4.f, 0.f);
-    gpSetPolyVertex(ground, 3, -4.f, 4.f, GP_INFER_COORD);
-    gpSetPolyColor(ground, GROUND_R, GROUND_G, GROUND_B);
+    gpPolyList *ground_list = gpCreatePolyList();
+
+    double x = 0.f;
+    double y = 0.f;
+
+    for (int i = 0; i < GROUND_DIV; i++, x+= 2.0f) {
+        y = 0.f;
+        for (int j = 0; j < GROUND_DIV; j++, y+= 2.0f) {
+            gpPoly *ground = gpCreatePoly(4);
+            gpSetPolyVertex(ground, 0, 1.f, 1.f, 0.f);
+            gpSetPolyVertex(ground, 1, 1.f, -1.f, 0.f);
+            gpSetPolyVertex(ground, 2, -1.f, -1.f, 0.f);
+            gpSetPolyVertex(ground, 3, -1.f, 1.f, GP_INFER_COORD);
+            gpTranslatePoly(ground, x, y, 0.f);
+            gpSetPolyColor(ground, GROUND_R, GROUND_G, GROUND_B);
+            gpAddPolyToList(ground_list, ground);
+        }
+    }
+    // This code doesn't seem to work, it hangs the program
+    //double translate = 2.f * -(double)(GROUND_DIV)/2;
+    //gpTranslatePolyList(ground_list, translate, translate, 0.f);
 
 
     // Define the scene from a TOP DOWN point of view
     gpPolyList *b1 = createCube(1.0f, 1.0f, 4.0f);
     gpTranslatePolyList(b1, 0.f, 0.f, -2.f);
 
-    gpAddPolyToList(polys, ground);
-    gpSetPolyHierarchyList(scene, polys);
+    gpSetPolyHierarchyList(scene, ground_list);
     gpSetPolyHierarchyList(scene_1, b1);
     gpSetPolyHierarchyChild(scene, scene_1);
 
