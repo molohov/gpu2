@@ -3,22 +3,20 @@
 #include <math.h>
 #include <stdlib.h>
 
-gpPolyList *polys = NULL;
 gpPolyHierarchy *scene = NULL;
-gpPolyHierarchy *scene_1 = NULL;
 // Color constants for the scene
 int GROUND_R = 0x10;
 int GROUND_G = 0x7f;
 int GROUND_B = 0x10;
-int BUILDING_R = 0x10;
-int BUILDING_G = 0x10;
-int BUILDING_B = 0x10;
+int BUILDING_R = 0x3f;
+int BUILDING_G = 0x3f;
+int BUILDING_B = 0x3f;
 // Int constants for the ground
 int GROUND_DIV = 10;
 // Floating point constants for traversal and math
 double pi = 3.14159;
 double ROT_SPEED = 0.05f;
-double FLIGHT_SPEED = 0.01f;
+double FLIGHT_SPEED = 0.1f;
 int dir = -1;
 
 void idle()
@@ -69,7 +67,7 @@ bool keyboard(int c)
     return false;
 }
 
-gpPolyList *createCube(double xin, double yin, double zin)
+gpPolyList *createBlock(double xin, double yin, double zin, int r, int g, int b)
 {
   // Create a rectangular prism with dimensions x, y, z 
     double xdim = xin/2;
@@ -80,42 +78,42 @@ gpPolyList *createCube(double xin, double yin, double zin)
     gpSetPolyVertex(z, 1, -xdim, ydim, -zdim);
     gpSetPolyVertex(z, 2, xdim, ydim, -zdim);
     gpSetPolyVertex(z, 3, xdim, -ydim, GP_INFER_COORD);
-    gpSetPolyColor(z, BUILDING_R, BUILDING_G, BUILDING_B);
+    gpSetPolyColor(z, 2*r, 2*g, 2*b);
 
     gpPoly *z2 = gpCreatePoly(4);
     gpSetPolyVertex(z2, 0, -xdim, -ydim, zdim);
     gpSetPolyVertex(z2, 1, -xdim, ydim, zdim);
     gpSetPolyVertex(z2, 2, xdim, ydim, zdim);
     gpSetPolyVertex(z2, 3, xdim, -ydim, GP_INFER_COORD);
-    gpSetPolyColor(z2, BUILDING_R, BUILDING_G, BUILDING_B);
+    gpSetPolyColor(z2, 2*r, 2*g, 2*b);
 
     gpPoly *y = gpCreatePoly(4);
     gpSetPolyVertex(y, 0, -xdim, ydim, -zdim);
     gpSetPolyVertex(y, 1, -xdim, ydim, zdim);
     gpSetPolyVertex(y, 2, xdim, ydim, zdim);
     gpSetPolyVertex(y, 3, xdim, GP_INFER_COORD, -zdim);
-    gpSetPolyColor(y, BUILDING_R, BUILDING_G, BUILDING_B);
+    gpSetPolyColor(y, r, g, b);
 
     gpPoly *y2 = gpCreatePoly(4);
     gpSetPolyVertex(y2, 0, -xdim, -ydim, -zdim);
     gpSetPolyVertex(y2, 1, -xdim, -ydim, zdim);
     gpSetPolyVertex(y2, 2, xdim, -ydim, zdim);
     gpSetPolyVertex(y2, 3, xdim, GP_INFER_COORD, -zdim);
-    gpSetPolyColor(y2, BUILDING_R, BUILDING_G, BUILDING_B);
+    gpSetPolyColor(y2, r, g, b);
 
     gpPoly *x = gpCreatePoly(4);
     gpSetPolyVertex(x, 0, xdim, -ydim, -zdim);
     gpSetPolyVertex(x, 1, xdim, -ydim, zdim);
     gpSetPolyVertex(x, 2, xdim, ydim, zdim);
     gpSetPolyVertex(x, 3, GP_INFER_COORD, ydim, -zdim);
-    gpSetPolyColor(x, BUILDING_R, BUILDING_G, BUILDING_B);
+    gpSetPolyColor(x, r/2, g/2, b/2);
 
     gpPoly *x2 = gpCreatePoly(4);
     gpSetPolyVertex(x2, 0, -xdim, -ydim, -zdim);
     gpSetPolyVertex(x2, 1, -xdim, -ydim, zdim);
     gpSetPolyVertex(x2, 2, -xdim, ydim, zdim);
     gpSetPolyVertex(x2, 3, GP_INFER_COORD, ydim, -zdim);
-    gpSetPolyColor(x2, BUILDING_R, BUILDING_G, BUILDING_B);
+    gpSetPolyColor(x2, r/2, g/2, b/2);
 
     gpPolyList *cube = gpCreatePolyList();
     gpAddPolyToList(cube, z);
@@ -136,9 +134,7 @@ int main () {
 
     // Create the scene
 
-    polys = gpCreatePolyList();
     scene = gpCreatePolyHierarchy();
-    scene_1 = gpCreatePolyHierarchy();
 
     gpPolyList *ground_list = gpCreatePolyList();
 
@@ -159,12 +155,23 @@ int main () {
     }
 
     // Define the scene from a TOP DOWN point of view
-    gpPolyList *b1 = createCube(1.0f, 1.0f, 4.0f);
+    gpPolyList *b1 = createBlock(1.0f, 1.0f, 4.0f, BUILDING_R, BUILDING_G, BUILDING_B);
     gpTranslatePolyList(b1, 0.f, 0.f, -2.f);
+    gpPolyList *b2 = createBlock(1.0f, 2.0f, 3.0f, BUILDING_R, BUILDING_G, BUILDING_B);
+    gpTranslatePolyList(b2, 3.f, 2.f, -1.5f);
+    gpPolyList *b3 = createBlock(3.0f, 1.0f, 2.0f, BUILDING_R, BUILDING_G, BUILDING_B);
+    gpTranslatePolyList(b3, -4.f, 2.f, -1.f);
 
     gpSetPolyHierarchyList(scene, ground_list);
+    gpPolyHierarchy * scene_1 = gpCreatePolyHierarchy();
+    gpPolyHierarchy * scene_2 = gpCreatePolyHierarchy();
+    gpPolyHierarchy * scene_3 = gpCreatePolyHierarchy();
     gpSetPolyHierarchyList(scene_1, b1);
+    gpSetPolyHierarchyList(scene_2, b2);
+    gpSetPolyHierarchyList(scene_3, b3);
     gpSetPolyHierarchyChild(scene, scene_1);
+    gpSetPolyHierarchyChild(scene_1, scene_2);
+    gpSetPolyHierarchyChild(scene_2, scene_3);
 
     gpRotatePolyHierarchy(scene, pi/2, 0.f, 0.f);
     gpTranslatePolyHierarchy(scene, 0.f, -2.0f, 5.f);
