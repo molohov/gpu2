@@ -1310,6 +1310,9 @@ void gpFillConvexPolyZBuff(gpImg *img, gpVertex3Fixed * vertices, int num_vertic
         }
     }
 
+    // Should not happen???
+    if (y_min < 0) return;
+
     int left_index = start_index, right_index = start_index;
 
     unsigned char r = color->r;
