@@ -42,6 +42,9 @@ bool keyboard(int c)
         case 'e':
             dir = 1;
             break;
+        case 't':
+            dir = 0;
+            break;
         // control pitch
         case 'w':
             gpRotatePolyHierarchy(scene, ROT_SPEED, 0.f, 0.f);
